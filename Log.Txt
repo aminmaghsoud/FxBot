@@ -998,3 +998,103 @@ Bot2 2024-07-30 16:40:49=> traderequest: comment=V2 - M5
 Bot2 2024-07-30 16:40:49=> traderequest: position=0
 Bot2 2024-07-30 16:40:49=> traderequest: position_by=0
 Bot2 2024-07-30 16:40:54=> Signal EURJPY Type:Sell, Volume:0.04, Price:166.927, S/L:167.60524557442085, T/P:166.24875442557914
+Bot2 2024-07-30 16:40:54=> Sell order for EURJPY
+Bot2 2024-07-30 16:40:54=> Send sell order EURJPY 0.04 lots with deviation=0 points
+Bot2 2024-07-30 16:40:54=> Send sell order for EURJPY done!, 
+Bot2 2024-07-30 16:55:09=> Signal XAUUSD Type:Buy, Volume:0.02, Price:2392.82, S/L:2386.6874478231766, T/P:2398.9525521768237
+Bot2 2024-07-30 16:55:09=> Buy order for XAUUSD
+Bot2 2024-07-30 16:55:09=> Send buy order XAUUSD 0.02 lots with deviation=0 points
+Bot2 2024-07-30 16:55:09=> Send buy order for XAUUSD done!, 
+Bot2 2024-07-30 16:55:15=> Signal DowJones30 Type:Buy, Volume:0.04, Price:40926.0, S/L:40697.76422184544, T/P:41154.23577815456
+Bot2 2024-07-30 16:55:15=> Buy order for DowJones30
+Bot2 2024-07-30 16:55:15=> Send buy order DowJones30 0.04 lots with deviation=0 points
+Bot2 2024-07-30 16:55:15=> Send buy order for DowJones30 done!, 
+Bot2 2024-07-30 17:00:04=> Signal EURCAD Type:Sell, Volume:0.04, Price:1.49748, S/L:1.4996332229261118, T/P:1.495326777073888
+Bot2 2024-07-30 17:00:04=> Sell order for EURCAD
+Bot2 2024-07-30 17:00:04=> Send sell order EURCAD 0.04 lots with deviation=0 points
+Bot2 2024-07-30 17:00:04=> Send sell order for EURCAD done!, 
+Bot2 2024-07-30 17:25:02=> Signal GBPUSD Type:Sell, Volume:0.04, Price:1.28269, S/L:1.2848155339066403, T/P:1.28056446609336
+Bot2 2024-07-30 17:25:02=> Sell order for GBPUSD
+Bot2 2024-07-30 17:25:03=> Send sell order GBPUSD 0.04 lots with deviation=0 points
+Bot2 2024-07-30 17:25:03=> Send sell order for GBPUSD done!, 
+Bot2 2024-07-30 18:50:03=> Signal AUDJPY Type:Sell, Volume:0.04, Price:100.499, S/L:101.11189590474626, T/P:99.88610409525373
+Bot2 2024-07-30 18:50:03=> Sell order for AUDJPY
+Bot2 2024-07-30 18:50:03=> Send sell order AUDJPY 0.04 lots with deviation=0 points
+Bot2 2024-07-30 18:50:03=> Send sell order for AUDJPY done!, 
+Bot2 2024-07-30 18:50:07=> Signal EURCAD Type:Sell, Volume:0.04, Price:1.49739, S/L:1.4982341066297966, T/P:1.4965458933702034
+Bot2 2024-07-30 18:50:07=> Sell order for EURCAD
+Bot2 2024-07-30 18:50:07=> Send sell order EURCAD 0.04 lots with deviation=0 points
+Bot2 2024-07-30 18:50:07=> Send sell order for EURCAD done!, 
+Bot2 2024-07-30 18:50:11=> Signal EURNZD Type:Sell, Volume:0.04, Price:1.83327, S/L:1.835859254474323, T/P:1.8306807455256768
+Bot2 2024-07-30 18:50:11=> Sell order for EURNZD
+Bot2 2024-07-30 18:50:14=> Send sell order EURNZD 0.04 lots with deviation=0 points
+Bot2 2024-07-30 18:50:14=> Send sell order for EURNZD done!, 
+Bot2 2024-07-30 18:52:37=> 2024-07-30 (9)  -10.26$
+Bot2 2024-07-30 18:52:37=> 2024-07-29 (1)  10000.0$
+Bot2 2024-07-30 18:53:29=> Max open trades: 20
+Bot2 2024-07-30 18:53:29=> Stake currency: USDT
+Bot2 2024-07-30 18:53:29=> Balance: 9989.74$
+Bot2 2024-07-30 18:53:29=> Equity: 9980.09$
+Bot2 2024-07-30 18:53:29=> ------------------------------------
+Bot2 2024-07-30 18:53:29=> Profit: -9.65$
+Bot2 2024-07-30 18:53:29=> Total profit buy: -6.0$
+Bot2 2024-07-30 18:53:29=> Total profit sell: -3.65$
+Bot2 2024-07-30 18:53:29=> ------------------------------------
+Bot2 2024-07-30 18:53:29=> Number of buy: 1
+Bot2 2024-07-30 18:53:29=> Number of sell: 4
+Bot2 2024-07-30 18:53:29=> ------------------------------------
+Bot2 2024-07-30 18:53:29=> Volume: 0.2
+Bot2 2024-07-30 18:53:29=> Total buy volume: 0.04
+Bot2 2024-07-30 18:53:29=> Total sell volume: 0.16
+Bot2 2024-07-30 18:53:29=> ------------------------------------
+Bot2 2024-07-30 18:53:29=> Trailing stoploss: -1500.0$
+Bot2 2024-07-30 18:53:29=> Trailing TakeProfit: 20000$
+Bot2 2024-07-30 18:53:29=> Can open new order: Yes
+Bot2 2024-07-30 18:55:02=> Signal EURAUD Type:Sell, Volume:0.04, Price:1.65405, S/L:1.655668010643239, T/P:1.652431989356761
+Bot2 2024-07-30 18:55:02=> Sell order for EURAUD
+Bot2 2024-07-30 18:55:03=> Send sell order EURAUD 0.04 lots with deviation=0 points
+Bot2 2024-07-30 18:55:03=> Send sell order for EURAUD done!, 
+Bot2 2024-07-30 19:21:01=> Max open trades: 20
+Bot2 2024-07-30 19:21:01=> Stake currency: USDT
+Bot2 2024-07-30 19:21:01=> Balance: 9989.74$
+Bot2 2024-07-30 19:21:01=> Equity: 9977.7$
+Bot2 2024-07-30 19:21:01=> ------------------------------------
+Bot2 2024-07-30 19:21:01=> Profit: -12.04$
+Bot2 2024-07-30 19:21:01=> Total profit buy: -5.44$
+Bot2 2024-07-30 19:21:01=> Total profit sell: -6.6$
+Bot2 2024-07-30 19:21:01=> ------------------------------------
+Bot2 2024-07-30 19:21:01=> Number of buy: 1
+Bot2 2024-07-30 19:21:01=> Number of sell: 5
+Bot2 2024-07-30 19:21:01=> ------------------------------------
+Bot2 2024-07-30 19:21:01=> Volume: 0.24
+Bot2 2024-07-30 19:21:01=> Total buy volume: 0.04
+Bot2 2024-07-30 19:21:01=> Total sell volume: 0.2
+Bot2 2024-07-30 19:21:01=> ------------------------------------
+Bot2 2024-07-30 19:21:01=> Trailing stoploss: -1500.0$
+Bot2 2024-07-30 19:21:01=> Trailing TakeProfit: 20000$
+Bot2 2024-07-30 19:21:01=> Can open new order: Yes
+Bot2 2024-07-30 19:45:05=> Signal USDJPY Type:Sell, Volume:0.04, Price:153.396, S/L:154.05540207178944, T/P:152.73659792821053
+Bot2 2024-07-30 19:45:05=> Sell order for USDJPY
+Bot2 2024-07-30 19:45:05=> Send sell order USDJPY 0.04 lots with deviation=0 points
+Bot2 2024-07-30 19:45:05=> Send sell order for USDJPY done!, 
+Bot2 2024-07-30 19:58:00=> Max open trades: 20
+Bot2 2024-07-30 19:58:00=> Stake currency: USDT
+Bot2 2024-07-30 19:58:00=> Balance: 9990.23$
+Bot2 2024-07-30 19:58:00=> Equity: 9989.6$
+Bot2 2024-07-30 19:58:00=> ------------------------------------
+Bot2 2024-07-30 19:58:00=> Profit: -0.63$
+Bot2 2024-07-30 19:58:00=> Total profit buy: -4.84$
+Bot2 2024-07-30 19:58:00=> Total profit sell: 4.21$
+Bot2 2024-07-30 19:58:00=> ------------------------------------
+Bot2 2024-07-30 19:58:00=> Number of buy: 1
+Bot2 2024-07-30 19:58:00=> Number of sell: 5
+Bot2 2024-07-30 19:58:00=> ------------------------------------
+Bot2 2024-07-30 19:58:00=> Volume: 0.24
+Bot2 2024-07-30 19:58:00=> Total buy volume: 0.04
+Bot2 2024-07-30 19:58:00=> Total sell volume: 0.2
+Bot2 2024-07-30 19:58:00=> ------------------------------------
+Bot2 2024-07-30 19:58:00=> Trailing stoploss: -1500.0$
+Bot2 2024-07-30 19:58:00=> Trailing TakeProfit: 20000$
+Bot2 2024-07-30 19:58:00=> Can open new order: Yes
+Bot2 2024-07-30 19:58:11=> Orders successfully closed and Stopped opening a new order, Balance: 9989.19$
+Bot2 2024-07-30 19:58:26=> Stopped opening a new order

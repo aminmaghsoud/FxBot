@@ -3,9 +3,7 @@ import pytz
 from Utility import *
 import time
 ########################################################################################################
-ConnectionString = (r"Driver={ODBC Driver 18 for SQL Server}; Server=.\FXBOT; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;")
-#ConnectionString = "Driver={ODBC Driver 18 for SQL Server}; Server=WIN-GREOR96KJAS; Database=FXBOT; Trusted_Connection=yes;"
-
+ConnectionString = ("Driver={ODBC Driver 18 for SQL Server}; Server=.; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;")
 # آی دی ربات
 Id = 2 
 # عنوان ربات

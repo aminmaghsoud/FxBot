@@ -1,0 +1,67 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>8ce69353-7813-451d-b71d-aaa9c2f7552f</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>FxBot.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>FxBot</Name>
+    <RootNamespace>FxBot</RootNamespace>
+    <InterpreterId>Global|PythonCore|3.10</InterpreterId>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <CommandLineArguments>2 Run</CommandLineArguments>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="BacktestStrategyXAUUSDV4.py" />
+    <Compile Include="CustomBacktestStrategy.py" />
+    <Compile Include="CustomBacktestStrategyV3.py" />
+    <Compile Include="OpeningSessionStrategy.py" />
+    <Compile Include="FxBot.py" />
+    <Compile Include="PublicVarible.py" />
+    <Compile Include="StochasticStrategy.py" />
+    <Compile Include="Strategies\MyStrategy.py" />
+    <Compile Include="SupplyDemandStrategyM15.py" />
+    <Compile Include="SupplyDemandStrategyM5.py" />
+    <Compile Include="SupplyDemandStrategyV2.py" />
+    <Compile Include="SupplyDemandStrategyV3.py" />
+    <Compile Include="SupplyDemandStrategyV6-1.py" />
+    <Compile Include="SupplyDemandStrategyV5_Backtest.py" />
+    <Compile Include="SupplyDemandStrategyV71111111111111.py" />
+    <Compile Include="SupplyDemandStrategyV6_Backtest.py" />
+    <Compile Include="Trade.py" />
+    <Compile Include="Utility.py" />
+    <Compile Include="Indicators\zz.py" />
+    <Compile Include="ZigzagIndicator1.py" />
+    <Compile Include="ZigzagIndicator2.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="Global|PythonCore|3.10" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data\" />
+    <Folder Include="Strategies\" />
+    <Folder Include="Indicators\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>

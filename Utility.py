@@ -1170,12 +1170,12 @@ void OnStart()
    }}
   }}
 """
- 
-ConnectionString = (r"Driver={ODBC Driver 18 for SQL Server}; Server=.\FXBOT; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;")
+
+connection_string = "Driver={ODBC Driver 18 for SQL Server}; Server=.; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;"
 def update_pair_values(pair_name, new_roof, new_floor, new_diff,new_message):
     try:
         # اتصال به دیتابیس
-        conn = pyodbc.connect(ConnectionString)
+        conn = pyodbc.connect(connection_string)
         cursor = conn.cursor()
         
         # اجرای کوئری برای بروزرسانی داده‌ها در جدول Base
@@ -1200,11 +1200,11 @@ def update_pair_values(pair_name, new_roof, new_floor, new_diff,new_message):
         print("Error in connection or update operation", e)
         return False
     
-ConnectionString = (r"Driver={ODBC Driver 18 for SQL Server}; Server=.\FXBOT; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;")
+connection_string = "Driver={ODBC Driver 18 for SQL Server}; Server=.; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;"
 def get_pair_values(pair_name):
     try:
         # اتصال به دیتابیس
-        conn = pyodbc.connect(ConnectionString)
+        conn = pyodbc.connect(connection_string)
         cursor = conn.cursor()
         
         # اجرای کوئری برای خواندن داده‌ها از جدول Base
