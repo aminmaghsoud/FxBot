@@ -4,11 +4,11 @@ from Utility import *
 import time
 ########################################################################################################
 #ConnectionString = ("Driver={ODBC Driver 18 for SQL Server}; Server=.; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;")
-ConnectionString = (r"Driver={ODBC Driver 18 for SQL Server}; Server=.\FXBOT; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;")
+ConnectionString = (r"Driver={ODBC Driver 18 for SQL Server}; Server=.\FXBOT; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;") 
 # آی دی ربات
 Id = 2 
 # عنوان ربات
-Name = ""
+Name = "" 
 # بالانس مجازی حساب
 VirtualBalance = 0
 # تعداد اوردرهای باز همزمان
@@ -30,7 +30,7 @@ LotIncreaseRatio = 0
 TradesStartTime = "00:00"
 TradesEndTime = "00:00"
 StopTradesBeforeNews = 0
-StopTradesAfterNews = 0
+StopTradesAfterNews = 0 
 # فهرست اخبار
 News = []
 # آیا مارکت باز است
