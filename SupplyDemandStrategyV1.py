@@ -17,223 +17,258 @@ import ta
 import numpy as np
 from datetime import datetime
 
-class SupplyDemandStrategyV1():
+
+class SupplyDemandStrategyV2():
       Pair = ""
-      TimeFrame = MT5.TIMEFRAME_M1
+      TimeFrame = MT5.TIMEFRAME_M5
 ########################################################################################################
       def __init__(self, Pair):
           self.Pair = Pair
            
 ##############################################################################################################################################################
       def Main(self):
-          if self.Pair != "XAUUSDb":
-             return
-          print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ StrategyV1 M5 --------------")
-          #Botdashboard(14 , self.Pair)
+          print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ StrategyV2 M5 Spike --------------")
+          if self.Pair == 'EURNZDb' : return
+          
+          sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
+          if sell_positions_with_open_prices:
+            for ticket, open_price in sell_positions_with_open_prices.items():
+              positions = MT5.positions_get()
+              for position_info in positions:
+               if position_info.symbol == self.Pair :
+                  Botdashboard(54 , self.Pair)
+                  return
+          buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
+          if buy_positions_with_open_prices:
+             for ticket, open_price in buy_positions_with_open_prices.items():
+                positions = MT5.positions_get()
+                for position_info in positions:
+                  if position_info.symbol == self.Pair :
+                     Botdashboard(53 , self.Pair)
+                     return 
+                  
+          high_low_diff = 0 
           SymbolInfo = MT5.symbol_info(self.Pair)
           if SymbolInfo is not None :
+             RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 250)
+             if RatesM5 is not None:
+                FrameRatesM5 = PD.DataFrame(RatesM5)
+                if not FrameRatesM5.empty:
+                   FrameRatesM5['datetime'] = PD.to_datetime(FrameRatesM5['time'], unit='s')
+                   FrameRatesM5 = FrameRatesM5.drop('time', axis=1)
+                   FrameRatesM5 = FrameRatesM5.set_index(PD.DatetimeIndex(FrameRatesM5['datetime']), drop=True)
              
-             RatesM1 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M1, 0, 120)
-             if RatesM1 is not None:
-                FrameRatesM1 = PD.DataFrame(RatesM1)
-                if not FrameRatesM1.empty:
-                   FrameRatesM1['datetime'] = PD.to_datetime(FrameRatesM1['time'], unit='s')
-                   FrameRatesM1 = FrameRatesM1.drop('time', axis=1)
-                   FrameRatesM1 = FrameRatesM1.set_index(PD.DatetimeIndex(FrameRatesM1['datetime']), drop=True)
+             RatesM15 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M15, 0, 250)
+             if RatesM15 is not None:
+                FrameRatesM15 = PD.DataFrame(RatesM15)
+                if not FrameRatesM15.empty:
+                   FrameRatesM15['datetime'] = PD.to_datetime(FrameRatesM15['time'], unit='s')
+                   FrameRatesM15 = FrameRatesM15.drop('time', axis=1)
+                   FrameRatesM15 = FrameRatesM15.set_index(PD.DatetimeIndex(FrameRatesM15['datetime']), drop=True)
                    
+             
 ########################################################################################### بررسی شروط اولیه  #########################################################################################################
              current_datetime = datetime.now()
-             LastCandle = FrameRatesM1.iloc[-1]
-             minutes_to_exclude = [4, 5, 9, 10, 14, 15, 19, 20, 24, 25, 29, 30, 34, 35, 39, 40, 44, 45, 49, 50, 54, 55, 59, 0]
-             if (LastCandle['datetime'].hour in [0,1]) or (current_datetime.weekday() == 4 and current_datetime.hour >= 17) or LastCandle['datetime'].minute not in minutes_to_exclude : 
+             LastCandle = FrameRatesM5.iloc[-1]
+             minutes_to_exclude = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+             if (LastCandle['datetime'].hour in [0,1]) or (current_datetime.weekday() == 4 and current_datetime.hour >= 17) :# or current_datetime.minute not in minutes_to_exclude or current_datetime.second > 20  : 
                 Botdashboard(4 , self.Pair)
                 return
-             elif PublicVarible.CanOpenOrderST == False or PublicVarible.CanOpenOrder == False : 
+             if PublicVarible.CanOpenOrderST == False or PublicVarible.CanOpenOrder == False : 
                 Botdashboard(36 , self.Pair)
                 return
 ########################################################################################### دریافت اطلاعات تایم فریم ها و محاسبه اندیکاتور #########################################################################################################
-             RatesM30 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M30, 0, 260)
-             if RatesM30 is not None:
-                   FrameRatesM30 = PD.DataFrame(RatesM30)
-                   if not FrameRatesM30.empty:
-                      FrameRatesM30['datetime'] = PD.to_datetime(FrameRatesM30['time'], unit='s')
-                      FrameRatesM30 = FrameRatesM30.drop('time', axis=1)
-                      FrameRatesM30 = FrameRatesM30.set_index(PD.DatetimeIndex(FrameRatesM30['datetime']), drop=True)
-                      SuperT30 = supertrend(Pair = self.Pair , high= FrameRatesM30['high'], low= FrameRatesM30['low'], close= FrameRatesM30['close'], length= 14 , multiplier= 3) #SuperTrend calculation
-                      DirectionM30 = SuperT30.iloc[-2][1]
-                      PriceST3 = SuperT30.iloc[-2][0]
-
-             RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 260)
-             if RatesM5 is not None:
-                   FrameRatesM5 = PD.DataFrame(RatesM5)
-                   if not FrameRatesM5.empty:
-                      FrameRatesM5['datetime'] = PD.to_datetime(FrameRatesM5['time'], unit='s')
-                      FrameRatesM5 = FrameRatesM5.drop('time', axis=1)
-                      FrameRatesM5 = FrameRatesM5.set_index(PD.DatetimeIndex(FrameRatesM5['datetime']), drop=True)
-                      SuperTM5 = supertrend(Pair = self.Pair , high= FrameRatesM5['high'], low= FrameRatesM5['low'], close= FrameRatesM5['close'], length= 10 , multiplier = 4 ) #SuperTrend calculation
-                      DirectionM5 = SuperTM5.iloc[-2][1]
-                      PriceST2 = SuperTM5.iloc[-2][0]
-                      
-             if DirectionM5 != DirectionM30 : 
+             
+             BB = PTA.bbands(close= FrameRatesM15['close'] , length= 40 , std = 2 , ddof= 0 , mamode = 1 )    
+             print 
+             SuperTM5 = supertrend(Pair = self.Pair , high= FrameRatesM5['high'], low= FrameRatesM5['low'], close= FrameRatesM5['close'], length= 14 , multiplier= 3) #SuperTrend calculation
+             DirectionM5 = SuperTM5.iloc[-2][1]
+             Direction = "UP" if DirectionM5 == 1 else "DOWN"
+             PriceST3 = SuperTM5.iloc[-2][0]
+             
+             SuperTM15 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 14 , multiplier= 3) #SuperTrend calculation
+             DirectionM15 = SuperTM15.iloc[-2][1]
+             Direction15 = "UP" if DirectionM15 == 1 else "DOWN"
+             PriceST1 = SuperTM15.iloc[-2][0]
+             
+             SuperTM15_2 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 9 , multiplier= 9) #SuperTrend calculation
+             DirectionM15_2 = SuperTM15.iloc[-2][1]
+             Direction15_2 = "UP" if DirectionM15 == 1 else "DOWN"
+             PriceST2 = SuperTM15.iloc[-2][0]
+             PriceST75= SuperTM15.iloc[-50][0]
+             
+             if PriceST2 == PriceST75 : 
+                print(f"PriceST2 ==  PriceST50 and return")
                 return
              
-             RatesH1 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_H1, 0, 260)
-             if RatesH1 is not None:
-                   FrameRatesH1 = PD.DataFrame(RatesH1)
-                   if not FrameRatesH1.empty:
-                      FrameRatesH1['datetime'] = PD.to_datetime(FrameRatesH1['time'], unit='s')
-                      FrameRatesH1 = FrameRatesH1.drop('time', axis=1)
-                      FrameRatesH1 = FrameRatesH1.set_index(PD.DatetimeIndex(FrameRatesH1['datetime']), drop=True)
-                      STH30 = PTA.stoch(high= FrameRatesH1['high'], low= FrameRatesH1['low'], close= FrameRatesH1['close'], k= 14, d= 5, smooth_k= 5)   #Stochastic calculation 
-                      
-########################################################################################### بررسی شروط اولیه بیش فروش و بیش خرید  #########################################################################################################
+             print(f"Direction M5 is {Direction}")
+             print(f"Direction M15-1 is {Direction15}")
+             print(f"Direction M15-2 is {Direction15_2}")
              
-             if DirectionM30 == 1 and  STH30.iloc[-1][0] > 99 : 
-                Botdashboard(12 , self.Pair) 
-                return     
-             #elif DirectionM30 == 1 and MFIH1.iloc[-1] > 85 : 
-             #   Botdashboard(42 , self.Pair)
-             #   return
-             elif DirectionM30 == -1 and STH30.iloc[-1][0] < 1 :
-                Botdashboard(11 , self.Pair) 
-                return     
-             #elif DirectionM30 == -1 and MFIH1.iloc[-1] < 15 : 
-             #   Botdashboard(43 , self.Pair)
-             #   return
-
-########################################################################################### بدنه استراتژی  #########################################################################################################
-             init ()
-             BuyAllow = 1
-             SellAllow = 1
-             #if SuperT30.iloc[-2][0] == SuperT30.iloc[-5][0] :
-             #   BuyAllow = 0
-             #   SellAllow = 0
+             ## لگ نزولی
+             end_index = -16
+             current_index = -3
+             count = 1
+             high_low_diff = 0.0
+             Basefloor = 0.0
+             Baseroof = 0.0
+             Text = None
+             if FrameRatesM5.iloc[-2]['high'] > FrameRatesM5.iloc[-3]['high']  : 
+                 while current_index > end_index : 
+                       Now_c_H = FrameRatesM5.iloc[current_index]['high']
+                       Old_c_H = FrameRatesM5.iloc[current_index - 1]['high'] 
+                       Now_c_L = FrameRatesM5.iloc[current_index]['low']
+                       Old_c_L = FrameRatesM5.iloc[current_index - 1]['low']
+                       
+                       if Now_c_H < Old_c_H : #and Now_c_L < Old_c_L : 
+                          count += 1 
+                          current_index -= 1
+                       else : 
+                           break
+             if count > 1 : 
+                high_low_diff = round((abs(FrameRatesM5.iloc[-2]['low'] - FrameRatesM5.iloc[current_index]['high'])) / (SymbolInfo.point),2)
                 
-             ################################ شرط معامله فروش  #####################################
-
-             if DirectionM30 == 1  :    
-                buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
-                if buy_positions_with_open_prices:
-                 for ticket, open_price in buy_positions_with_open_prices.items():
-                   positions = MT5.positions_get()
-                   for position_info in positions:
-                     if position_info.symbol == self.Pair :
-                        Botdashboard(53 , self.Pair)
-                        return
+                if  ((self.Pair == 'XAUUSDb'and high_low_diff < 250) or (self.Pair != 'XAUUSDb'and high_low_diff < 150)) :
+                   return
+                if FrameRatesM5.iloc[-2]['low'] < FrameRatesM5.iloc[-3]['low'] : Basefloor = FrameRatesM5.iloc[-2]['low'] 
+                else : Basefloor = FrameRatesM5.iloc[-3]['low']
+                Baseroof = FrameRatesM5.iloc[-2]['high']
+                print(f"high_low_diff: {high_low_diff}  and  Baseroof: {Baseroof}  and  Basefloor: {Basefloor} and  Range arraye : {abs(Basefloor - Baseroof) / (SymbolInfo.point)} \n")
                 
-                BaseHigh = self.FindSwingHigh(FrameRatesM5, SymbolInfo.point,0,0,0)  
-                if SellAllow == 1 : Botdashboard(63 , self.Pair)
-                else : Botdashboard(64 , self.Pair)
-                SymbolInfo = MT5.symbol_info(self.Pair)
-                
-                if BaseHigh == -1 and SellAllow :                                                                  ######### شرط اصلی پیدا کردن نقطه ورود به معامله ##########   STH30slope < 0 and RSIslope < -0.5 and StochRSI_k2 > 80 
-                   write_trade_info_to_file(self.Pair ,"Sell" , BaseHigh, 0, 0, 0 , 0 ,0 , DirectionM30 )
-                   EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
-                   Volume = self.CalcLotSize(Point= SymbolInfo.point)                                                                 #########  محاسه حجم ورود به معامله ##########
-                                                              #########  تعیین حدضرر معامله #########
-                   TP1 = FrameRatesM5.iloc[-3]['close']
-                   SL = EntryPrice - ((TP1 - EntryPrice)* 0.7)                                                                            #########  تعیین حدسود معامله ########## 
-                   if time.time() - PublicVarible.last_message_time >= 5 :
-                       PublicVarible.last_message_time = time.time()
-                       Text = "🔺 V1 -M5- Find Spike\n"
-                       Text += f"{SymbolInfo.name}\n"
-                       Text += "Sell\n"
-                       Text += f"Volume: {str(Volume)}\n"
-                       Text += f"Price: {str(EntryPrice)}\n"
-                       Text += f"S/L: {str(SL)}\n"
-                       Text += f"T/P: {str(TP1)}"
-                       PromptToTelegram(Text)
-                       print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                       Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                       OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= f"id:{PublicVarible.Id}- V1 M5") #########  ارسال اطلاعات فروش به تابع  ########## 
+                if (abs(Baseroof - Basefloor) / (SymbolInfo.point) < high_low_diff * 0.35 ):
+                   roof, floor, diff , message = get_pair_values(self.Pair)
+                   if message is None or time.time() - message >= 280 :
+                      last_message_time = time.time()
+                      DBupdate = update_pair_values(self.Pair,Baseroof,Basefloor,high_low_diff,last_message_time)
+                      Text =  f"{self.Pair}\n"
+                      if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 : 
+                         Text += f"Auto Trade Cross ... 🤖 \n" 
+                      elif DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  : 
+                         Text += f"Auto Trade Direct ... 🤖 \n"
+                      else : f"Manual Trade ... 👨‍  \n"
+                      if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1  :
+                         Text += f"معامله : خرید / BUY \n" 
+                      elif  DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1 :
+                            Text +=f"معامله : فروش / SELL  \n" 
+                      else: Text +=f"نیاز به بررسی ...  \n" 
+                      Text += f"لگ نزولی ... 🔴 \n"
+                      Text += f"ارتفاع لگ: {round(high_low_diff,2) / 10 } pip\n"
+                      Text += f"ارتفاع رنج: {round(abs(Basefloor - Baseroof) / (SymbolInfo.point) /10 , 2)} pip \n"
+                      Text += f"ظرفیت سود: {round((round(high_low_diff,2) - (abs(Basefloor - Baseroof) / (SymbolInfo.point)) )/10 , 2)} pip \n"
+                      Text += f"تعداد کندل: {count}\n"
+                      Text += f"سقف: {Baseroof}\n"
+                      Text += f"کف: {Basefloor}\n"
+                      Text += f"M5 روند : {Direction}\n"
+                      Text += f"M15روند : Up" if DirectionM15 == 1 else f"M15روند : Down"
+                      PromptToTelegram(Text)
+                      #shape = draw_rectangle(self.Pair,Baseroof,Basefloor)
                    
-             ############################# شرط معامله خرید  #####################################
+                   if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1  : 
                       
-             if DirectionM30 == -1: 
-                sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
-                if sell_positions_with_open_prices:
-                  for ticket, open_price in sell_positions_with_open_prices.items():
-                    positions = MT5.positions_get()
-                    for position_info in positions:
-                     if position_info.symbol == self.Pair :
-                        Botdashboard(54 , self.Pair)
-                        return
+                      EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
+                      if self.Pair == 'XAUUSDb' : Volume = 0.02
+                      else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
+                      SL = PriceST1 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
+                      TP1 = (abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)    
+                      write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )
+                      print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                      Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                      OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
+                      
+                   if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  : 
+                      
+                      EntryPrice = SymbolInfo.ask                                                                                        ######### قیمت  ورود به معامله ##########
+                      if self.Pair == 'XAUUSDb' : Volume = 0.02
+                      else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
+                      SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
+                      TP1 = EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100)    
+                      write_trade_info_to_file(self.Pair ,"Sell" , EntryPrice, SL, TP1, Direction )
+                      print(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                      Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                      OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V2 - M5")
+
+             ## لگ صعودی
+             end_index = -16
+             current_index = -3
+             count = 1
+             high_low_diff = 0.0
+             Basefloor = 0.0
+             Baseroof = 0.0
+             Text = None       
+             if FrameRatesM5.iloc[-2]['high'] < FrameRatesM5.iloc[-3]['high']  : 
+                 while current_index > end_index : 
+                       Now_c_H = FrameRatesM5.iloc[current_index]['high']
+                       Old_c_H = FrameRatesM5.iloc[current_index - 1]['high'] 
+                       Now_c_L = FrameRatesM5.iloc[current_index]['low']
+                       Old_c_L = FrameRatesM5.iloc[current_index - 1]['low']
+                       
+                       if  Now_c_L > Old_c_L : #and Now_c_H > Old_c_H : 
+                          count += 1 
+                          current_index -= 1
+                       else : 
+                           break
+             if count > 1 : 
+                high_low_diff = round((abs(FrameRatesM5.iloc[-2]['high'] - FrameRatesM5.iloc[current_index]['low'])) / (SymbolInfo.point) , 2)
+                if  ((self.Pair == 'XAUUSDb'and high_low_diff < 250) or (self.Pair != 'XAUUSDb'and high_low_diff < 150)) :
+                    return
+                if FrameRatesM5.iloc[-2]['high'] > FrameRatesM5.iloc[-3]['high'] : Baseroof = FrameRatesM5.iloc[-2]['high']  
+                else : Baseroof = FrameRatesM5.iloc[-3]['high'] 
+                Basefloor = FrameRatesM5.iloc[-2]['low']
+                print(f"high_low_diff: {high_low_diff}  and  Baseroof: {Baseroof}  and  Basefloor: {Basefloor} and  Range arraye : {abs(Basefloor - Baseroof)/ (SymbolInfo.point)} \n")
                 
-                BaseLow = self.FindSwingLow(FrameRatesM5, SymbolInfo.point,0,0,0)
-                if BuyAllow == 1 : Botdashboard(63 , self.Pair)
-                else : Botdashboard(64 , self.Pair)
-                SymbolInfo = MT5.symbol_info(self.Pair)
-                
-                if (BaseLow == 1) and BuyAllow :                                                        # ######## شرط اصلی پیدا کردن نقطه ورود به معامله ########## (BaseLow == 1 or BaseLow == 2 or BaseLow == 3 or BaseLow == 4 or BaseLow == 5) and RSIslope > 0.5  and StochRSI_k2 < 20  
-                   EntryPrice = SymbolInfo.ask                                                           ######### قیمت  ورود به معامله ##########
-                   Volume = self.CalcLotSize(Point= SymbolInfo.point)                                    #########  محاسه حجم ورود به معامله ##########
-                   TP1 = FrameRatesM5.iloc[-3]['close'] 
-                   SL = ((EntryPrice - TP1)* 0.7) + EntryPrice        
-                   if time.time() - PublicVarible.last_message_time >= 5 :
-                       write_trade_info_to_file(self.Pair ,"Buy" , BaseLow, 0, 0, 0 , 0 , 0 , DirectionM30 )
-                       PublicVarible.last_message_time = time.time()
-                       Text = "🔻 V1 -M5- Find Spike\n"
-                       Text += f"{SymbolInfo.name}\n"
-                       Text += "Buy\n"
-                       Text += f"Volume: {str(Volume)}\n"
-                       Text += f"Price: {str(EntryPrice)}\n"
-                       Text += f"S/L: {str(SL)}\n"
-                       Text += f"T/P: {str(TP1)}"
-                       PromptToTelegram(Text)
+                if (abs(Baseroof - Basefloor) / (SymbolInfo.point) < high_low_diff * 0.35 ) : 
+                   roof, floor, diff , message = get_pair_values(self.Pair)
+                   if message is None or time.time() - message >= 280 :
+                      last_message_time = time.time()
+                      DBupdate = update_pair_values(self.Pair,Baseroof,Basefloor,high_low_diff,last_message_time)
+                      Text =  f"{self.Pair}\n"
+                      if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  : 
+                         Text += f"Auto Trade Cross ... 🤖 \n" 
+                      elif DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1  : 
+                         Text += f"Auto Trade Direct ... 🤖 \n"
+                      else : f"Manual Trade ... 👨‍  \n"
+                      if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  :
+                         Text += f"معامله : فروش / SELL \n" 
+                      elif  DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 :
+                            Text +=f"معامله : خرید / BUY  \n" 
+                      else: Text +=f"نیاز به بررسی ...  \n" 
+                      Text += f"لگ صعودی ... 🟢 \n"
+                      Text += f"ارتفاع لگ: {round(high_low_diff,2) / 10 } pip\n"
+                      Text += f"ارتفاع رنج: {round(abs(Basefloor - Baseroof) / (SymbolInfo.point) /10 , 2)} pip \n"
+                      Text += f"ظرفیت سود: {round((round(high_low_diff,2) - (abs(Basefloor - Baseroof) / (SymbolInfo.point)) )/10 , 2)} pip \n"
+                      Text += f"تعداد کندل: {count}\n"
+                      Text += f"سقف: {Baseroof}\n"
+                      Text += f"کف: {Basefloor}\n"
+                      Text += f"M5 روند : {Direction}\n"
+                      Text += f"M15روند : Up" if DirectionM15 == 1 else f"M15روند : Down"
+                      PromptToTelegram(Text)
+                      #shape = draw_rectangle(self.Pair,Baseroof,Basefloor)
+                   
+                   if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  :
+                       
+                       EntryPrice = SymbolInfo.ask                                                                                        ######### قیمت  ورود به معامله ##########
+                       if self.Pair == 'XAUUSDb' : Volume = 0.02
+                       else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
+                       SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
+                       TP1 = EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100)    
+                       write_trade_info_to_file(self.Pair ,"Sell" , EntryPrice, SL, TP1, Direction )
                        print(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                        Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                       OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= f"id:{PublicVarible.Id}- V1 M5") #########  ارسال اطلاعات فروش به تابع  ##########    
-                      
-########################################################################################################
-      def FindSwingHigh(self, FrameRates, Point,M5RSI,StochRSI_k2,RSIslope):
-          SymbolInfo = MT5.symbol_info(self.Pair)
-          Base = 0
-          O1 = FrameRates.iloc[-2]['open']
-          C1 = FrameRates.iloc[-2]['close']
-          L1 = FrameRates.iloc[-2]['low']
-          H1 = FrameRates.iloc[-2]['high']
-          O2 = FrameRates.iloc[-3]['open']
-          H2 = FrameRates.iloc[-3]['high']
-          L2 = FrameRates.iloc[-3]['low']
-          C2 = FrameRates.iloc[-3]['close']
-          O3 = FrameRates.iloc[-4]['open']
-          C3 = FrameRates.iloc[-4]['close']
-          
-          if C3 >= O3 and C1 < O1 and ((O1 - C1) > 120 * SymbolInfo.point) and C2 < O2 and ((O2 - C2)> 90 * SymbolInfo.point) and L1 < L2 and H1 < H2  and (O1 - C1) > (O2 - C2): 
-             
-             #if time.time() - PublicVarible.last_message_time >= 5 :
-             #    PublicVarible.last_message_time = time.time()
-             #    PromptToTelegram(f"الگوی سر و شانه نزولی پیدا کردم  ...{SymbolInfo.name} مقدار RSI : {round(M5RSI,2)}  مقدار استوک {round(StochRSI_k2,2)} شیب خط RSI: {round(RSIslope,2)} ")
-             print("Bearish Leg found ...")
-             Base = -1 
-
-          return (Base)
-
-########################################################################################################
-      def FindSwingLow(self, FrameRates, Point,M5RSI,StochRSI_k2,RSIslope):
-          SymbolInfo = MT5.symbol_info(self.Pair)
-          Base = 0
-          O1 = FrameRates.iloc[-2]['open']
-          C1 = FrameRates.iloc[-2]['close']
-          L1 = FrameRates.iloc[-2]['low']
-          H1 = FrameRates.iloc[-2]['high']
-          O2 = FrameRates.iloc[-3]['open']
-          H2 = FrameRates.iloc[-3]['high']
-          L2 = FrameRates.iloc[-3]['low']
-          C2 = FrameRates.iloc[-3]['close']
-          O3 = FrameRates.iloc[-4]['open']
-          C3 = FrameRates.iloc[-4]['close']
-
-          if C3 <= O3 and  C1 > O1 and ((C1 - O1) > 120 * SymbolInfo.point) and C2 > O2 and ((C2 - O2)> 90 * SymbolInfo.point) and L1 > L2 and H1 > H2 and (C1 - O1) > (C2 - O2): 
-             #if time.time() - PublicVarible.last_message_time >= 5 :
-             #   PublicVarible.last_message_time = time.time()
-             #   #PromptToTelegram(f"الگوی سر و شانه صعودی پیدا کردم  ...{SymbolInfo.name} مقدار RSI : {round(M5RSI,2)} مقدار استوک :{round(StochRSI_k2,2)} شیب خط RSI: {round(RSIslope,2)} ")
-             print("Bullish Leg found ...")
-             Base = 1 
-              
-          return (Base)
-
-########################################################################################################
+                       OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V2 - M5")
+       
+                   if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 :
+                     
+                       EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
+                       if self.Pair == 'XAUUSDb' : Volume = 0.02
+                       else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
+                       SL = PriceST1 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
+                       TP1 = (abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)    
+                       write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )
+                       print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                       Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                       OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5") 
+                       
+""""########################################################################################################
       def CalcLotSize(self,Point):
         
          #if self.Pair == 'XAUUSDb' : 
@@ -250,3 +285,4 @@ def CloseAllPosi(Pair:str):
    #  PromptToTelegram(Text= f"Market trend is changed and All orders successfully closed" + "\n" + f"💰 Balance: {str(GetBalance())}$")
      return True
 ########################################################################################################
+"""

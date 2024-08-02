@@ -78,8 +78,10 @@ class SupplyDemandStrategyV2():
                 Botdashboard(36 , self.Pair)
                 return
 ########################################################################################### دریافت اطلاعات تایم فریم ها و محاسبه اندیکاتور #########################################################################################################
-             
-                     
+             Bband = PTA.bbands(close= FrameRatesM15['close'] , length= 40 , std = 2 , ddof= 0 , mamode = 'EMA' )    
+             BRoof = round(Bband.iloc[-2][-3] , 2 ) 
+             BBase = round(Bband.iloc[-2][-5] , 2 )  
+
              SuperTM5 = supertrend(Pair = self.Pair , high= FrameRatesM5['high'], low= FrameRatesM5['low'], close= FrameRatesM5['close'], length= 14 , multiplier= 3) #SuperTrend calculation
              DirectionM5 = SuperTM5.iloc[-2][1]
              Direction = "UP" if DirectionM5 == 1 else "DOWN"
@@ -91,10 +93,10 @@ class SupplyDemandStrategyV2():
              PriceST1 = SuperTM15.iloc[-2][0]
              
              SuperTM15_2 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 9 , multiplier= 9) #SuperTrend calculation
-             DirectionM15_2 = SuperTM15.iloc[-2][1]
+             DirectionM15_2 = SuperTM15_2.iloc[-2][1]
              Direction15_2 = "UP" if DirectionM15 == 1 else "DOWN"
-             PriceST2 = SuperTM15.iloc[-2][0]
-             PriceST75= SuperTM15.iloc[-50][0]
+             PriceST2 = SuperTM15_2.iloc[-2][0]
+             PriceST75= SuperTM15_2.iloc[-50][0]
              
              if PriceST2 == PriceST75 : 
                 print(f"PriceST2 ==  PriceST50 and return")
@@ -168,7 +170,11 @@ class SupplyDemandStrategyV2():
                       if self.Pair == 'XAUUSDb' : Volume = 0.02
                       else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
                       SL = PriceST1 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
-                      TP1 = (abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)    
+                      TP1 = BRoof #(abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)   
+                      if  abs(TP1 - EntryPrice) < abs(EntryPrice - SL) * 0.9 : 
+                          print ('TP is Small')
+                          write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, "Tp is Small", Direction )
+                          return   
                       write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )
                       print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                       Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
@@ -180,7 +186,11 @@ class SupplyDemandStrategyV2():
                       if self.Pair == 'XAUUSDb' : Volume = 0.02
                       else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
                       SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
-                      TP1 = EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100)    
+                      TP1 = BBase #EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100) 
+                      if  abs(TP1 - EntryPrice) < abs(EntryPrice - SL) * 0.9 : 
+                          print ('TP is Small')
+                          write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, "Tp is Small", Direction )
+                          return     
                       write_trade_info_to_file(self.Pair ,"Sell" , EntryPrice, SL, TP1, Direction )
                       print(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                       Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
@@ -249,7 +259,11 @@ class SupplyDemandStrategyV2():
                        if self.Pair == 'XAUUSDb' : Volume = 0.02
                        else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
                        SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
-                       TP1 = EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100)    
+                       TP1 = BRoof #EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100)    
+                       if  abs(TP1 - EntryPrice) < abs(EntryPrice - SL) * 0.9 : 
+                          print ('TP is Small')
+                          write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, "Tp is Small", Direction )
+                          return  
                        write_trade_info_to_file(self.Pair ,"Sell" , EntryPrice, SL, TP1, Direction )
                        print(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                        Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
@@ -260,8 +274,12 @@ class SupplyDemandStrategyV2():
                        EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
                        if self.Pair == 'XAUUSDb' : Volume = 0.02
                        else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
-                       SL = PriceST1 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
-                       TP1 = (abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)    
+                       SL = PriceST1 - ( SymbolInfo.point * 50)                                #########  تعیین حدضرر معامله #########
+                       TP1 = BBase #(abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)    
+                       if  abs(TP1 - EntryPrice) < abs(EntryPrice - SL) * 0.9 : 
+                          print ('TP is Small')
+                          write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, "Tp is Small", Direction )
+                          return  
                        write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )
                        print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                        Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
