@@ -247,72 +247,27 @@ def ProfitByDay(Date:datetime):
     return Profit  
 ########################################################################################################
 def CloseAllPosition(Pair:str):
-    #total_stop_loss_usd = 0.0
-    ## دریافت تمام پوزیشن‌های باز
-    #all_positions = MT5.positions_get()
-    ## محاسبه مجموع حد ضررهای به دلار
-    #for position in all_positions:
-    #    stop_loss = position.sl
-    #    volume = position.volume
-    #    symbol_info = MT5.symbol_info(position.symbol)
-    #    point = symbol_info.point
-    #    tick_value = symbol_info.tick_value
-    #    stop_loss_usd = (stop_loss - position.price_open) / point * tick_value * volume
-    #    total_stop_loss_usd += stop_loss_usd
-    #print(Fore.LIGHTYELLOW_EX,"Total Dollar Loss  :              ",Fore.LIGHTRED_EX,"                    ",round(total_stop_loss_usd,2)," USD",Fore.RESET,"\n")
-    #
-    #return True
-    #
-# فراخوانی تابع برای محاسبه مجموع حد ضررهای به دلار
-
-    all_positions = MT5.positions_get()
-    total_loss_dollar = 0.0  # متغیر برای نگهداری مجموع ضرر دلاری
-    for position in all_positions:
-       #if position.type == MT5.POSITION_TYPE_BUY:
-        entry_price = position.price_open
-        stop_loss = position.sl
-        volume = position.volume
-        # محاسبه فاصله قیمت ورود تا حد ضرر
-        price_distance = abs(entry_price - stop_loss)
-        # محاسبه ضرر دلاری معامله
-        trade_loss = price_distance * volume *100
-        # اضافه کردن ضرر معامله به مجموع ضررها
-        total_loss_dollar += trade_loss
-        #print("price_distance: ",price_distance,"    trade_loss:",trade_loss,"    total_loss_dollar:",total_loss_dollar,"    volume:",volume)
-        #print("entry_price:",entry_price,"   stop_loss:",stop_loss)
-       # چاپ مجموع ضرر دلاری
-    #print(Fore.LIGHTYELLOW_EX,"Total Dollar Loss  :              ",Fore.LIGHTRED_EX,"                    ",round(total_loss_dollar,2)," USD",Fore.RESET,"\n") 
-    #
-    #Profit = 0
-    #Positions = MT5.positions_get(symbol= Pair)
-    #
-    #if Positions is None:
-    #   return
-    #elif len(Positions) > 0:
-    #     #Botdashboard(3 , Pair)
-         #Pos = PD.DataFrame(list(Positions), columns= Positions[0]._asdict().keys())
-         #Profit = Pos['profit'].sum()
-         #
-         #print ()
-         #Balance = GetBalance()
-         #if Balance >= 1000:
-         #    A =  Balance // 1000
-         #    Balance = round(A * 1000)
-         #
-         #space = (Profit * -1) + (Balance * -0.02)
-         #
-         #if Profit > 0  : 
-         #   print(Fore.LIGHTYELLOW_EX,"Total profit at this moment       ",Fore.LIGHTGREEN_EX,"                    ",round(Profit,2),Fore.RESET,"\n")
-         #else : 
-         #   print(Fore.LIGHTYELLOW_EX,"Total profit at this moment       ",Fore.LIGHTRED_EX,"                   ",round(Profit,2),Fore.RESET,"\n")
-         #
-         #print(Fore.LIGHTYELLOW_EX,"Total Dollar Loss (%2.5):         ",Fore.LIGHTRED_EX,"                   ",round(Balance * -0.02, 2),Fore.RESET,"\n")
-         #print(Fore.LIGHTYELLOW_EX,"The remaining distance to the loss",Fore.LIGHTRED_EX,"                   ",round(space, 2),Fore.RESET,"\n")
+     
+    Profit = 0
+    Positions = MT5.positions_get(symbol= Pair)
+    
+    if Positions is None:
+       return
+    elif len(Positions) > 0:
+         Botdashboard(3 , Pair)
+         Pos = PD.DataFrame(list(Positions), columns= Positions[0]._asdict().keys())
+         Profit = Pos['profit'].sum() + Pos['swap'].sum() + Pos['commission'].sum()
+         print ()
+         Balance = GetBalance()
+         if Profit > 0  : 
+            print(Fore.LIGHTYELLOW_EX,"Total profit at this moment       ",Fore.LIGHTGREEN_EX,"                    ",round(Profit,2),Fore.RESET,"\n")
+         else : 
+            print(Fore.LIGHTYELLOW_EX,"Total profit at this moment       ",Fore.LIGHTRED_EX,"                   ",round(Profit,2),Fore.RESET,"\n")
         
-         #if Profit < Balance * -0.02 : 
-         #   MT5.Close(symbol= Pair)
-         #   Prompt(f"Profit is {round(Profit, 2)}$ and Posision successfully closed by Smart StopLoss , Balance: {str(GetBalance())}$")
-         #   PromptToTelegram(Text= f"❎ Profit is {round(Profit, 2)}$ Posision successfully closed by Smart StopLoss " + "\n" + f"💰 Balance: {str(GetBalance())}$")
+         if Profit > Balance * 0.05 : 
+            MT5.Close(symbol= Pair)
+            Prompt(f"Profit is {round(Profit, 2)}$ and Posision successfully closed by Smart StopLoss , Balance: {str(GetBalance())}$")
+            PromptToTelegram(Text= f"❎ Profit is {round(Profit, 2)}$ (5%) Posision successfully closed by Smart StopLoss " + "\n" + f"💰 Balance: {str(GetBalance())}$")
          #  
          ##محاسبه حد سود متحرک
          #if Profit <= (Balance * -0.3) and PublicVarible.TrailingTP >= 0: 

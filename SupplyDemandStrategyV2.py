@@ -28,6 +28,7 @@ class SupplyDemandStrategyV2():
 ##############################################################################################################################################################
       def Main(self):
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ StrategyV2 M5 Spike --------------")
+          CloseAllPosition(self.Pair)
           if self.Pair == 'EURNZDb' : return
           
           sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
@@ -71,16 +72,16 @@ class SupplyDemandStrategyV2():
              current_datetime = datetime.now()
              LastCandle = FrameRatesM5.iloc[-1]
              minutes_to_exclude = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
-             if (LastCandle['datetime'].hour in [0,1]) or (current_datetime.weekday() == 4 and current_datetime.hour >= 17) :# or current_datetime.minute not in minutes_to_exclude or current_datetime.second > 20  : 
+             if (LastCandle['datetime'].hour in [0,1]) or (current_datetime.weekday() == 4 and current_datetime.hour >= 23) :# or current_datetime.minute not in minutes_to_exclude or current_datetime.second > 20  : 
                 Botdashboard(4 , self.Pair)
                 return
              if PublicVarible.CanOpenOrderST == False or PublicVarible.CanOpenOrder == False : 
                 Botdashboard(36 , self.Pair)
                 return
 ########################################################################################### دریافت اطلاعات تایم فریم ها و محاسبه اندیکاتور #########################################################################################################
-             Bband = PTA.bbands(close= FrameRatesM15['close'] , length= 40 , std = 2 , ddof= 0 , mamode = 'EMA' )    
-             BRoof = round(Bband.iloc[-2][-3] , 2 ) 
-             BBase = round(Bband.iloc[-2][-5] , 2 )  
+             #Bband = PTA.bbands(close= FrameRatesM15['close'] , length= 40 , std = 2 , ddof= 0 , mamode = 'EMA' )    
+             #BRoof = round(Bband.iloc[-2][-3] , 2 ) 
+             #BBase = round(Bband.iloc[-2][-5] , 2 )  
 
              SuperTM5 = supertrend(Pair = self.Pair , high= FrameRatesM5['high'], low= FrameRatesM5['low'], close= FrameRatesM5['close'], length= 14 , multiplier= 3) #SuperTrend calculation
              DirectionM5 = SuperTM5.iloc[-2][1]
@@ -139,8 +140,8 @@ class SupplyDemandStrategyV2():
                 print(f"high_low_diff: {high_low_diff}  and  Baseroof: {Baseroof}  and  Basefloor: {Basefloor} and  Range arraye : {abs(Basefloor - Baseroof) / (SymbolInfo.point)} \n")
                 
                 if (abs(Baseroof - Basefloor) / (SymbolInfo.point) < high_low_diff * 0.35 ):
-                   roof, floor, diff , message = get_pair_values(self.Pair)
-                   if message is None or time.time() - message >= 280 :
+                  roof, floor, diff , message = get_pair_values(self.Pair)
+                  if message is None or time.time() - message >= 280 :
                       last_message_time = time.time()
                       DBupdate = update_pair_values(self.Pair,Baseroof,Basefloor,high_low_diff,last_message_time)
                       Text =  f"{self.Pair}\n"
@@ -166,33 +167,23 @@ class SupplyDemandStrategyV2():
                       PromptToTelegram(Text)
                       #shape = draw_rectangle(self.Pair,Baseroof,Basefloor)
                    
-                   if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1  : 
-                      
+                  if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1  : 
                       EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
-                      if self.Pair == 'XAUUSDb' : Volume = 0.02
-                      else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
+                      if self.Pair == 'XAUUSDb' : Volume = 0.03
+                      else:  Volume = 0.04                                                    #########  محاسه حجم ورود به معامله ##########
                       SL = PriceST1 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
-                      TP1 = BRoof #(abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)   
-                      if  abs(TP1 - EntryPrice) < abs(EntryPrice - SL) * 0.9 : 
-                          print ('TP is Small')
-                          write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, "Tp is Small", Direction )
-                          return   
+                      TP1 = (abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)   
                       write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )
                       print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                       Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                       OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
                       
-                   if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  : 
-                      
+                  if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  : 
                       EntryPrice = SymbolInfo.ask                                                                                        ######### قیمت  ورود به معامله ##########
-                      if self.Pair == 'XAUUSDb' : Volume = 0.02
-                      else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
+                      if self.Pair == 'XAUUSDb' : Volume = 0.03
+                      else:  Volume = 0.04                                                    #########  محاسه حجم ورود به معامله ##########
                       SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
-                      TP1 = BBase #EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100) 
-                      if  abs(TP1 - EntryPrice) < abs(EntryPrice - SL) * 0.9 : 
-                          print ('TP is Small')
-                          write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, "Tp is Small", Direction )
-                          return     
+                      TP1 = EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100) 
                       write_trade_info_to_file(self.Pair ,"Sell" , EntryPrice, SL, TP1, Direction )
                       print(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                       Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
@@ -222,14 +213,17 @@ class SupplyDemandStrategyV2():
                 high_low_diff = round((abs(FrameRatesM5.iloc[-2]['high'] - FrameRatesM5.iloc[current_index]['low'])) / (SymbolInfo.point) , 2)
                 if  ((self.Pair == 'XAUUSDb'and high_low_diff < 250) or (self.Pair != 'XAUUSDb'and high_low_diff < 150)) :
                     return
+                if  ((self.Pair == 'XAUUSDb'and high_low_diff > 750) or (self.Pair != 'XAUUSDb'and high_low_diff > 500)) :
+                    return
+                
                 if FrameRatesM5.iloc[-2]['high'] > FrameRatesM5.iloc[-3]['high'] : Baseroof = FrameRatesM5.iloc[-2]['high']  
                 else : Baseroof = FrameRatesM5.iloc[-3]['high'] 
                 Basefloor = FrameRatesM5.iloc[-2]['low']
                 print(f"high_low_diff: {high_low_diff}  and  Baseroof: {Baseroof}  and  Basefloor: {Basefloor} and  Range arraye : {abs(Basefloor - Baseroof)/ (SymbolInfo.point)} \n")
                 
                 if (abs(Baseroof - Basefloor) / (SymbolInfo.point) < high_low_diff * 0.35 ) : 
-                   roof, floor, diff , message = get_pair_values(self.Pair)
-                   if message is None or time.time() - message >= 280 :
+                  roof, floor, diff , message = get_pair_values(self.Pair)
+                  if message is None or time.time() - message >= 280 :
                       last_message_time = time.time()
                       DBupdate = update_pair_values(self.Pair,Baseroof,Basefloor,high_low_diff,last_message_time)
                       Text =  f"{self.Pair}\n"
@@ -251,41 +245,33 @@ class SupplyDemandStrategyV2():
                       Text += f"سقف: {Baseroof}\n"
                       Text += f"کف: {Basefloor}\n"
                       Text += f"M5 روند : {Direction}\n"
-                      Text += f"M15روند : Up" if DirectionM15 == 1 else f"M15روند : Down"
+                      Text += f"M15روند : Up \n" if DirectionM15 == 1 else f"M15روند : Down \n"
                       PromptToTelegram(Text)
                       #shape = draw_rectangle(self.Pair,Baseroof,Basefloor)
-                   
-                   if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  :
-                       
+
+                  if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 :
+                       EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
+                       if self.Pair == 'XAUUSDb' : Volume = 0.03
+                       else:  Volume = 0.04                                                    #########  محاسه حجم ورود به معامله ##########
+                       SL = PriceST1 - ( SymbolInfo.point * 50)                                #########  تعیین حدضرر معامله #########
+                       TP1 = (abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)    
+                       write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )
+                       print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                       Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                       OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5") 
+
+                  if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  :
                        EntryPrice = SymbolInfo.ask                                                                                        ######### قیمت  ورود به معامله ##########
-                       if self.Pair == 'XAUUSDb' : Volume = 0.02
-                       else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
+                       if self.Pair == 'XAUUSDb' : Volume = 0.03
+                       else:  Volume = 0.04                                                   #########  محاسه حجم ورود به معامله ##########
                        SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
-                       TP1 = BRoof #EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100)    
-                       if  abs(TP1 - EntryPrice) < abs(EntryPrice - SL) * 0.9 : 
-                          print ('TP is Small')
-                          write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, "Tp is Small", Direction )
-                          return  
+                       TP1 = EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100)    
                        write_trade_info_to_file(self.Pair ,"Sell" , EntryPrice, SL, TP1, Direction )
                        print(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                        Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                        OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V2 - M5")
        
-                   if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 :
-                     
-                       EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
-                       if self.Pair == 'XAUUSDb' : Volume = 0.02
-                       else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
-                       SL = PriceST1 - ( SymbolInfo.point * 50)                                #########  تعیین حدضرر معامله #########
-                       TP1 = BBase #(abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)    
-                       if  abs(TP1 - EntryPrice) < abs(EntryPrice - SL) * 0.9 : 
-                          print ('TP is Small')
-                          write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, "Tp is Small", Direction )
-                          return  
-                       write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )
-                       print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                       Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                       OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5") 
+                   
                        
 """"########################################################################################################
       def CalcLotSize(self,Point):
