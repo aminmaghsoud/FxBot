@@ -51,7 +51,7 @@ BrokerTimeZone = pytz.timezone("Asia/Istanbul")  #Etc/GMT-3
 Executor = concurrent.futures.ThreadPoolExecutor()
 TelegramToken = ""
 TelegramBot = None
-TelegramChatId = [177496720, 388239785,5386526087,294153466]
+TelegramChatId = [152284556 , 388239785]
 LastTelegramUpdateId = -1
 # آخرین زمانی که ربات اعلام آماده بودن کرده است
 LastDatetimeRobotIsReady = None

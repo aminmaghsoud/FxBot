@@ -27,9 +27,15 @@ class SupplyDemandStrategyV2():
            
 ##############################################################################################################################################################
       def Main(self):
-          print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ StrategyV2 M5 Spike --------------")
-          if self.Pair == 'EURNZDb' : return
           
+          print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ StrategyV2 M5 Spike --------------")
+
+          if self.Pair == 'EURNZDb' : return
+
+          if self.Pair == 'XAUUSDb' : 
+                 Volume = 0.02      #GoldLot
+          else:  Volume = 0.03      #OtherLot 
+
           sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
           if sell_positions_with_open_prices:
             for ticket, open_price in sell_positions_with_open_prices.items():
@@ -166,8 +172,6 @@ class SupplyDemandStrategyV2():
                    if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1  : 
                       
                       EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
-                      if self.Pair == 'XAUUSDb' : Volume = 0.02
-                      else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
                       SL = PriceST1 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
                       TP1 = (abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)    
                       write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )
@@ -178,8 +182,6 @@ class SupplyDemandStrategyV2():
                    if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  : 
                       
                       EntryPrice = SymbolInfo.ask                                                                                        ######### قیمت  ورود به معامله ##########
-                      if self.Pair == 'XAUUSDb' : Volume = 0.02
-                      else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
                       SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
                       TP1 = EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100)    
                       write_trade_info_to_file(self.Pair ,"Sell" , EntryPrice, SL, TP1, Direction )
@@ -247,8 +249,6 @@ class SupplyDemandStrategyV2():
                    if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  :
                        
                        EntryPrice = SymbolInfo.ask                                                                                        ######### قیمت  ورود به معامله ##########
-                       if self.Pair == 'XAUUSDb' : Volume = 0.02
-                       else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
                        SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
                        TP1 = EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100)    
                        write_trade_info_to_file(self.Pair ,"Sell" , EntryPrice, SL, TP1, Direction )
@@ -259,8 +259,6 @@ class SupplyDemandStrategyV2():
                    if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 :
                      
                        EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
-                       if self.Pair == 'XAUUSDb' : Volume = 0.02
-                       else:  Volume = 0.03                                                    #########  محاسه حجم ورود به معامله ##########
                        SL = PriceST1 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
                        TP1 = (abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)    
                        write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )

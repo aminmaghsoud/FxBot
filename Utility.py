@@ -256,7 +256,7 @@ def CloseAllPosition(Pair:str):
     elif len(Positions) > 0:
          Botdashboard(3 , Pair)
          Pos = PD.DataFrame(list(Positions), columns= Positions[0]._asdict().keys())
-         Profit = Pos['profit'].sum() + Pos['swap'].sum() + Pos['commission'].sum()
+         Profit = Pos['profit'].sum() #+ Pos['swap'].sum() + Pos['commission'].sum()
          print ()
          Balance = GetBalance()
          if Profit > 0  : 
