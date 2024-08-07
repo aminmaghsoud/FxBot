@@ -30,15 +30,15 @@ class SupplyDemandStrategyV2():
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ StrategyV2 M5 Spike --------------")
           CloseAllPosition(self.Pair)
           
-          GreenPair  = [ 'CADJPYb' , 'AUDJPYb' , 'EURCADb' , 'USDJPYb' , 'USDCHFb' , 'NZDUSDb' , 'EURCHFb']
-          YellowPair	= [ 'XAUUSDb' , 'EURAUDb' , 'AUDUSDb' , 'CADCHFb' , 'USDCADb' , 'EURUSDb' , 'DowJones30' , 'AUDNZDb']
-          RedPair    = [ 'AUDCADb' , 'EURJPYb' , 'AUDCHFb' , 'EURGBPb' , 'NZDCADb' ]			
-          BlackPair	= [ 'GBPUSDb' , 'EURNZDb' , 'NZDCHFb']					
+          GreenPair  = ['CADJPYb' , 'AUDJPYb' , 'EURCADb' , 'USDJPYb' , 'USDCHFb' , 'NZDUSDb' , 'EURCHFb']
+          YellowPair	= ['XAUUSDb' , 'EURAUDb' , 'AUDUSDb' , 'CADCHFb' , 'USDCADb' , 'EURUSDb' , 'DowJones30' , 'AUDNZDb']
+          RedPair    = ['AUDCADb' , 'EURJPYb' , 'AUDCHFb' , 'EURGBPb' , 'NZDCADb' ]			
+          BlackPair	= ['GBPUSDb' , 'EURNZDb' , 'NZDCHFb']					
 
           if   self.Pair in BlackPair  : return
-          elif self.Pair in GreenPair  : Volume = 0.05
-          elif self.Pair in YellowPair : Volume = 0.03
-          elif self.Pair in RedPair    : Volume = 0.02
+          elif self.Pair in GreenPair  : Volume = 0.03
+          elif self.Pair in YellowPair : Volume = 0.02
+          elif self.Pair in RedPair    : Volume = 0.01
           else : Volume = 0.01
 
           sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
@@ -82,9 +82,12 @@ class SupplyDemandStrategyV2():
              current_datetime = datetime.now()
              LastCandle = FrameRatesM5.iloc[-1]
              minutes_to_exclude = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
-             if (LastCandle['datetime'].hour in [0,1]) or (current_datetime.weekday() == 4 and current_datetime.hour >= 23)  or current_datetime.minute not in minutes_to_exclude :#or current_datetime.second > 20  : 
+             if (LastCandle['datetime'].hour in [0,1]) or (current_datetime.weekday() == 4 and current_datetime.hour >= 20)  or current_datetime.minute not in minutes_to_exclude :#or current_datetime.second > 20  : 
                 Botdashboard(4 , self.Pair)
                 return
+             if (current_datetime.hour >= 21 and current_datetime.minute == 0) or (current_datetime.weekday() == 4 and current_datetime.hour >= 17  and current_datetime.minute == 0) : 
+                PublicVarible.CanOpenOrder == False  
+                
              if PublicVarible.CanOpenOrderST == False or PublicVarible.CanOpenOrder == False : 
                 Botdashboard(36 , self.Pair)
                 return
