@@ -29,7 +29,7 @@ import psutil
 ########################################################################################################
 class FxBot():
       def __init__(self):
-          print("Start Robot IRAN Banoo...")
+          print("Start Robot Pirouz...")
           print("*************************************")
 ########################################################################################################
       def Main(self, BotId:int):
@@ -117,20 +117,20 @@ class FxBot():
 
                           # بروزرسانی داده های مالی
                           SymbolInfo = MT5.symbol_info(Item['Name'])
-                          print (Fore.BLACK,Back.LIGHTWHITE_EX,"Item Name                                               Result",Back.LIGHTMAGENTA_EX,"    IRAN Banoo is hunting ...    ", datetime.now().time(),Back.RESET,Fore.RESET,"\n" )
+                          print (Fore.BLACK,Back.LIGHTWHITE_EX,"Item Name                                               Result",Back.LIGHTBLUE_EX,"     Smart Pirouz is hunting ...    ", datetime.now().time(),Back.RESET,Fore.RESET,"\n" )
                           for index, pair_info in enumerate(PublicVarible.Pair):
                            if pair_info['Name'] == Item['Name']:
                                print(f" The index is: {index + 1}")
                                break 
                           #print (Fore.LIGHTWHITE_EX,Back.BLACK," Number of Added Pair: ", len(PublicVarible.Pair),Back.RESET)
-                          print (Fore.BLACK,Back.LIGHTGREEN_EX ," Symbol  :  ", SymbolInfo.name,Back.RESET,Fore.RESET,"                                 Point : ","{:.10f}".format(SymbolInfo.point))
+                          print (Fore.BLACK,Back.LIGHTBLUE_EX ," Symbol  :  ", SymbolInfo.name,Back.RESET,Fore.RESET,"                                 Point : ","{:.10f}".format(SymbolInfo.point))
                           print ("            ",Back.RESET,Fore.RESET,"                                           spread: ",round(SymbolInfo.spread,1))
                           print ("            ",Back.RESET,Fore.RESET,"                                           TP pip: ",round(SymbolInfo.spread,1)*3/10 ,"\n" )
                           
 
                           if (datetime.now() - PublicVarible.LastDatetimeRobotIsReady).total_seconds() / 60 > 45:
                             PublicVarible.LastDatetimeRobotIsReady = datetime.now() 
-                            PromptToTelegram(Text= "📌 Robot IRAN Banoo is ready, market is open")
+                            PromptToTelegram(Text= "📌 Robot Pirouz is ready, market is open")
 
                           A = SupplyDemandStrategyV7(Pair = Item['Name'])
                           #B = SupplyDemandStrategyV8(Pair = Item['Name'])

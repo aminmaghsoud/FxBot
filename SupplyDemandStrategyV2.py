@@ -49,6 +49,7 @@ class SupplyDemandStrategyV2():
                if position_info.symbol == self.Pair :
                   Botdashboard(54 , self.Pair)
                   return
+               
           buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
           if buy_positions_with_open_prices:
              for ticket, open_price in buy_positions_with_open_prices.items():
@@ -86,9 +87,11 @@ class SupplyDemandStrategyV2():
                 Botdashboard(4 , self.Pair)
                 return
              if (current_datetime.hour >= 21 and current_datetime.minute == 0) or (current_datetime.weekday() == 4 and current_datetime.hour >= 17  and current_datetime.minute == 0) : 
-                PublicVarible.CanOpenOrder == False  
-                
-             if PublicVarible.CanOpenOrderST == False or PublicVarible.CanOpenOrder == False : 
+                PublicVarible.CanOpenOrder = False  
+             elif current_datetime.hour == 2 and current_datetime.minute == 0 :
+                PublicVarible.CanOpenOrder = True  
+
+             if PublicVarible.CanOpenOrder == False :  #PublicVarible.CanOpenOrderST == False or 
                 Botdashboard(36 , self.Pair)
                 return
 ########################################################################################### دریافت اطلاعات تایم فریم ها و محاسبه اندیکاتور #########################################################################################################
