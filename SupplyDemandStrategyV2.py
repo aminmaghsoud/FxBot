@@ -78,7 +78,13 @@ class SupplyDemandStrategyV2():
                    FrameRatesM15 = FrameRatesM15.drop('time', axis=1)
                    FrameRatesM15 = FrameRatesM15.set_index(PD.DatetimeIndex(FrameRatesM15['datetime']), drop=True)
                    
-             
+             RatesM30 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M30, 0, 250)
+             if RatesM30 is not None:
+                FrameRatesM30 = PD.DataFrame(RatesM30)
+                if not FrameRatesM30.empty:
+                   FrameRatesM30['datetime'] = PD.to_datetime(FrameRatesM30['time'], unit='s')
+                   FrameRatesM30 = FrameRatesM30.drop('time', axis=1)
+                   FrameRatesM30 = FrameRatesM30.set_index(PD.DatetimeIndex(FrameRatesM30['datetime']), drop=True)
 ########################################################################################### بررسی شروط اولیه  #########################################################################################################
              current_datetime = datetime.now()
              LastCandle = FrameRatesM5.iloc[-1]
@@ -104,11 +110,16 @@ class SupplyDemandStrategyV2():
              Direction = "UP" if DirectionM5 == 1 else "DOWN"
              PriceST3 = SuperTM5.iloc[-2][0]
              
-             SuperTM15 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 14 , multiplier= 3) #SuperTrend calculation
+             #SuperTM15 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 14 , multiplier= 3) #SuperTrend calculation
+             #DirectionM15 = SuperTM15.iloc[-2][1]
+             #Direction15 = "UP" if DirectionM15 == 1 else "DOWN"
+             #PriceST1 = SuperTM15.iloc[-2][0]
+             
+             SuperTM15 = supertrend(Pair = self.Pair , high= FrameRatesM30['high'], low= FrameRatesM30['low'], close= FrameRatesM30['close'], length= 10 , multiplier= 3.5) #SuperTrend calculation
              DirectionM15 = SuperTM15.iloc[-2][1]
              Direction15 = "UP" if DirectionM15 == 1 else "DOWN"
              PriceST1 = SuperTM15.iloc[-2][0]
-             
+
              SuperTM15_2 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 9 , multiplier= 9) #SuperTrend calculation
              DirectionM15_2 = SuperTM15_2.iloc[-2][1]
              Direction15_2 = "UP" if DirectionM15 == 1 else "DOWN"
