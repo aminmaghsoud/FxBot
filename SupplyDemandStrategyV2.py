@@ -35,11 +35,24 @@ class SupplyDemandStrategyV2():
           RedPair    = ['AUDCADb' , 'EURJPYb' , 'AUDCHFb' , 'EURGBPb' , 'NZDCADb' ]			
           BlackPair	= ['GBPUSDb' , 'EURNZDb' , 'NZDCHFb']					
 
-          if   self.Pair in BlackPair  : return
-          elif self.Pair in GreenPair  : Volume = 0.03
-          elif self.Pair in YellowPair : Volume = 0.02
-          elif self.Pair in RedPair    : Volume = 0.01
-          else : Volume = 0.01
+          if PublicVarible.risk_high == 1 : 
+             if   self.Pair in BlackPair  : return
+             elif self.Pair in GreenPair  : Volume = 0.04
+             elif self.Pair in YellowPair : Volume = 0.03
+             elif self.Pair in RedPair    : Volume = 0.02
+             else : Volume = 0.01
+          elif PublicVarible.risk_med == 1 : 
+             if   self.Pair in BlackPair  : return
+             elif self.Pair in GreenPair  : Volume = 0.03
+             elif self.Pair in YellowPair : Volume = 0.02
+             elif self.Pair in RedPair    : Volume = 0.01
+             else : Volume = 0.01
+          elif PublicVarible.risk_low == 1 : 
+             if   self.Pair in BlackPair  : return
+             elif self.Pair in GreenPair  : Volume = 0.02
+             elif self.Pair in YellowPair : Volume = 0.01
+             elif self.Pair in RedPair    : Volume = 0.00
+             else : Volume = 0.00
 
           sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
           if sell_positions_with_open_prices:

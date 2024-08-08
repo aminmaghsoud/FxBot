@@ -354,7 +354,15 @@ def Statistics():
     else:
        Prompt(f"Can open new order: No")
        Text += "\n" + f"❌ Can open new order: No"
-
+    if PublicVarible.risk_high == 1 : 
+             Prompt(f"Risk : High")
+             Text += "\n" + f"Risk : High "
+    elif PublicVarible.risk_med == 1 : 
+             Prompt(f"Risk: Medium")
+             Text += "\n" + f"Risk : Medium"
+    elif PublicVarible.risk_low == 1 : 
+             Prompt(f"Risk: Low")
+             Text += "\n" + f"Risk : Low"
     PromptToTelegram(Text= Text)
 ########################################################################################################
 def ForceCloseAllPosition():
@@ -430,19 +438,30 @@ def ProcessTelegramCommand():
            PromptToTelegram(Text= Text)
         elif Command == "/reboot_server":
               os.system('shutdown -t 0 -r -f')
-        elif Command == "/trailing_tp_zero":
-             PublicVarible.TrailingTP = 0
+        elif Command == "/risk_high":
+             PublicVarible.risk_high = 1
+             PublicVarible.risk_med = 0
+             PublicVarible.risk_low = 0
              Text = ""
-             Prompt(f"TrailingTP is zero")
-             Text += "♦️ TrailingTP is zero"
+             Prompt(f"Risk is High Now !!!")
+             Text += "♦️ Risk is #High Now !!!"
              PromptToTelegram(Text= Text)
-        elif Command == "/trailing_sl_zero":
-             PublicVarible.TrailingSL = 0
+        elif Command == "/risk_med":
+             PublicVarible.risk_high = 0
+             PublicVarible.risk_med = 1
+             PublicVarible.risk_low = 0
              Text = ""
-             Prompt(f"TrailingSL is zero")
-             Text += "♦️ TrailingSL is zero"
+             Prompt(f"Risk is Medium Now !!!")
+             Text += "♦️ Risk is #Medium Now !!!"
              PromptToTelegram(Text= Text)
-           
+        elif Command == "/risk_low":
+             PublicVarible.risk_high = 0
+             PublicVarible.risk_med = 0
+             PublicVarible.risk_low = 1
+             Text = ""
+             Prompt(f"Risk is low Now !!!")
+             Text += "♦️ Risk is #low Now !!!"
+             PromptToTelegram(Text= Text)  
     except Exception as e:
             print(e)
 

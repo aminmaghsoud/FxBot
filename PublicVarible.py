@@ -72,3 +72,6 @@ firstBuy = 100
 firstSell = 100
 last_message_time = time.time()
 last_message_time1 = time.time()
+risk_high = 0
+risk_med = 1
+risk_low = 0
