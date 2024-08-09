@@ -153,7 +153,7 @@ class SupplyDemandStrategyV2():
              Basefloor = 0.0
              Baseroof = 0.0
              Text = None
-             if SymbolInfo.bid  > FrameRatesM5.iloc[-2]['high']  : 
+             if FrameRatesM5.iloc[-2]['high'] > FrameRatesM5.iloc[-3]['high']  : 
                  while current_index > end_index : 
                        Now_c_H = FrameRatesM5.iloc[current_index]['high']
                        Old_c_H = FrameRatesM5.iloc[current_index - 1]['high'] 
@@ -235,7 +235,7 @@ class SupplyDemandStrategyV2():
              Basefloor = 0.0
              Baseroof = 0.0
              Text = None       
-             if SymbolInfo.ask < FrameRatesM5.iloc[-2]['low']  : 
+             if FrameRatesM5.iloc[-2]['low'] < FrameRatesM5.iloc[-3]['low']  : 
                  while current_index > end_index : 
                        Now_c_H = FrameRatesM5.iloc[current_index]['high']
                        Old_c_H = FrameRatesM5.iloc[current_index - 1]['high'] 
