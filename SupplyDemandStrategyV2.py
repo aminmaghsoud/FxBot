@@ -30,10 +30,12 @@ class SupplyDemandStrategyV2():
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ StrategyV2 M5 Spike --------------")
           CloseAllPosition(self.Pair)
           
-          GreenPair  = ['CADJPYb' , 'AUDJPYb' , 'EURCADb' , 'USDJPYb' , 'USDCHFb' , 'NZDUSDb' , 'EURCHFb']
-          YellowPair	= ['XAUUSDb' , 'EURAUDb' , 'AUDUSDb' , 'CADCHFb' , 'USDCADb' , 'EURUSDb' , 'DowJones30' , 'AUDNZDb']
-          RedPair    = ['AUDCADb' , 'EURJPYb' , 'AUDCHFb' , 'EURGBPb' , 'NZDCADb' ]			
-          BlackPair	= ['GBPUSDb' , 'EURNZDb' , 'NZDCHFb']					
+          GreenPair  = ['CADJPYb' , 'EURCADb' , 'USDJPYb' , 'USDCHFb', 'EURCHFb' , 'AUDNZDb' , 'AUDUSDb' , 'CADCHFb' , 'DowJones30' , 'XAUUSDb' ]
+          YellowPair	= ['AUDJPYb' , 'EURUSDb' , 'NZDUSDb' ]
+          RedPair    = ['AUDCADb' , 'AUDCHFb' , 'EURGBPb' , 'NZDCADb' , 'EURAUDb' , 'USDCADb']			
+          BlackPair	= ['GBPUSDb' , 'EURNZDb' , 'NZDCHFb' , 'EURJPYb']					
+
+         # روزهای سبز (دوشنبه و چهارشنبه)      روزهای قرمز (سه شنبه و پنجشنبه)        جمعه (تعظیل باشد)
 
           if PublicVarible.risk_high == 1 : 
              if   self.Pair in BlackPair  : return
@@ -105,14 +107,10 @@ class SupplyDemandStrategyV2():
              if (LastCandle['datetime'].hour in [0,1]) or (current_datetime.weekday() == 4 and current_datetime.hour >= 20)  or current_datetime.minute not in minutes_to_exclude :#or current_datetime.second > 20  : 
                 Botdashboard(4 , self.Pair)
                 return
-             if (current_datetime.hour >= 21 and current_datetime.minute == 0) or (current_datetime.weekday() == 4 and current_datetime.hour >= 17  and current_datetime.minute == 0) : 
+             if (current_datetime.hour >= 22 and current_datetime.minute == 0) or (current_datetime.weekday() == 4 and current_datetime.hour >= 17  and current_datetime.minute == 0) : 
                 PublicVarible.CanOpenOrder = False  
-             elif current_datetime.hour == 2 and current_datetime.minute == 0 :
+             elif current_datetime.hour == 3 and current_datetime.minute == 0 :
                 PublicVarible.CanOpenOrder = True  
-
-             if PublicVarible.CanOpenOrder == False :  #PublicVarible.CanOpenOrderST == False or 
-                Botdashboard(36 , self.Pair)
-                return
 ########################################################################################### دریافت اطلاعات تایم فریم ها و محاسبه اندیکاتور #########################################################################################################
              #Bband = PTA.bbands(close= FrameRatesM15['close'] , length= 40 , std = 2 , ddof= 0 , mamode = 'EMA' )    
              #BRoof = round(Bband.iloc[-2][-3] , 2 ) 
@@ -123,15 +121,15 @@ class SupplyDemandStrategyV2():
              Direction = "UP" if DirectionM5 == 1 else "DOWN"
              PriceST3 = SuperTM5.iloc[-2][0]
              
-             #SuperTM15 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 14 , multiplier= 3) #SuperTrend calculation
-             #DirectionM15 = SuperTM15.iloc[-2][1]
-             #Direction15 = "UP" if DirectionM15 == 1 else "DOWN"
-             #PriceST1 = SuperTM15.iloc[-2][0]
-             
-             SuperTM15 = supertrend(Pair = self.Pair , high= FrameRatesM30['high'], low= FrameRatesM30['low'], close= FrameRatesM30['close'], length= 10 , multiplier= 3.5) #SuperTrend calculation
+             SuperTM15 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 14 , multiplier= 3) #SuperTrend calculation
              DirectionM15 = SuperTM15.iloc[-2][1]
              Direction15 = "UP" if DirectionM15 == 1 else "DOWN"
              PriceST1 = SuperTM15.iloc[-2][0]
+             
+             #SuperTM15 = supertrend(Pair = self.Pair , high= FrameRatesM30['high'], low= FrameRatesM30['low'], close= FrameRatesM30['close'], length= 10 , multiplier= 3.5) #SuperTrend calculation
+             #DirectionM15 = SuperTM15.iloc[-2][1]
+             #Direction15 = "UP" if DirectionM15 == 1 else "DOWN"
+             #PriceST1 = SuperTM15.iloc[-2][0]
 
              SuperTM15_2 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 9 , multiplier= 9) #SuperTrend calculation
              DirectionM15_2 = SuperTM15_2.iloc[-2][1]
@@ -206,7 +204,11 @@ class SupplyDemandStrategyV2():
                       Text += f"M15روند : Up" if DirectionM15 == 1 else f"M15روند : Down"
                       PromptToTelegram(Text)
                       #shape = draw_rectangle(self.Pair,Baseroof,Basefloor)
-                   
+
+                  if PublicVarible.CanOpenOrder == False :  #PublicVarible.CanOpenOrderST == False or 
+                      Botdashboard(36 , self.Pair)
+                      return 
+                  
                   if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1  : 
                       EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
                       SL = PriceST1 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
@@ -247,6 +249,7 @@ class SupplyDemandStrategyV2():
                            break
              if count > 1 : 
                 high_low_diff = round((abs(FrameRatesM5.iloc[-2]['high'] - FrameRatesM5.iloc[current_index]['low'])) / (SymbolInfo.point) , 2)
+
                 if  ((self.Pair == 'XAUUSDb'and high_low_diff < 250) or (self.Pair != 'XAUUSDb'and high_low_diff < 150)) :
                     return
                 if  ((self.Pair == 'XAUUSDb'and high_low_diff > 750) or (self.Pair != 'XAUUSDb'and high_low_diff > 500)) :
@@ -285,6 +288,10 @@ class SupplyDemandStrategyV2():
                       PromptToTelegram(Text)
                       #shape = draw_rectangle(self.Pair,Baseroof,Basefloor)
 
+                  if PublicVarible.CanOpenOrder == False :  #PublicVarible.CanOpenOrderST == False or 
+                     Botdashboard(36 , self.Pair)
+                     return
+                  
                   if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 :
                        EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
                        SL = PriceST1 - ( SymbolInfo.point * 50)                                #########  تعیین حدضرر معامله #########

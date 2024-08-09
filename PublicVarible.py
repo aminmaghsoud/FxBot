@@ -2,6 +2,8 @@
 import pytz
 from Utility import *
 import time
+from datetime import datetime
+
 ########################################################################################################
 #ConnectionString = ("Driver={ODBC Driver 18 for SQL Server}; Server=.; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;")
 ConnectionString = (r"Driver={ODBC Driver 18 for SQL Server}; Server=.\FXBOT; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;") 
@@ -51,7 +53,7 @@ BrokerTimeZone = pytz.timezone("Asia/Istanbul")  #Etc/GMT-3
 Executor = concurrent.futures.ThreadPoolExecutor()
 TelegramToken = ""
 TelegramBot = None
-TelegramChatId = [152284556 , 388239785]
+TelegramChatId = [152284556 , 388239785 , 98785822]
 LastTelegramUpdateId = -1
 # آخرین زمانی که ربات اعلام آماده بودن کرده است
 LastDatetimeRobotIsReady = None
@@ -72,6 +74,13 @@ firstBuy = 100
 firstSell = 100
 last_message_time = time.time()
 last_message_time1 = time.time()
-risk_high = 0
-risk_med = 1
-risk_low = 0
+
+current_datetime = datetime.now()
+if  current_datetime.weekday() in [1 , 3  , 4] : 
+  risk_high = 0
+  risk_med = 0
+  risk_low = 1
+elif  current_datetime.weekday() in [0 , 2] : 
+  risk_high = 1
+  risk_med = 0
+  risk_low = 0

@@ -130,6 +130,7 @@ class FxBot():
 
                           if (datetime.now() - PublicVarible.LastDatetimeRobotIsReady).total_seconds() / 60 > 45:
                             PublicVarible.LastDatetimeRobotIsReady = datetime.now() 
+                            Statistics()
                             PromptToTelegram(Text= "📌 Robot Pirouz is ready, market is open")
 
                           A = SupplyDemandStrategyV7(Pair = Item['Name'])

@@ -356,13 +356,13 @@ def Statistics():
        Text += "\n" + f"❌ Can open new order: No"
     if PublicVarible.risk_high == 1 : 
              Prompt(f"Risk : High")
-             Text += "\n" + f"Risk : High "
+             Text += "\n" + f" ⚠️ Tradeing Risk >> High 🔴 "
     elif PublicVarible.risk_med == 1 : 
              Prompt(f"Risk: Medium")
-             Text += "\n" + f"Risk : Medium"
+             Text += "\n" + f" ⚠️ Tradeing Risk >> Medium 🟢"
     elif PublicVarible.risk_low == 1 : 
              Prompt(f"Risk: Low")
-             Text += "\n" + f"Risk : Low"
+             Text += "\n" + f" ⚠️ Tradeing Risk >> Low 🟡"
     PromptToTelegram(Text= Text)
 ########################################################################################################
 def ForceCloseAllPosition():
@@ -462,6 +462,9 @@ def ProcessTelegramCommand():
              Prompt(f"Risk is low Now !!!")
              Text += "♦️ Risk is #low Now !!!"
              PromptToTelegram(Text= Text)  
+        elif Command == "/kissme":
+             PromptToTelegram('بفرما ...')
+             PromptToTelegram('😘')
     except Exception as e:
             print(e)
 
