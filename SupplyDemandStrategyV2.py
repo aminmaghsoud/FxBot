@@ -104,7 +104,7 @@ class SupplyDemandStrategyV2():
              current_datetime = datetime.now()
              LastCandle = FrameRatesM5.iloc[-1]
              minutes_to_exclude = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
-             if (LastCandle['datetime'].hour in [0,1]) or (current_datetime.weekday() == 4 and current_datetime.hour >= 20)  or current_datetime.minute not in minutes_to_exclude :#or current_datetime.second > 20  : 
+             if (LastCandle['datetime'].hour in [0,1]) or (current_datetime.weekday() == 4 and current_datetime.hour >= 22)  or current_datetime.minute not in minutes_to_exclude :#or current_datetime.second > 20  : 
                 Botdashboard(4 , self.Pair)
                 return
              if (current_datetime.hour >= 22 and current_datetime.minute == 0) or (current_datetime.weekday() == 4 and current_datetime.hour >= 17  and current_datetime.minute == 0) : 
@@ -235,7 +235,7 @@ class SupplyDemandStrategyV2():
              Basefloor = 0.0
              Baseroof = 0.0
              Text = None       
-             if SymbolInfo.ask < FrameRatesM5.iloc[-2]['high']  : 
+             if SymbolInfo.ask < FrameRatesM5.iloc[-2]['low']  : 
                  while current_index > end_index : 
                        Now_c_H = FrameRatesM5.iloc[current_index]['high']
                        Old_c_H = FrameRatesM5.iloc[current_index - 1]['high'] 
