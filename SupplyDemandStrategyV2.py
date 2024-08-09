@@ -36,6 +36,8 @@ class SupplyDemandStrategyV2():
           BlackPair	= ['GBPUSDb' , 'EURNZDb' , 'NZDCHFb' , 'EURJPYb']					
 
          # روزهای سبز (دوشنبه و چهارشنبه)      روزهای قرمز (سه شنبه و پنجشنبه)        جمعه (تعظیل باشد)
+         # روی اعداد سوپرترندها کار کنبم . تا 19 مرداد روی  14/3 بودن . از هفته جدید میذاریم روی 10/4 
+
 
           if PublicVarible.risk_high == 1 : 
              if   self.Pair in BlackPair  : return
@@ -104,7 +106,7 @@ class SupplyDemandStrategyV2():
              current_datetime = datetime.now()
              LastCandle = FrameRatesM5.iloc[-1]
              minutes_to_exclude = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
-             if (LastCandle['datetime'].hour in [0,1]) or (current_datetime.weekday() == 4 and current_datetime.hour >= 22)  or current_datetime.minute not in minutes_to_exclude :#or current_datetime.second > 20  : 
+             if (LastCandle['datetime'].hour in [0,1]) or (current_datetime.weekday() == 4 and current_datetime.hour >= 23)  or current_datetime.minute not in minutes_to_exclude :#or current_datetime.second > 20  : 
                 Botdashboard(4 , self.Pair)
                 return
              if (current_datetime.hour >= 22 and current_datetime.minute == 0) or (current_datetime.weekday() == 4 and current_datetime.hour >= 17  and current_datetime.minute == 0) : 
@@ -116,12 +118,12 @@ class SupplyDemandStrategyV2():
              #BRoof = round(Bband.iloc[-2][-3] , 2 ) 
              #BBase = round(Bband.iloc[-2][-5] , 2 )  
 
-             SuperTM5 = supertrend(Pair = self.Pair , high= FrameRatesM5['high'], low= FrameRatesM5['low'], close= FrameRatesM5['close'], length= 14 , multiplier= 3) #SuperTrend calculation
+             SuperTM5 = supertrend(Pair = self.Pair , high= FrameRatesM5['high'], low= FrameRatesM5['low'], close= FrameRatesM5['close'], length= 10 , multiplier= 4) #SuperTrend calculation
              DirectionM5 = SuperTM5.iloc[-2][1]
              Direction = "UP" if DirectionM5 == 1 else "DOWN"
              PriceST3 = SuperTM5.iloc[-2][0]
              
-             SuperTM15 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 14 , multiplier= 3) #SuperTrend calculation
+             SuperTM15 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 10 , multiplier= 4) #SuperTrend calculation
              DirectionM15 = SuperTM15.iloc[-2][1]
              Direction15 = "UP" if DirectionM15 == 1 else "DOWN"
              PriceST1 = SuperTM15.iloc[-2][0]
@@ -141,9 +143,9 @@ class SupplyDemandStrategyV2():
                 print(f"PriceST2 ==  PriceST50 and return")
                 return
              
-             print(f"Direction M5 is {Direction}")
-             print(f"Direction M15-1 is {Direction15}")
-             print(f"Direction M15-2 is {Direction15_2}")
+             print(f"Direction M5 is {Direction} , PriceST3 {PriceST3}")
+             print(f"Direction M15-1 is {Direction15} , PriceST1 {PriceST1}")
+             print(f"Direction M15-2 is {Direction15_2} , PriceST2 {PriceST2}")
              
              ## لگ نزولی
              end_index = -16
