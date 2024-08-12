@@ -29,7 +29,11 @@ class SupplyDemandStrategyV1():
       def Main(self):
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ StrategyV1 M5 quick Spike --------------")
           CloseAllPosition(self.Pair)
-          
+
+          if PublicVarible.Quick_trade == False  : 
+             print("Quick_trade Stoped By Manager ...  ")
+             return
+
           GreenPair  = ['CADJPYb' , 'EURCADb' , 'USDJPYb' , 'USDCHFb', 'EURCHFb' , 'AUDNZDb' , 'AUDUSDb' , 'CADCHFb' , 'DowJones30' , 'XAUUSDb' ]
           YellowPair	= ['AUDJPYb' , 'EURUSDb' , 'NZDUSDb' ]
           RedPair    = ['AUDCADb' , 'AUDCHFb' , 'EURGBPb' , 'NZDCADb' , 'EURAUDb' , 'USDCADb']			
@@ -151,11 +155,11 @@ class SupplyDemandStrategyV1():
              
              D_Leg_point = (C_P_old_H - C_old_L) / (SymbolInfo.point)
              print("D_Leg_point",D_Leg_point)
-             write_trade_info_to_file(self.Pair ,"Down Leg" , D_Leg_point , 0, 0, 0 )
+             
              ## لگ نزولی سریع
              if C_old_O > C_old_C and C_P_old_O > C_P_old_C : 
                if C_old_H < C_P_old_H and C_old_L < C_P_old_L  : 
-                  if (self.Pair == 'XAUUSDb'  and D_Leg_point > 200) or (self.Pair != 'XAUUSDb'  and (D_Leg_point) > 100)  : 
+                  if (self.Pair == 'XAUUSDb'  and D_Leg_point > 200) or (self.Pair != 'XAUUSDb'  and (D_Leg_point) > 110)  : 
                     roof, floor, diff , message = get_pair_values(self.Pair)
                     if message is None or time.time() - message >= 280 :
                       last_message_time = time.time()
@@ -173,26 +177,27 @@ class SupplyDemandStrategyV1():
                       PromptToTelegram(Text)
                       #shape = draw_rectangle(self.Pair,Baseroof,Basefloor)
 
-                  if PublicVarible.CanOpenOrder == False :  #PublicVarible.CanOpenOrderST == False or 
+                    if PublicVarible.CanOpenOrder == False :  #PublicVarible.CanOpenOrderST == False or 
                       Botdashboard(36 , self.Pair)
                       return 
                   
-                  if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  : 
+                    if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  : 
                       EntryPrice = SymbolInfo.ask           
                       SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
                       TP1 = EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100) 
+                      write_trade_info_to_file(self.Pair ,"Down Leg" , D_Leg_point , 0, 0, 0 )
                       write_trade_info_to_file(self.Pair ,"Sell" , EntryPrice, SL, TP1, Direction )
                       print(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                       Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                      #OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V1 - M5")
+                      OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V1 - M5")
 
              U_Leg_point = ((C_old_H - C_P_old_L) / (SymbolInfo.point))
              print("U_Leg_point" ,U_Leg_point)
-             write_trade_info_to_file(self.Pair ,"Up Leg" , U_Leg_point , 0, 0, 0 )
+             
              ##  لگ صعودی سریع
              if C_old_O < C_old_C and C_P_old_O < C_P_old_C : 
                 if C_old_H > C_P_old_H and C_old_L > C_P_old_L  : 
-                  if (self.Pair == 'XAUUSDb'  and U_Leg_point > 200) or (self.Pair != 'XAUUSDb'  and U_Leg_point > 100 )  : 
+                  if (self.Pair == 'XAUUSDb'  and U_Leg_point > 200) or (self.Pair != 'XAUUSDb'  and U_Leg_point > 110 )  : 
                     roof, floor, diff , message = get_pair_values(self.Pair)
                     if message is None or time.time() - message >= 280 :
                       last_message_time = time.time()
@@ -210,18 +215,19 @@ class SupplyDemandStrategyV1():
                       PromptToTelegram(Text)
                       #shape = draw_rectangle(self.Pair,Baseroof,Basefloor)
 
-                  if PublicVarible.CanOpenOrder == False :  #PublicVarible.CanOpenOrderST == False or 
-                     Botdashboard(36 , self.Pair)
-                     return
+                    if PublicVarible.CanOpenOrder == False :  #PublicVarible.CanOpenOrderST == False or 
+                        Botdashboard(36 , self.Pair)
+                        return
                   
-                  if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 :
+                    if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 :
                        EntryPrice = SymbolInfo.bid 
                        SL = PriceST1 - ( SymbolInfo.point * 50)                                #########  تعیین حدضرر معامله #########
                        TP1 = (abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)    
+                       write_trade_info_to_file(self.Pair ,"Up Leg" , U_Leg_point , 0, 0, 0 )
                        write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )
                        print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                        Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                       #OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V1 - M5") 
+                       OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V1 - M5") 
                        
 """"########################################################################################################
       def CalcLotSize(self,Point):

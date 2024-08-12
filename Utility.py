@@ -363,6 +363,10 @@ def Statistics():
     elif PublicVarible.risk_low == 1 : 
              Prompt(f"Risk: Low")
              Text += "\n" + f" ⚠️ Tradeing Risk >> Low 🟡"
+    if PublicVarible.Quick_trade == False : 
+             Text += "\n" + f" ⚠️ Quck tread if OFF 🟢 "
+    elif PublicVarible.Quick_trade == True : 
+             Text += "\n" + f" ⚠️ Quck tread if ON 🔴 "
     PromptToTelegram(Text= Text)
 ########################################################################################################
 def ForceCloseAllPosition():
@@ -465,6 +469,12 @@ def ProcessTelegramCommand():
         elif Command == "/kissme":
              PromptToTelegram('بفرما ...')
              PromptToTelegram('😘')
+        elif Command == "/quick_trade_off" :
+             PublicVarible.Quick_trade = False
+             PromptToTelegram("Quick trade if OFF") 
+        elif Command == "/quick_trade_on" :
+             PublicVarible.Quick_trade = True 
+             PromptToTelegram("Quick trade if ON")
     except Exception as e:
             print(e)
 

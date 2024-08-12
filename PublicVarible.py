@@ -84,3 +84,5 @@ elif  current_datetime.weekday() in [0 , 2] :
   risk_high = 1
   risk_med = 0
   risk_low = 0
+
+Quick_trade = False
