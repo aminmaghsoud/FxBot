@@ -354,13 +354,13 @@ def Statistics():
     else:
        Prompt(f"Can open new order: No")
        Text += "\n" + f"❌ Can open new order: No"
-    if PublicVarible.risk_high == 1 : 
+    if PublicVarible.risk == 3 : 
              Prompt(f"Risk : High")
              Text += "\n" + f" ⚠️ Tradeing Risk >> High 🔴 "
-    elif PublicVarible.risk_med == 1 : 
+    elif PublicVarible.risk == 2 : 
              Prompt(f"Risk: Medium")
              Text += "\n" + f" ⚠️ Tradeing Risk >> Medium 🟢"
-    elif PublicVarible.risk_low == 1 : 
+    elif PublicVarible.risk == 1 : 
              Prompt(f"Risk: Low")
              Text += "\n" + f" ⚠️ Tradeing Risk >> Low 🟡"
     if PublicVarible.Quick_trade == False : 
@@ -443,25 +443,19 @@ def ProcessTelegramCommand():
         elif Command == "/reboot_server":
               os.system('shutdown -t 0 -r -f')
         elif Command == "/risk_high":
-             PublicVarible.risk_high = 1
-             PublicVarible.risk_med = 0
-             PublicVarible.risk_low = 0
+             PublicVarible.risk= 3
              Text = ""
              Prompt(f"Risk is High Now !!!")
              Text += "♦️ Risk is #High Now !!!"
              PromptToTelegram(Text= Text)
         elif Command == "/risk_med":
-             PublicVarible.risk_high = 0
-             PublicVarible.risk_med = 1
-             PublicVarible.risk_low = 0
+             PublicVarible.risk= 2
              Text = ""
              Prompt(f"Risk is Medium Now !!!")
              Text += "♦️ Risk is #Medium Now !!!"
              PromptToTelegram(Text= Text)
         elif Command == "/risk_low":
-             PublicVarible.risk_high = 0
-             PublicVarible.risk_med = 0
-             PublicVarible.risk_low = 1
+             PublicVarible.risk= 1
              Text = ""
              Prompt(f"Risk is low Now !!!")
              Text += "♦️ Risk is #low Now !!!"

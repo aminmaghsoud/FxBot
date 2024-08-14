@@ -39,19 +39,19 @@ class SupplyDemandStrategyV2():
          # روی اعداد سوپرترندها کار کنبم . تا 19 مرداد روی  14/3 بودن . از هفته جدید میذاریم روی 10/4 
 
 
-          if PublicVarible.risk_high == 1 : 
+          if PublicVarible.risk == 3 : 
              if   self.Pair in BlackPair  : return
              elif self.Pair in GreenPair  : Volume = 0.04
              elif self.Pair in YellowPair : Volume = 0.03
              elif self.Pair in RedPair    : Volume = 0.02
              else : Volume = 0.01
-          elif PublicVarible.risk_med == 1 : 
+          elif PublicVarible.risk == 2  : 
              if   self.Pair in BlackPair  : return
              elif self.Pair in GreenPair  : Volume = 0.03
              elif self.Pair in YellowPair : Volume = 0.02
              elif self.Pair in RedPair    : Volume = 0.01
              else : Volume = 0.01
-          elif PublicVarible.risk_low == 1 : 
+          elif PublicVarible.risk == 1 : 
              if   self.Pair in BlackPair  : return
              elif self.Pair in GreenPair  : Volume = 0.02
              elif self.Pair in YellowPair : Volume = 0.01
@@ -135,7 +135,7 @@ class SupplyDemandStrategyV2():
 
              SuperTM15_2 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 9 , multiplier= 9) #SuperTrend calculation
              DirectionM15_2 = SuperTM15_2.iloc[-2][1]
-             Direction15_2 = "UP" if DirectionM15 == 1 else "DOWN"
+             Direction15_2 = "UP" if DirectionM15_2 == 1 else "DOWN"
              PriceST2 = SuperTM15_2.iloc[-2][0]
              PriceST75= SuperTM15_2.iloc[-50][0]
              

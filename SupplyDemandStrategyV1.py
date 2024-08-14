@@ -29,29 +29,28 @@ class SupplyDemandStrategyV1():
       def Main(self):
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ StrategyV1 M5 quick Spike --------------")
           CloseAllPosition(self.Pair)
-
           if PublicVarible.Quick_trade == False  : 
              print("Quick_trade Stoped By Manager ...  ")
-             return
+             #return
 
           GreenPair  = ['CADJPYb' , 'EURCADb' , 'USDJPYb' , 'USDCHFb', 'EURCHFb' , 'AUDNZDb' , 'AUDUSDb' , 'CADCHFb' , 'DowJones30' , 'XAUUSDb' ]
           YellowPair	= ['AUDJPYb' , 'EURUSDb' , 'NZDUSDb' ]
           RedPair    = ['AUDCADb' , 'AUDCHFb' , 'EURGBPb' , 'NZDCADb' , 'EURAUDb' , 'USDCADb']			
           BlackPair	= ['GBPUSDb' , 'EURNZDb' , 'NZDCHFb' , 'EURJPYb']					
 
-          if PublicVarible.risk_high == 1 : 
+          if PublicVarible.risk == 3 : 
              if   self.Pair in BlackPair  : return
              elif self.Pair in GreenPair  : Volume = 0.02
              elif self.Pair in YellowPair : Volume = 0.01
              elif self.Pair in RedPair    : Volume = 0.00
              else : Volume = 0.01
-          elif PublicVarible.risk_med == 1 : 
+          elif PublicVarible.risk == 2  : 
              if   self.Pair in BlackPair  : return
              elif self.Pair in GreenPair  : Volume = 0.01
              elif self.Pair in YellowPair : Volume = 0.01
              elif self.Pair in RedPair    : Volume = 0.00
              else : Volume = 0.01
-          elif PublicVarible.risk_low == 1 : 
+          elif PublicVarible.risk == 1 : 
              if   self.Pair in BlackPair  : return
              elif self.Pair in GreenPair  : Volume = 0.01
              elif self.Pair in YellowPair : Volume = 0.00
@@ -135,7 +134,7 @@ class SupplyDemandStrategyV1():
 
              SuperTM15_2 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 9 , multiplier= 9) #SuperTrend calculation
              DirectionM15_2 = SuperTM15_2.iloc[-2][1]
-             Direction15_2 = "UP" if DirectionM15 == 1 else "DOWN"
+             Direction15_2 = "UP" if DirectionM15_2 == 1 else "DOWN"
              PriceST2 = SuperTM15_2.iloc[-2][0]
              PriceST75= SuperTM15_2.iloc[-50][0]
              
@@ -180,7 +179,9 @@ class SupplyDemandStrategyV1():
                     if PublicVarible.CanOpenOrder == False :  #PublicVarible.CanOpenOrderST == False or 
                       Botdashboard(36 , self.Pair)
                       return 
-                  
+                    if PublicVarible.Quick_trade == False  : 
+                       return      
+                                
                     if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  : 
                       EntryPrice = SymbolInfo.ask           
                       SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
@@ -218,7 +219,9 @@ class SupplyDemandStrategyV1():
                     if PublicVarible.CanOpenOrder == False :  #PublicVarible.CanOpenOrderST == False or 
                         Botdashboard(36 , self.Pair)
                         return
-                  
+                    if PublicVarible.Quick_trade == False  : 
+                       return      
+                    
                     if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 :
                        EntryPrice = SymbolInfo.bid 
                        SL = PriceST1 - ( SymbolInfo.point * 50)                                #########  تعیین حدضرر معامله #########
