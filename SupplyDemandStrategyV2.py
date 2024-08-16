@@ -111,7 +111,7 @@ class SupplyDemandStrategyV2():
                 return
              if (current_datetime.hour >= 22 and current_datetime.minute == 0) or (current_datetime.weekday() == 4 and current_datetime.hour >= 17  and current_datetime.minute == 0) : 
                 PublicVarible.CanOpenOrder = False  
-             elif current_datetime.hour == 3 and current_datetime.minute == 0 :
+             if current_datetime.hour == 3 and current_datetime.minute < 5 :
                 PublicVarible.CanOpenOrder = True  
 ########################################################################################### دریافت اطلاعات تایم فریم ها و محاسبه اندیکاتور #########################################################################################################
              #Bband = PTA.bbands(close= FrameRatesM15['close'] , length= 40 , std = 2 , ddof= 0 , mamode = 'EMA' )    
@@ -137,9 +137,9 @@ class SupplyDemandStrategyV2():
              DirectionM15_2 = SuperTM15_2.iloc[-2][1]
              Direction15_2 = "UP" if DirectionM15_2 == 1 else "DOWN"
              PriceST2 = SuperTM15_2.iloc[-2][0]
-             PriceST75= SuperTM15_2.iloc[-50][0]
+             PriceST50= SuperTM15_2.iloc[-50][0]
              
-             if PriceST2 == PriceST75 : 
+             if PriceST2 == PriceST50 : 
                 print(f"PriceST2 ==  PriceST50 and return")
                 return
              
