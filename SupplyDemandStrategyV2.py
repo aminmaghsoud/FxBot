@@ -133,14 +133,14 @@ class SupplyDemandStrategyV2():
              #Direction15 = "UP" if DirectionM15 == 1 else "DOWN"
              #PriceST1 = SuperTM15.iloc[-2][0]
 
-             SuperTM15_2 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 9 , multiplier= 9) #SuperTrend calculation
+             SuperTM15_2 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 9 , multiplier= 7) #SuperTrend calculation
              DirectionM15_2 = SuperTM15_2.iloc[-2][1]
              Direction15_2 = "UP" if DirectionM15_2 == 1 else "DOWN"
              PriceST2 = SuperTM15_2.iloc[-2][0]
-             PriceST50= SuperTM15_2.iloc[-50][0]
+             PriceST75= SuperTM15_2.iloc[-75][0]
              
-             if PriceST2 == PriceST50 : 
-                print(f"PriceST2 ==  PriceST50 and return")
+             if PriceST2 == PriceST75 : 
+                print(f"PriceST2 ==  PriceST75 and return")
                 return
              
              print(f"Direction M5 is {Direction} , PriceST3 {PriceST3}")

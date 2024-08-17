@@ -100,10 +100,10 @@ def update_variables(new_risk, new_lot_size, new_quick_trade, new_can_open_order
 def create_gui():
     root = tk.Tk()
     root.title("تنظیمات ربات")
-    root.geometry("800x600")
+    root.geometry("500x300")
 
     # رنگ پس‌زمینه
-    right_bg_color = "lightblue"
+    right_bg_color = "yellow"
     left_bg_color = "gray"
 
     # ایجاد فریم سمت راست و چپ
@@ -154,7 +154,7 @@ def create_gui():
         except ValueError:
             print("مقدار وارد شده معتبر نیست.")
 
-    tk.Button(left_frame, text="ذخیره", bg="green", fg="white", font=("B Nazanin", 12), command=save).pack(anchor="w", padx=20, pady=20)
+    tk.Button(left_frame, text="اعمال تغییرات", bg="red", fg="white", font=("B Nazanin", 12), command=save).pack(anchor="w", padx=20, pady=20)
 
     root.mainloop()
 
