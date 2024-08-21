@@ -1,4 +1,4 @@
-﻿#from math import floor
+#from math import floor
 #from mimetypes import init
 #from multiprocessing.pool import CLOSE
 #from pickle import NONE
@@ -191,14 +191,14 @@ class SupplyDemandStrategyV2():
                       last_message_time = time.time()
                       DBupdate = update_pair_values(self.Pair,Baseroof,Basefloor,high_low_diff,last_message_time)
                       Text =  f"{self.Pair}\n"
-                      if DirectionM15 == 1 and DirectionM15_2 == 1 and SR < 20 : 
+                      if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 : 
                          Text += f"Auto Trade Cross ... 🤖 \n" 
-                      elif DirectionM15 == -1 and DirectionM15_2 == -1  and SR > 80 : 
+                      elif DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  : 
                          Text += f"Auto Trade Direct ... 🤖 \n"
                       else : f"Manual Trade ... 👨‍  \n"
-                      if  DirectionM15 == 1 and DirectionM15_2 == 1 and SR < 20  :
+                      if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1  :
                          Text += f"معامله : خرید / BUY \n" 
-                      elif DirectionM15 == -1 and DirectionM15_2 == -1  and SR > 80:
+                      elif  DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1 :
                             Text +=f"معامله : فروش / SELL  \n" 
                       else: Text +=f"نیاز به بررسی ...  \n" 
                       Text += f"لگ نزولی ... 🔴 \n"
@@ -208,7 +208,7 @@ class SupplyDemandStrategyV2():
                       Text += f"تعداد کندل: {count}\n"
                       Text += f"سقف: {Baseroof}\n"
                       Text += f"کف: {Basefloor}\n"
-                      Text += f"مقدار SR : {round(SR,1)}\n"
+                      Text += f"M5 روند : {Direction}\n"
                       Text += f"M15روند : Up" if DirectionM15 == 1 else f"M15روند : Down"
                       PromptToTelegram(Text)
                       #shape = draw_rectangle(self.Pair,Baseroof,Basefloor)
@@ -217,7 +217,7 @@ class SupplyDemandStrategyV2():
                       Botdashboard(36 , self.Pair)
                       return 
                   
-                  if  DirectionM15 == 1 and DirectionM15_2 == 1  and SR < 20 : 
+                  if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1  : 
                       EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
                       SL = PriceST1 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
                       TP1 = (abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)   
@@ -226,7 +226,7 @@ class SupplyDemandStrategyV2():
                       Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                       OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
                       
-                  if  DirectionM15 == -1 and DirectionM15_2 == -1  and SR > 80 : 
+                  if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  : 
                       EntryPrice = SymbolInfo.ask                                                                                        ######### قیمت  ورود به معامله ##########
                       SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
                       TP1 = EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100) 
@@ -274,14 +274,14 @@ class SupplyDemandStrategyV2():
                       last_message_time = time.time()
                       DBupdate = update_pair_values(self.Pair,Baseroof,Basefloor,high_low_diff,last_message_time)
                       Text =  f"{self.Pair}\n"
-                      if DirectionM15 == -1 and DirectionM15_2 == -1   and SR > 80 : 
+                      if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  : 
                          Text += f"Auto Trade Cross ... 🤖 \n" 
-                      elif DirectionM15 == 1 and DirectionM15_2 == 1  and SR < 20 : 
+                      elif DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1  : 
                          Text += f"Auto Trade Direct ... 🤖 \n"
                       else : f"Manual Trade ... 👨‍  \n"
-                      if DirectionM15 == -1 and DirectionM15_2 == -1  and SR > 80:
+                      if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  :
                          Text += f"معامله : فروش / SELL \n" 
-                      elif  DirectionM15 == 1 and DirectionM15_2 == 1 and SR < 20 :
+                      elif  DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 :
                             Text +=f"معامله : خرید / BUY  \n" 
                       else: Text +=f"نیاز به بررسی ...  \n" 
                       Text += f"لگ صعودی ... 🟢 \n"
@@ -291,7 +291,7 @@ class SupplyDemandStrategyV2():
                       Text += f"تعداد کندل: {count}\n"
                       Text += f"سقف: {Baseroof}\n"
                       Text += f"کف: {Basefloor}\n"
-                      Text += f"مقدار SR : {round(SR,1)}\n"
+                      Text += f"M5 روند : {Direction}\n"
                       Text += f"M15روند : Up \n" if DirectionM15 == 1 else f"M15روند : Down \n"
                       PromptToTelegram(Text)
                       #shape = draw_rectangle(self.Pair,Baseroof,Basefloor)
@@ -300,7 +300,7 @@ class SupplyDemandStrategyV2():
                      Botdashboard(36 , self.Pair)
                      return
                   
-                  if   DirectionM15 == 1 and DirectionM15_2 == 1 and SR < 20 :
+                  if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 :
                        EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
                        SL = PriceST1 - ( SymbolInfo.point * 50)                                #########  تعیین حدضرر معامله #########
                        TP1 = (abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)    
@@ -309,7 +309,7 @@ class SupplyDemandStrategyV2():
                        Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                        OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5") 
 
-                  if   DirectionM15 == -1 and DirectionM15_2 == -1  and SR > 80 :
+                  if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  :
                        EntryPrice = SymbolInfo.ask                                                                                        ######### قیمت  ورود به معامله ##########
                        SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
                        TP1 = EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100)    

@@ -36,8 +36,8 @@ class SupplyDemandStrategyV1():
           GreenPair  = ['CADJPYb' , 'EURCADb' , 'USDJPYb' , 'USDCHFb', 'EURCHFb' , 'AUDNZDb' , 'AUDUSDb' , 'CADCHFb' , 'DowJones30' , 'XAUUSDb' ]
           YellowPair	= ['AUDJPYb' , 'EURUSDb' , 'NZDUSDb' ]
           RedPair    = ['AUDCADb' , 'AUDCHFb' , 'EURGBPb' , 'NZDCADb' , 'EURAUDb' , 'USDCADb']			
-          BlackPair	= ['GBPUSDb' , 'EURNZDb' , 'NZDCHFb' , 'EURJPYb']					
-
+          BlackPair	= ['GBPUSDb' , 'EURNZDb' , 'NZDCHFb' , 'EURJPYb']
+          
           if PublicVarible.risk == 3 : 
              if   self.Pair in BlackPair  : return
              elif self.Pair in GreenPair  : Volume = 0.02
