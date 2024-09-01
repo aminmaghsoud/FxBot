@@ -534,7 +534,7 @@ def GetBalance():
        Prompt("Account info is None")
        Quit()
 
-    return AccountInfo.balance # * 2 
+    return AccountInfo.balance 
 ########################################################################################################
 def CheckOrderIsOpen(Pair:str, LastCandle, TimeFrame, Type, DistanceFromLastPosition:int = 5):
     Result = False
@@ -700,13 +700,13 @@ def Botdashboard(status,Pair:str) :
           case 28 : print(Fore.YELLOW,"Finding swing low                 ",Fore.LIGHTRED_EX,"                     Not OK",Fore.RESET,"\n") ; #write_None(Pair,text = "Finding swing low ")
           case 34 : print(Fore.LIGHTYELLOW_EX,"Finding swing low                 ",Fore.LIGHTGREEN_EX,"                     OK",Fore.RESET,"\n")
           case 21 : print(Fore.YELLOW,"Sell signal ...                   ",Fore.LIGHTRED_EX,"                     Not OK",Fore.RESET,"\n")
-          case 31 : print(Fore.YELLOW,"Buy signal ...                    ",Fore.LIGHTRED_EX,"                     Not OK",Fore.RESET,"\n")
+          case 31 : print(Fore.YELLOW,"TP  is LOW ...                    ",Fore.LIGHTRED_EX,"                     Returned",Fore.RESET,"\n")
           case 22 :
                     print(Fore.LIGHTYELLOW_EX,"Super trend H1                                        ",Back.GREEN,Fore.LIGHTWHITE_EX,"   UP",Fore.GREEN,"|",Back.RESET,Fore.RESET)
 
           case 32 :
                     print(Fore.LIGHTYELLOW_EX,"Super trend H1                                        ",Back.RED,Fore.LIGHTWHITE_EX," DOWN",Fore.RED,"|",Back.RESET,Fore.RESET)
-          case 35 : print(Fore.LIGHTYELLOW_EX,"Limit after daily target          ",Fore.LIGHTGREEN_EX,"                     NO",Fore.RESET,"\n")
+          case 35 : print(Fore.YELLOW,"ADX is LOW ...                    ",Fore.LIGHTRED_EX,"                     Returned",Fore.RESET,"\n")
           case 36 : print(Fore.YELLOW,"Limit daily target or manual stop ",Fore.LIGHTRED_EX,"                     YES",Fore.RESET,"\n")
           case 37 : 
                     SymbolInfo = MT5.symbol_info(Pair)

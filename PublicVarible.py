@@ -4,6 +4,7 @@ from Utility import *
 import time
 from datetime import datetime
 import tkinter as tk
+import sys
 from threading import Thread
 ########################################################################################################
 #ConnectionString = ("Driver={ODBC Driver 18 for SQL Server}; Server=.; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;")
@@ -153,8 +154,12 @@ def create_gui():
             update_variables(new_risk, new_lot_size, new_quick_trade, new_can_open_order)
         except ValueError:
             print("مقدار وارد شده معتبر نیست.")
+    def close():
+        root.destroy()
+        sys.exit()
 
-    tk.Button(left_frame, text="اعمال تغییرات", bg="red", fg="white", font=("B Nazanin", 12), command=save).pack(anchor="w", padx=20, pady=20)
+    tk.Button(left_frame, text="اعمال تغییرات", bg="black", fg="white", font=("B Nazanin", 12), command=save).pack(anchor="w", padx=20, pady=20)
+    tk.Button(left_frame, text="خروج از برنامه", bg="red", fg="white", font=("B Nazanin", 12), command=close).pack(anchor="w", padx=20, pady=20)
 
     root.mainloop()
 

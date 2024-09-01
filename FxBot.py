@@ -139,7 +139,7 @@ class FxBot():
                           E = SupplyDemandStrategyV2(Pair = Item['Name']) #Leg and trade 
                          # C = SupplyDemandStrategyV9(Pair = Item['Name']) 
                          # F = SupplyDemandStrategyV3(Pair = Item['Name']) #معاملات معکوس
-                          G = SupplyDemandStrategyV4(Pair = Item['Name'])
+                          #G = SupplyDemandStrategyV4(Pair = Item['Name'])
                           PublicVarible.Executor.submit(A.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #Posision Modify olny
                           #PublicVarible.Executor.submit(B.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #XAUUSD M1
                           #PublicVarible.Executor.submit(D.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #XAUUSD M5
