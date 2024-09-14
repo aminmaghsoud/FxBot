@@ -462,7 +462,7 @@ def ProcessTelegramCommand():
              PromptToTelegram(Text= Text)  
         elif Command == "/kissme":
              PromptToTelegram('بفرما ...')
-             PromptToTelegram('😘')
+             PromptToTelegram('🫢') #😘
         elif Command == "/quick_trade_off" :
              PublicVarible.Quick_trade = False
              PromptToTelegram("Quick trade if OFF") 

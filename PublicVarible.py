@@ -86,7 +86,7 @@ elif  current_datetime.weekday() in [0 , 2]  :
 Quick_trade = False
 lot_size = 0.01
 Quick_trade = False
-CanOpenOrder = True
+CanOpenOrder = False
 
 def update_variables(new_risk, new_lot_size, new_quick_trade, new_can_open_order):
     PublicVarible.risk = new_risk

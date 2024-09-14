@@ -1,12 +1,12 @@
-﻿import math
-#from mimetypes import init
-#from multiprocessing.pool import CLOSE
-#from pickle import NONE
-#from xmlrpc.client import DateTime
-#from matplotlib.colors import Normalize
-#import pandas_ta as PTA
+﻿from math import floor
+from mimetypes import init
+from multiprocessing.pool import CLOSE
+from pickle import NONE
+from xmlrpc.client import DateTime
+from matplotlib.colors import Normalize
+import pandas_ta as PTA
 import pandas as PD
-#from scipy.signal import normalize
+from scipy.signal import normalize
 from Utility import *
 from Trade import *
 import PublicVarible
@@ -14,7 +14,7 @@ import time
 import MetaTrader5 as MT5
 from colorama import init, Fore, Back, Style
 import ta
-#import numpy as np
+import numpy as np
 from datetime import datetime
 
 
@@ -30,16 +30,11 @@ class SupplyDemandStrategyV2():
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ StrategyV2 M5 Spike --------------")
           CloseAllPosition(self.Pair)
           
-          GreenPair  = ['EURUSDb' , 'EURCHFb', 'AUDJPYb' , 'EURCADb'  , 'EURGBPb' , 'USDCHFb' , 'CADJPYb' , 'USDJPYb' ]
-          YellowPair	= ['XAUUSDb' , 'AUDCADb' , 'NZDUSDb' , 'AUDNZDb' , 'EURAUDb' , 'AUDUSDb'] 
-          RedPair    = ['GBPUSDb' , 'USDCADb' , 'NZDCADb' , 'CADCHFb' , 'AUDCHFb' , 'EURJPYb' , 'DowJones30']
+          GreenPair  = ['EURUSDb' , 'EURCHFb' , 'EURCADb' , 'DowJones30' , 'EURGBPb' , 'USDCHFb' ,'USDJPYb' ]
+          YellowPair	= ['XAUUSDb' , 'AUDCADb' , 'NZDUSDb' , 'AUDNZDb' , 'EURAUDb' , 'CADJPYb' ,  'AUDUSDb'] 
+          RedPair    = ['GBPUSDb' , 'USDCADb' , 'NZDCADb' , 'CADCHFb' , 'AUDCHFb' , 'EURJPYb', 'AUDJPYb']
           BlackPair	= ['NZDCHFb', 'EURNZDb' ]					
 
-         # روزهای سبز (دوشنبه و چهارشنبه)      روزهای قرمز (سه شنبه و پنجشنبه)        جمعه (تعظیل باشد)
-         # ورژن سود ده همین بود -تغییرات جدید در حالت فلت شدن بجای رد کردن ، حجم نصف میشود  - حداقل ارتفاع لگ هم کاهش داده شد
-         # جهت جلوگیری از چرخش های ناگهانی بازار و شناسایی دقیق RBR و DBD ها ريال ADX و Bband اضافه شد 
-
-         
           Volume = CalcLotSize()
           if PublicVarible.risk == 3 : 
              if   self.Pair in BlackPair  : return
@@ -62,7 +57,8 @@ class SupplyDemandStrategyV2():
           
           Volume = round(Volume , 2)
           print(f"Vloume = {Volume}")
-
+          
+          
           sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
           if sell_positions_with_open_prices:
             for ticket, open_price in sell_positions_with_open_prices.items():
@@ -71,7 +67,6 @@ class SupplyDemandStrategyV2():
                if position_info.symbol == self.Pair :
                   Botdashboard(54 , self.Pair)
                   return
-               
           buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
           if buy_positions_with_open_prices:
              for ticket, open_price in buy_positions_with_open_prices.items():
@@ -100,35 +95,39 @@ class SupplyDemandStrategyV2():
                    FrameRatesM15 = FrameRatesM15.drop('time', axis=1)
                    FrameRatesM15 = FrameRatesM15.set_index(PD.DatetimeIndex(FrameRatesM15['datetime']), drop=True)
                    
-             RatesM30 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M30, 0, 250)
-             if RatesM30 is not None:
-                FrameRatesM30 = PD.DataFrame(RatesM30)
-                if not FrameRatesM30.empty:
-                   FrameRatesM30['datetime'] = PD.to_datetime(FrameRatesM30['time'], unit='s')
-                   FrameRatesM30 = FrameRatesM30.drop('time', axis=1)
-                   FrameRatesM30 = FrameRatesM30.set_index(PD.DatetimeIndex(FrameRatesM30['datetime']), drop=True)
+             
 ########################################################################################### بررسی شروط اولیه  #########################################################################################################
              current_datetime = datetime.now()
-             LastCandle = FrameRatesM5.iloc[-1]
+             LastCandle = FrameRatesM15.iloc[-1]
              minutes_to_exclude = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
-             if (LastCandle['datetime'].hour in [0,1]) or (current_datetime.weekday() == 4 and current_datetime.hour >= 23)  or current_datetime.minute not in minutes_to_exclude :#or current_datetime.second > 20  : 
+
+             if (LastCandle['datetime'].hour in [0 , 1]) or ((current_datetime.weekday() == 4 and current_datetime.hour > 20)) : #or (current_datetime.minute not in minutes_to_exclude ) :#or current_datetime.second > 20  : 
                 Botdashboard(4 , self.Pair)
                 return
-             if (current_datetime.hour >= 8 and current_datetime.minute == 0) or (current_datetime.weekday() == 4 and current_datetime.hour >= 21  and current_datetime.minute == 0) : 
+             if ((current_datetime.hour > 1 and current_datetime.minute == 0)) : # or ((current_datetime.weekday() == 4 and current_datetime.hour >= 21  and current_datetime.minute == 0)) : 
                 PublicVarible.CanOpenOrder = False  
-             if current_datetime.hour == 2 and current_datetime.minute < 5 :
-                PublicVarible.CanOpenOrder = True  
+             if current_datetime.hour == 2 and current_datetime.minute in minutes_to_exclude :
+                PublicVarible.CanOpenOrder = False  
 ########################################################################################### دریافت اطلاعات تایم فریم ها و محاسبه اندیکاتور #########################################################################################################
-             Bband = PTA.bbands(close= FrameRatesM30['close'] , length= 40 , std = 2 , ddof= 0 , mamode = 'EMA' )    
-             BRoof = Bband.iloc[-2][-3]
-             BFloor = Bband.iloc[-2][-5]
-             print("Broof : " , BRoof , "BFloor : " , BFloor)
-
              adx = PTA.adx( high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 14 )
              adx_Signal = adx.iloc[-2][0]
-             print("adx_Signal" , adx_Signal)
+             if adx_Signal < 26 : 
+                print(f"ADX is : {adx_Signal}")
+                return       
+             
+             ichi = PTA.ichimoku( high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'] , tenkan= 9 , kijun= 26 , senkou= 52)
+             print(ichi.columns)
 
-             SuperTM5 = supertrend(Pair = self.Pair , high= FrameRatesM5['high'], low= FrameRatesM5['low'], close= FrameRatesM5['close'], length= 5 , multiplier= 1.5) #SuperTrend calculation
+             SuperTM15_2 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 9 , multiplier= 9) #SuperTrend calculation
+             DirectionM15_2 = SuperTM15_2.iloc[-2][1]
+             Direction15_2 = "UP" if DirectionM15_2 == 1 else "DOWN"
+             PriceST2 = SuperTM15_2.iloc[-2][0]
+             PriceST50= SuperTM15_2.iloc[-50][0]
+             if PriceST2 == PriceST50 : 
+                print(f"PriceST2 ==  PriceST50 and return ")
+                return
+
+             SuperTM5 = supertrend(Pair = self.Pair , high= FrameRatesM5['high'], low= FrameRatesM5['low'], close= FrameRatesM5['close'], length= 14 , multiplier= 3) #SuperTrend calculation
              DirectionM5 = SuperTM5.iloc[-2][1]
              Direction = "UP" if DirectionM5 == 1 else "DOWN"
              PriceST3 = SuperTM5.iloc[-2][0]
@@ -137,23 +136,17 @@ class SupplyDemandStrategyV2():
              DirectionM15 = SuperTM15.iloc[-2][1]
              Direction15 = "UP" if DirectionM15 == 1 else "DOWN"
              PriceST1 = SuperTM15.iloc[-2][0]
-             
-             #SuperTM15_2 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 9 , multiplier= 9) #SuperTrend calculation
-             DirectionM15_2 = SuperTM15.iloc[-2][1]
-             Direction15_2 = "UP" if DirectionM15_2 == 1 else "DOWN"
-             PriceST2 = SuperTM15.iloc[-2][0]
-             PriceST75= SuperTM15.iloc[-20][0]
-             
-             if PriceST2 == PriceST75 : 
-                print(f"PriceST1 ==  PriceST5 and Volume * 0.5 ")
-                if Volume == 0 or Volume == 0.01 : 
-                   return
-                else : Volume = round(Volume / 2 , 2)
-             
-             print(f"Direction M5 is {Direction} , PriceST3 {PriceST3}")
-             print(f"Direction M15-1 is {Direction15} , PriceST1 {PriceST1}")
-             print(f"Direction M15-2 is {Direction15_2} , PriceST2 {PriceST2}")
-             
+
+             cci = PTA.cci(high= FrameRatesM15['high'] , low= FrameRatesM15['low'], close= FrameRatesM15['close'],  length= 14  )
+             cci_Signal = cci.iloc[-1]
+
+             if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 and cci_Signal > 100 : 
+                print(f"cci is big  {cci_Signal}")
+                #return  
+             if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1 and cci_Signal < -100 : 
+                print(f"cci is Small  {cci_Signal}")
+                #return  
+
              ## لگ نزولی
              end_index = -16
              current_index = -3
@@ -162,8 +155,11 @@ class SupplyDemandStrategyV2():
              Basefloor = 0.0
              Baseroof = 0.0
              Text = None
-             if FrameRatesM5.iloc[-2]['high'] > FrameRatesM5.iloc[-3]['high']  : 
-                 while current_index > end_index : 
+             if (FrameRatesM15.iloc[-2]['high'] > FrameRatesM15.iloc[-3]['high']) : #and (FrameRatesM15.iloc[-2]['low'] > FrameRatesM15.iloc[-3]['low'])   :  #سختگیری بزرگ 
+               #for initial_index in range(-7, -3) :
+                 #current_index = initial_index  
+                 #if count == 1 : 
+                   while current_index > end_index : 
                        Now_c_H = FrameRatesM5.iloc[current_index]['high']
                        Old_c_H = FrameRatesM5.iloc[current_index - 1]['high'] 
                        Now_c_L = FrameRatesM5.iloc[current_index]['low']
@@ -174,21 +170,25 @@ class SupplyDemandStrategyV2():
                           current_index -= 1
                        else : 
                            break
+                 #else : 
+                     # break
+                 
              if count > 1 : 
                 high_low_diff = round((abs(FrameRatesM5.iloc[-2]['low'] - FrameRatesM5.iloc[current_index]['high'])) / (SymbolInfo.point),2)
                 
-                if  ((self.Pair == 'XAUUSDb'and high_low_diff < 150) or (self.Pair != 'XAUUSDb'and high_low_diff < 100)) :
-                    return
-                if  ((self.Pair == 'XAUUSDb'and high_low_diff > 1000) or (self.Pair != 'XAUUSDb'and high_low_diff > 800)) :
-                    return
+                if  ((self.Pair == 'XAUUSDb'and high_low_diff < 200) or (self.Pair != 'XAUUSDb'and high_low_diff < 125)) :
+                   return
+                if  ((self.Pair == 'XAUUSDb'and high_low_diff > 700) or (self.Pair != 'XAUUSDb'and high_low_diff < 500)) :
+                   return
+                
                 if FrameRatesM5.iloc[-2]['low'] < FrameRatesM5.iloc[-3]['low'] : Basefloor = FrameRatesM5.iloc[-2]['low'] 
                 else : Basefloor = FrameRatesM5.iloc[-3]['low']
                 Baseroof = FrameRatesM5.iloc[-2]['high']
                 print(f"high_low_diff: {high_low_diff}  and  Baseroof: {Baseroof}  and  Basefloor: {Basefloor} and  Range arraye : {abs(Basefloor - Baseroof) / (SymbolInfo.point)} \n")
                 
-                if (abs(Baseroof - Basefloor) / (SymbolInfo.point) < high_low_diff * 0.8 ):
-                  roof, floor, diff , message = get_pair_values(self.Pair)
-                  if message is None or time.time() - message >= 280 :
+                if (abs(Baseroof - Basefloor) / (SymbolInfo.point) < high_low_diff * 0.50 ):
+                   roof, floor, diff , message = get_pair_values(self.Pair)
+                   if message is None or time.time() - message >= 280 :
                       last_message_time = time.time()
                       DBupdate = update_pair_values(self.Pair,Baseroof,Basefloor,high_low_diff,last_message_time)
                       Text =  f"{self.Pair}\n"
@@ -196,78 +196,52 @@ class SupplyDemandStrategyV2():
                          Text += f"Auto Trade Cross ... 🤖 \n" 
                       elif DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  : 
                          Text += f"Auto Trade Direct ... 🤖 \n"
-                      else : f"Manual Trade ... 👨‍  \n"
                       if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1  :
                          Text += f"معامله : خرید / BUY \n" 
                       elif  DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1 :
                             Text +=f"معامله : فروش / SELL  \n" 
-                      else: Text +=f"نیاز به بررسی ...  \n" 
                       Text += f"لگ نزولی ... 🔴 \n"
                       Text += f"ارتفاع لگ: {round(high_low_diff,2) / 10 } pip\n"
                       Text += f"ارتفاع رنج: {round(abs(Basefloor - Baseroof) / (SymbolInfo.point) /10 , 2)} pip \n"
                       Text += f"ظرفیت سود: {round((round(high_low_diff,2) - (abs(Basefloor - Baseroof) / (SymbolInfo.point)) )/10 , 2)} pip \n"
                       Text += f"تعداد کندل: {count}\n"
-                      Text += f"سقف باند: {Baseroof}\n"
-                      Text += f"کف باند: {Basefloor}\n"
-                      Text += f"ADX : {adx_Signal}\n"
+                      Text += f"ADX: {round(adx_Signal , 2)}\n"
+                      Text += f"CCI: {round(cci_Signal , 2)}\n"
+                      Text += f"M5 روند : {Direction}\n"
                       Text += f"M15روند : Up" if DirectionM15 == 1 else f"M15روند : Down"
                       PromptToTelegram(Text)
                       #shape = draw_rectangle(self.Pair,Baseroof,Basefloor)
-
-                  if PublicVarible.CanOpenOrder == False :  #PublicVarible.CanOpenOrderST == False or 
-                         Botdashboard(36 , self.Pair)
-                         return
-                  if adx_Signal < 27 : 
-                         Botdashboard(35 , self.Pair)
-                         Text = f"{self.Pair} \n ADX = {adx_Signal}" 
-                         PromptToTelegram(Text)
-                         return 
-                  
-                  if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1  : 
-                      EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
-                      SL = PriceST1 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
-                      TP1 = (abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)   
-                      if TP1 > BRoof : 
-                         TP1 = BRoof 
-                      if (EntryPrice > BRoof) : 
-                         Botdashboard(31 , self.Pair)
-                         Text = f"{self.Pair} \n EntryPrice > BRoof  " 
-                         PromptToTelegram(Text)
-                         return
-                      if ((BRoof - EntryPrice) / SymbolInfo.point < 250) : 
-                         Botdashboard(31 , self.Pair)
-                         Text = f"{self.Pair} \n TP = {TP1} - BRoof-EntryPrice < 250 = {(BRoof - EntryPrice)/ SymbolInfo.point}  " 
-                         PromptToTelegram(Text)
-                         if Volume > 0.01 : Volume = 0.01
-                      if ((BRoof - EntryPrice) / SymbolInfo.point < 50) :   
-                          return
-                      write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )
-                      print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                      Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                      OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
                       
-                  if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  : 
+                   if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1 and cci_Signal > -90  : 
+                      
                       EntryPrice = SymbolInfo.ask                                                                                        ######### قیمت  ورود به معامله ##########
                       SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
-                      TP1 = EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100) 
-                      if TP1 < BFloor : 
-                         TP1 = BFloor
-                      if (EntryPrice < BFloor) :
-                         Botdashboard(31 , self.Pair)
-                         Text = f"{self.Pair} \n EntryPrice < BFloor " 
-                         PromptToTelegram(Text)
-                         return
-                      if ((EntryPrice - BFloor) / SymbolInfo.point < 250) : 
-                         Botdashboard(31 , self.Pair)
-                         Text = f"{self.Pair} \n TP = {TP1} - EntryPrice-BFloor < 250 = {(EntryPrice - BFloor)/ SymbolInfo.point}  " 
-                         PromptToTelegram(Text)
-                         if Volume > 0.01 : Volume = 0.01
-                      if ((EntryPrice - BFloor) / SymbolInfo.point < 50) :   
-                          return
+                      Balance = GetBalance()
+                      if ((abs(SL - EntryPrice) / SymbolInfo.point) * Volume) >  (Balance * 0.02) : 
+                          Volume = round((Balance * 0.02) / (abs(SL - EntryPrice) / SymbolInfo.point) , 2)   
+                          #Volume = round(Volume / 3 , 2)
+                          if Volume < 0.01 : Volume = 0.01
+                      TP1 = EntryPrice - (abs(EntryPrice - SL) * 1.1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100)    
                       write_trade_info_to_file(self.Pair ,"Sell" , EntryPrice, SL, TP1, Direction )
                       print(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                       Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                       OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V2 - M5")
+
+                   if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 and cci_Signal < 90 : 
+                      
+                      EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
+                      SL = PriceST1 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
+                      Balance = GetBalance()
+                      if ((abs(SL - EntryPrice) / SymbolInfo.point) * Volume) >  (Balance * 0.02) : 
+                          Volume = round((Balance * 0.02) / (abs(SL - EntryPrice) / SymbolInfo.point) , 2)   
+                          #Volume = round(Volume / 3 , 2)
+                          if Volume < 0.01 : Volume = 0.01
+                      TP1 = (abs(EntryPrice - SL) * 1.1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)    
+                      write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )
+                      print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                      Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                      OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
+
 
              ## لگ صعودی
              end_index = -16
@@ -277,8 +251,11 @@ class SupplyDemandStrategyV2():
              Basefloor = 0.0
              Baseroof = 0.0
              Text = None       
-             if FrameRatesM5.iloc[-2]['low'] < FrameRatesM5.iloc[-3]['low']  : 
-                 while current_index > end_index : 
+             if FrameRatesM5.iloc[-2]['low'] < FrameRatesM5.iloc[-3]['low']  :#and FrameRatesM5.iloc[-2]['high'] < FrameRatesM5.iloc[-3]['high']  : #سختگیری بزرگ 
+               #for initial_index in range(-7, -3) :
+                # current_index = initial_index  
+                # if count == 1 :
+                   while current_index > end_index : 
                        Now_c_H = FrameRatesM5.iloc[current_index]['high']
                        Old_c_H = FrameRatesM5.iloc[current_index - 1]['high'] 
                        Now_c_L = FrameRatesM5.iloc[current_index]['low']
@@ -289,22 +266,24 @@ class SupplyDemandStrategyV2():
                           current_index -= 1
                        else : 
                            break
+                # else : 
+                   # break
+                 
              if count > 1 : 
                 high_low_diff = round((abs(FrameRatesM5.iloc[-2]['high'] - FrameRatesM5.iloc[current_index]['low'])) / (SymbolInfo.point) , 2)
-
-                if  ((self.Pair == 'XAUUSDb'and high_low_diff < 200) or (self.Pair != 'XAUUSDb'and high_low_diff < 100)) :
-                    return
-                if  ((self.Pair == 'XAUUSDb'and high_low_diff > 1000) or (self.Pair != 'XAUUSDb'and high_low_diff > 800)) :
-                    return
+                if  ((self.Pair == 'XAUUSDb'and high_low_diff < 200) or (self.Pair != 'XAUUSDb'and high_low_diff < 125)) :
+                   return
+                if  ((self.Pair == 'XAUUSDb'and high_low_diff > 700) or (self.Pair != 'XAUUSDb'and high_low_diff < 500)) :
+                   return
                 
                 if FrameRatesM5.iloc[-2]['high'] > FrameRatesM5.iloc[-3]['high'] : Baseroof = FrameRatesM5.iloc[-2]['high']  
                 else : Baseroof = FrameRatesM5.iloc[-3]['high'] 
                 Basefloor = FrameRatesM5.iloc[-2]['low']
                 print(f"high_low_diff: {high_low_diff}  and  Baseroof: {Baseroof}  and  Basefloor: {Basefloor} and  Range arraye : {abs(Basefloor - Baseroof)/ (SymbolInfo.point)} \n")
                 
-                if (abs(Baseroof - Basefloor) / (SymbolInfo.point) < high_low_diff * 0.8 ) : 
-                  roof, floor, diff , message = get_pair_values(self.Pair)
-                  if message is None or time.time() - message >= 280 :
+                if (abs(Baseroof - Basefloor) / (SymbolInfo.point) < high_low_diff * 0.50 ) : 
+                   roof, floor, diff , message = get_pair_values(self.Pair)
+                   if message is None or time.time() - message >= 280 :
                       last_message_time = time.time()
                       DBupdate = update_pair_values(self.Pair,Baseroof,Basefloor,high_low_diff,last_message_time)
                       Text =  f"{self.Pair}\n"
@@ -312,80 +291,49 @@ class SupplyDemandStrategyV2():
                          Text += f"Auto Trade Cross ... 🤖 \n" 
                       elif DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1  : 
                          Text += f"Auto Trade Direct ... 🤖 \n"
-                      else : f"Manual Trade ... 👨‍  \n"
                       if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  :
                          Text += f"معامله : فروش / SELL \n" 
                       elif  DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 :
                             Text +=f"معامله : خرید / BUY  \n" 
-                      else: Text +=f"نیاز به بررسی ...  \n" 
                       Text += f"لگ صعودی ... 🟢 \n"
                       Text += f"ارتفاع لگ: {round(high_low_diff,2) / 10 } pip\n"
                       Text += f"ارتفاع رنج: {round(abs(Basefloor - Baseroof) / (SymbolInfo.point) /10 , 2)} pip \n"
                       Text += f"ظرفیت سود: {round((round(high_low_diff,2) - (abs(Basefloor - Baseroof) / (SymbolInfo.point)) )/10 , 2)} pip \n"
                       Text += f"تعداد کندل: {count}\n"
-                      Text += f"سقف: {Baseroof}\n"
-                      Text += f"کف: {Basefloor}\n"
-                      Text += f"ADX : {adx_Signal}\n"
-                      Text += f"M15روند : Up \n" if DirectionM15 == 1 else f"M15روند : Down \n"
+                      Text += f"ADX: {round(adx_Signal , 2)}\n"
+                      Text += f"CCI: {round(cci_Signal , 2)}\n"
+                      Text += f"M5 روند : {Direction}\n"
+                      Text += f"M15روند : Up" if DirectionM15 == 1 else f"M15روند : Down"
                       PromptToTelegram(Text)
                       #shape = draw_rectangle(self.Pair,Baseroof,Basefloor)
-
-                  if PublicVarible.CanOpenOrder == False :  #PublicVarible.CanOpenOrderST == False or 
-                         Botdashboard(36 , self.Pair)
-                         return
-                  if adx_Signal < 27 : 
-                         Botdashboard(35 , self.Pair)
-                         Text = f"{self.Pair} \n ADX = {adx_Signal}" 
-                         PromptToTelegram(Text)
-                         return 
-                  
-                  if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 :
-                       EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
-                       SL = PriceST1 - ( SymbolInfo.point * 50)                                #########  تعیین حدضرر معامله #########
-                       TP1 = (abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)    
-                       if TP1 > BRoof : 
-                         TP1 = BRoof 
-                       if (EntryPrice > BRoof) :
-                         Botdashboard(31 , self.Pair)
-                         Text = f"{self.Pair} \n EntryPrice > BRoof " 
-                         PromptToTelegram(Text)
-                         return
-                       if ((BRoof - EntryPrice) / SymbolInfo.point < 250) : 
-                         Botdashboard(31 , self.Pair)
-                         Text = f"{self.Pair} \n TP = {TP1} - BRoof-EntryPrice < 250 = {(BRoof - EntryPrice)/ SymbolInfo.point}  " 
-                         PromptToTelegram(Text)
-                         if Volume > 0.01 : Volume = 0.01
-                       if ((BRoof - EntryPrice) / SymbolInfo.point < 50) :  
-                          return
-                       write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )
-                       print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                       Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                       OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5") 
-
-                  if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1  :
+                   
+                   if DirectionM5 == -1 and DirectionM15 == -1 and DirectionM15_2 == -1 and cci_Signal > -90 :
                        EntryPrice = SymbolInfo.ask                                                                                        ######### قیمت  ورود به معامله ##########
                        SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
-                       TP1 = EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100)    
-                       if TP1 < BFloor : 
-                         TP1 = BFloor
-                       if (EntryPrice < BFloor) :
-                         Botdashboard(31 , self.Pair)
-                         Text = f"{self.Pair} \n EntryPrice < BFloor " 
-                         PromptToTelegram(Text)
-                         return
-                       if ((EntryPrice - BFloor) / SymbolInfo.point < 250) : 
-                         Botdashboard(31 , self.Pair)
-                         Text = f"{self.Pair} \n TP = {TP1} - EntryPrice-BFloor < 250 = {(EntryPrice - BFloor)/ SymbolInfo.point}  " 
-                         PromptToTelegram(Text)
-                         if Volume > 0.01 : Volume = 0.01
-                       if ((EntryPrice - BFloor) / SymbolInfo.point < 50) :   
-                          return
+                       Balance = GetBalance()
+                       if ((abs(SL - EntryPrice) / SymbolInfo.point) * Volume) >  (Balance * 0.02) : 
+                          Volume = round((Balance * 0.02) / (abs(SL - EntryPrice) / SymbolInfo.point) , 2)   
+                          #Volume = round(Volume / 3 , 2)
+                          if Volume < 0.01 : Volume = 0.01
+                       TP1 = EntryPrice - (abs(EntryPrice - SL) * 1.1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100)    
                        write_trade_info_to_file(self.Pair ,"Sell" , EntryPrice, SL, TP1, Direction )
                        print(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                        Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                        OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V2 - M5")
        
-                   
+                   if DirectionM5 == 1 and DirectionM15 == 1 and DirectionM15_2 == 1 and cci_Signal < 90 :
+                       EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
+                       SL = PriceST1 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
+                       Balance = GetBalance()
+                       if ((abs(SL - EntryPrice) / SymbolInfo.point) * Volume) >  (Balance * 0.02) : 
+                          Volume = round((Balance * 0.02) / (abs(SL - EntryPrice) / SymbolInfo.point) , 2)   
+                          #Volume = round(Volume / 3 , 2)
+                          if Volume < 0.01 : Volume = 0.01
+                       TP1 = (abs(EntryPrice - SL) * 1.1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)    
+                       write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )
+                       print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                       Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                       OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5") 
                        
 ########################################################################################################
 def CalcLotSize():
