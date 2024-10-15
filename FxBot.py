@@ -128,22 +128,22 @@ class FxBot():
                           print ("            ",Back.RESET,Fore.RESET,"                                           TP pip: ",round(SymbolInfo.spread,1)*3/10 ,"\n" )
                           
 
-                          if (datetime.now() - PublicVarible.LastDatetimeRobotIsReady).total_seconds() / 60 > 45:
+                          if (datetime.now() - PublicVarible.LastDatetimeRobotIsReady).total_seconds() / 60 > 120 :
                             PublicVarible.LastDatetimeRobotIsReady = datetime.now() 
                             Statistics()
                             PromptToTelegram(Text= "📌 Robot Pirouz is ready, market is open")
 
-                          A = SupplyDemandStrategyV7(Pair = Item['Name'])
+                          #A = SupplyDemandStrategyV7(Pair = Item['Name'])
                           #B = SupplyDemandStrategyV8(Pair = Item['Name'])
-                          #D = SupplyDemandStrategyV1(Pair = Item['Name']) #لگ سریع
-                          E = SupplyDemandStrategyV2(Pair = Item['Name']) #Leg and trade 
+                          D = SupplyDemandStrategyV1(Pair = Item['Name']) #لگ سریع
+                         # E = SupplyDemandStrategyV2(Pair = Item['Name']) #Leg and trade 
                          # C = SupplyDemandStrategyV9(Pair = Item['Name']) 
-                         # F = SupplyDemandStrategyV3(Pair = Item['Name']) #معاملات معکوس
+                          #F = SupplyDemandStrategyV3(Pair = Item['Name']) #فقط اسپایک
                           #G = SupplyDemandStrategyV4(Pair = Item['Name'])
-                          PublicVarible.Executor.submit(A.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #Posision Modify olny
+                          #PublicVarible.Executor.submit(A.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #Posision Modify olny
                           #PublicVarible.Executor.submit(B.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #XAUUSD M1
-                          #PublicVarible.Executor.submit(D.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #XAUUSD M5
-                          PublicVarible.Executor.submit(E.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #Leg and trade
+                          PublicVarible.Executor.submit(D.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #XAUUSD M5
+                          #PublicVarible.Executor.submit(E.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #Leg and trade
                           #PublicVarible.Executor.submit(C.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
                           #PublicVarible.Executor.submit(F.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M15
                           #PublicVarible.Executor.submit(G.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # XAUUSD M5 Spike
@@ -163,7 +163,8 @@ class FxBot():
                           print (Fore.LIGHTWHITE_EX,Back.RED ," Symbol  :  ", SymbolInfo.name,Back.RESET,Fore.RESET,"                                 Point : ","{:.10f}".format(SymbolInfo.point) )
                           print ("            ",Back.RESET,Fore.RESET,"                                           spread: ",round(SymbolInfo.spread,1))
                           print ("            ",Back.RESET,Fore.RESET,"                                           TP pip: ",round(SymbolInfo.spread,1)*3/10 ,"\n" )
-                          
+                         # E = SupplyDemandStrategyV2(Pair = Item['Name'])
+                         # PublicVarible.Executor.submit(E.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #Leg and trade
                           Botdashboard(2 , Item['Name'])
                           CloseAllPosition(Pair= Item['Name'])
                           

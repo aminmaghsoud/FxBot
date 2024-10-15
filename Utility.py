@@ -264,8 +264,8 @@ def CloseAllPosition(Pair:str):
          else : 
             print(Fore.LIGHTYELLOW_EX,"Total profit at this moment       ",Fore.LIGHTRED_EX,"                   ",round(Profit,2),Fore.RESET,"\n")
         
-         if Profit > Balance * 0.05 : 
-            MT5.Close(symbol= Pair)
+         if Profit > Balance * 0.10 : 
+            #MT5.Close(symbol= Pair)
             Prompt(f"Profit is {round(Profit, 2)}$ and Posision successfully closed by Smart StopLoss , Balance: {str(GetBalance())}$")
             PromptToTelegram(Text= f"❎ Profit is {round(Profit, 2)}$ (5%) Posision successfully closed by Smart StopLoss " + "\n" + f"💰 Balance: {str(GetBalance())}$")
          #  
@@ -462,7 +462,9 @@ def ProcessTelegramCommand():
              PromptToTelegram(Text= Text)  
         elif Command == "/kissme":
              PromptToTelegram('بفرما ...')
-             PromptToTelegram('🫢') #😘
+             PromptToTelegram('😘')
+             PromptToTelegram('😘')
+             PromptToTelegram('😘')
         elif Command == "/quick_trade_off" :
              PublicVarible.Quick_trade = False
              PromptToTelegram("Quick trade if OFF") 
