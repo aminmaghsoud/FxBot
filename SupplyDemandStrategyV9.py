@@ -1,124 +1,206 @@
-﻿from math import floor
-from mimetypes import init
-from multiprocessing.pool import CLOSE
-from pickle import NONE
-from xmlrpc.client import DateTime
-from matplotlib.colors import Normalize
-import pandas_ta as PTA
-import pandas as PD
-from scipy.signal import normalize
+﻿import pandas as PD
 from Utility import *
 from Trade import *
-import PublicVarible
 import time
 import MetaTrader5 as MT5
 from colorama import init, Fore, Back, Style
-import ta
-import numpy as np
-from datetime import datetime
 
 class SupplyDemandStrategyV9():
       Pair = ""
-      TimeFrame = MT5.TIMEFRAME_M1
+      TimeFrame = MT5.TIMEFRAME_M5
 ########################################################################################################
       def __init__(self, Pair):
           self.Pair = Pair
            
 ##############################################################################################################################################################
       def Main(self):
-          if self.Pair == "XAUUSDb":
-             return
-          print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ StrategyV9 M5--------------")
-          #Botdashboard(14 , self.Pair)
+          print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ Strategy V9 M5 Range and Spike --")
+          
+          high_low_diff = 0 
           SymbolInfo = MT5.symbol_info(self.Pair)
           if SymbolInfo is not None :
-             RatesM1 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M1, 0, 120)
-             if RatesM1 is not None:
-                FrameRatesM1 = PD.DataFrame(RatesM1)
-                if not FrameRatesM1.empty:
-                   FrameRatesM1['datetime'] = PD.to_datetime(FrameRatesM1['time'], unit='s')
-                   FrameRatesM1 = FrameRatesM1.drop('time', axis=1)
-                   FrameRatesM1 = FrameRatesM1.set_index(PD.DatetimeIndex(FrameRatesM1['datetime']), drop=True)
-                   
-########################################################################################### بررسی شروط اولیه  #########################################################################################################
-             current_datetime = datetime.now()
-             LastCandle = FrameRatesM1.iloc[-1]
-             minutes_to_exclude = [4, 5, 9, 10, 14, 15, 19, 20, 24, 25, 29, 30, 34, 35, 39, 40, 44, 45, 49, 50, 54, 55, 59, 0]
-             if (LastCandle['datetime'].hour in [0,1]) or (current_datetime.weekday() == 4 and current_datetime.hour >= 17) or LastCandle['datetime'].minute not in minutes_to_exclude : 
-                Botdashboard(4 , self.Pair)
-                return
-             elif PublicVarible.CanOpenOrderST == False or PublicVarible.CanOpenOrder == False : 
-                Botdashboard(36 , self.Pair)
-                return
-########################################################################################### دریافت اطلاعات تایم فریم ها و محاسبه اندیکاتور #########################################################################################################
-             RatesM15 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M15, 0, 260)
-             if RatesM15 is not None:
-                   FrameRatesM15 = PD.DataFrame(RatesM15)
-                   if not FrameRatesM15.empty:
-                      FrameRatesM15['datetime'] = PD.to_datetime(FrameRatesM15['time'], unit='s')
-                      FrameRatesM15 = FrameRatesM15.drop('time', axis=1)
-                      FrameRatesM15 = FrameRatesM15.set_index(PD.DatetimeIndex(FrameRatesM15['datetime']), drop=True)
-                      SuperT15 = supertrend(Pair = self.Pair , high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 14 , multiplier= 3) #SuperTrend calculation
-                      DirectionM15 = SuperT15.iloc[-2][1]
-                      PriceST3 = SuperT15.iloc[-2][0]
-                      
-             RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 260)
-             if RatesM5 is not None:
-                   FrameRatesM5 = PD.DataFrame(RatesM5)
-                   if not FrameRatesM5.empty:
-                      FrameRatesM5['datetime'] = PD.to_datetime(FrameRatesM5['time'], unit='s')
-                      FrameRatesM5 = FrameRatesM5.drop('time', axis=1)
-                      FrameRatesM5 = FrameRatesM5.set_index(PD.DatetimeIndex(FrameRatesM5['datetime']), drop=True)
-                      SuperTM5 = supertrend(Pair = self.Pair , high= FrameRatesM5['high'], low= FrameRatesM5['low'], close= FrameRatesM5['close'], length= 10 , multiplier = 4 ) #SuperTrend calculation
-                      DirectionM5 = SuperTM5.iloc[-2][1]
-                      PriceST2 = SuperTM5.iloc[-2][0]
-             
-             if  DirectionM5 !=  DirectionM15 : 
-                 return
-
-             RatesH1 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_H1, 0, 25 )
-             if RatesH1 is not None:
-                   FrameRatesH1 = PD.DataFrame(RatesH1)
-                   if not FrameRatesH1.empty:
-                      FrameRatesH1['datetime'] = PD.to_datetime(FrameRatesH1['time'], unit='s')
-                      FrameRatesH1 = FrameRatesH1.drop('time', axis=1)
-                      FrameRatesH1 = FrameRatesH1.set_index(PD.DatetimeIndex(FrameRatesH1['datetime']), drop=True)
-                      STH30 = PTA.stoch(high= FrameRatesH1['high'], low= FrameRatesH1['low'], close= FrameRatesH1['close'], k= 14, d= 5, smooth_k= 5)   #Stochastic calculation 
-                      #STH30slope = (STH30.iloc[-1][0] - STH30.iloc[-3][0])
-                      #print(f"{self.Pair} STH30slope : {STH30slope}") 
-                      
-########################################################################################### بررسی شروط اولیه بیش فروش و بیش خرید  #########################################################################################################
-             
-             if DirectionM15 == 1 and  STH30.iloc[-1][0] > 80 : 
-                Botdashboard(12 , self.Pair) 
-                return     
-             #elif DirectionM15 == 1 and MFIH1.iloc[-1] > 85 : 
-             #   Botdashboard(42 , self.Pair)
-             #   return
-             elif DirectionM15 == -1 and STH30.iloc[-1][0] < 20 :
-                Botdashboard(11 , self.Pair) 
-                return     
-             #elif DirectionM15 == -1 and MFIH1.iloc[-1] < 15 : 
-             #   Botdashboard(43 , self.Pair)
-             #   return
-
-########################################################################################### بدنه استراتژی  #########################################################################################################
-             init ()
-             BuyAllow = 1
-             SellAllow = 1
-             #if SuperT15.iloc[-2][0] == SuperT15.iloc[-5][0] :
-             #   BuyAllow = 0
-             #   SellAllow = 0
-             RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 260)
+             RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 250)
              if RatesM5 is not None:
                 FrameRatesM5 = PD.DataFrame(RatesM5)
-                if not FrameRatesM5.empty:
+                if not FrameRatesM5.empty: 
                    FrameRatesM5['datetime'] = PD.to_datetime(FrameRatesM5['time'], unit='s')
                    FrameRatesM5 = FrameRatesM5.drop('time', axis=1)
-                   FrameRatesM5 = FrameRatesM5.set_index(PD.DatetimeIndex(FrameRatesM5['datetime']), drop=True)   
-             ################################ شرط معامله فروش  #####################################
+                   FrameRatesM5 = FrameRatesM5.set_index(PD.DatetimeIndex(FrameRatesM5['datetime']), drop=True)
 
-             if DirectionM15 == 1  :    
+             buy_positions_with_open_prices = get_buy_positions_with_open_prices()
+             if buy_positions_with_open_prices:
+                      for ticket, open_price in buy_positions_with_open_prices.items():
+                          position_data = {
+                              "symbol": self.Pair,  # نماد
+                              "ticket": ticket,     # شماره تیکت موقعیت
+                          }
+                          positions = MT5.positions_get()
+                          for position_info in positions:
+                             if position_info.ticket == ticket and position_info.symbol == self.Pair :
+                                 entry_price = position_info.price_open
+                                 take_profit = position_info.tp
+                                 stoploss = position_info.sl
+                                 
+                                 if  SymbolInfo.ask >= abs(abs(entry_price - take_profit) * 0.90 + entry_price):
+                                     # محاسبه مقدار جدید برای حد ضرر (stop_loss)
+                                     new_stop_loss = (entry_price + take_profit) / 2
+                                     # اعمال تغییرات
+                                     ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
+                                     print(" Buy Position Tp and Sl Modified to Bearish Status") 
+                                 elif SymbolInfo.ask >= abs(abs(entry_price - take_profit) * 0.75 + entry_price):
+                                     # محاسبه مقدار جدید برای حد ضرر (stop_loss)
+                                     new_stop_loss = abs(abs(entry_price - take_profit) * 0.25 + entry_price) #(entry_price + take_profit) / 2
+                                     # اعمال تغییرات
+                                     ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
+                                     print(" Buy Position Tp and Sl Modified to Bearish Status")
+                                 elif SymbolInfo.ask >= abs(abs(entry_price - take_profit) * 0.50 + entry_price):
+                                     # محاسبه مقدار جدید برای حد ضرر (stop_loss)
+                                     new_stop_loss = entry_price
+                                     # اعمال تغییرات
+                                     ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
+                                     print(" Buy Position Tp and Sl Modified to Bearish Status")
+                                 else:
+                                     print(f" Condition not met for ticket                             {ticket}" , "\n")
+             
+             sell_positions_with_open_prices = get_sell_positions_with_open_prices()
+             if sell_positions_with_open_prices:
+                      for ticket, open_price in sell_positions_with_open_prices.items():
+                          position_data = {
+                              "symbol": self.Pair,  # نماد
+                              "ticket": ticket,     # شماره تیکت موقعیت
+                          }
+                          positions = MT5.positions_get()
+                          for position_info in positions:
+                             if position_info.ticket == ticket and position_info.symbol == self.Pair :
+                                 entry_price = position_info.price_open
+                                 take_profit = position_info.tp
+                                 stoploss = position_info.sl
+                                 if SymbolInfo.bid <= abs(abs(entry_price - take_profit) * 0.90 - entry_price):
+                                     # محاسبه مقدار جدید برای حد ضرر (stop_loss)
+                                     new_stop_loss = (entry_price + take_profit) / 2
+                                     # اعمال تغییرات
+                                     ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
+                                     print(" Sell Position Tp and Sl Modified to Bearish Status")
+                                 elif SymbolInfo.bid <= abs(abs(entry_price - take_profit) * 0.75 - entry_price):
+                                     # محاسبه مقدار جدید برای حد ضرر (stop_loss)
+                                     new_stop_loss = abs(abs(entry_price - take_profit) * 0.25 - entry_price)
+                                     # اعمال تغییرات
+                                     ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
+                                     print(" Sell Position Tp and Sl Modified to Bearish Status")
+                                 elif SymbolInfo.bid <= abs(abs(entry_price - take_profit) * 0.50 - entry_price):
+                                     # محاسبه مقدار جدید برای حد ضرر (stop_loss)
+                                     new_stop_loss = entry_price
+                                     # اعمال تغییرات
+                                     ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
+                                     print(" Sell Position Tp and Sl Modified to Bearish Status")
+                                 else:
+                                     print(f" Condition not met for ticket                             {ticket}" , "\n")
+
+########################################################################################### دریافت اطلاعات تایم فریم ها و محاسبه اندیکاتور #########################################################################################################
+             current_datetime = datetime.now()
+             LastCandle = FrameRatesM5.iloc[-1]
+             minutes_to_exclude = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+             if (LastCandle['datetime'].hour in [0 , 1]) or ((current_datetime.weekday() == 4 and current_datetime.hour > 20)) or (current_datetime.minute not in minutes_to_exclude ) :#or current_datetime.second > 20  : 
+                Botdashboard(4 , self.Pair)
+                return 
+             ATR = PTA.atr(high = FrameRatesM5['high'],low = FrameRatesM5['low'], close = FrameRatesM5['close'],length=14)
+             ATR_Value = ATR.iloc[-1]
+             print("ATR_Value" , ATR_Value)
+########################################################################################### دریافت اطلاعات تایم فریم ها و محاسبه اندیکاتور #########################################################################################################
+             Balace = GetBalance()
+             ## لگ نزولی
+             end_index = -16
+             current_index = -3
+             count = 1
+             high_low_diff = 0.0
+            
+             Text = None
+             current_time = time.time()
+
+             if (FrameRatesM5.iloc[-2]['high'] > FrameRatesM5.iloc[-3]['high']) : #or (FrameRatesM5.iloc[-2]['low'] > FrameRatesM5.iloc[-3]['low']) : 
+                   while current_index > end_index : 
+                       Now_c_H = FrameRatesM5.iloc[current_index]['high']
+                       Old_c_H = FrameRatesM5.iloc[current_index - 1]['high'] 
+                       Now_c_L = FrameRatesM5.iloc[current_index]['low']
+                       Old_c_L = FrameRatesM5.iloc[current_index - 1]['low']
+                       
+                       if Now_c_H < Old_c_H : #and Now_c_L < Old_c_L :
+                          count += 1 
+                          current_index -= 1
+                       else : 
+                           break
+             if count > 1 : 
+                high_low_diff = round((abs( FrameRatesM5['low'].iloc[current_index : -2 ].min() - FrameRatesM5.iloc[current_index]['high'])) / (SymbolInfo.point),2)
+                if high_low_diff < (200 * ATR_Value * 0.9) : return
+                PublicVarible.Basefloor = FrameRatesM5['low'].iloc[current_index : -2 ].min()
+                PublicVarible.Baseroof = FrameRatesM5.iloc[-2]['high']
+                range_height = round(abs(PublicVarible.Baseroof - PublicVarible.Basefloor) / (SymbolInfo.point) / 10, 2)
+                if round(range_height / high_low_diff * 1000,1) > 50 : return
+                print(f"Down high_low_diff: {high_low_diff}  and  PublicVarible.Baseroof: {PublicVarible.Baseroof}  and  PublicVarible.Basefloor: {PublicVarible.Basefloor} and  Range arraye : {abs(PublicVarible.Basefloor - PublicVarible.Baseroof) / (SymbolInfo.point)} \n")
+                current_time = time.time()
+                if current_time - PublicVarible.last_execution_time >= 300:  
+                   Text = f"{self.Pair}\n"
+                   Text += f"M5 لگ نزولی و رنج# ... 🔴 \n"
+                   Text += f"ارتفاع لگ: {round(high_low_diff, 2) / 10} pip\n"
+                   Text += f"تعداد کندل: {count}\n"
+                   Text += f"سقف: {PublicVarible.Baseroof} \n"
+                   Text += f"کف : {PublicVarible.Basefloor} \n"
+                   Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff * 1000,1) } % \n"
+                   Text += f"ارتفاع رنج: {range_height} pip \n"
+                   Text += f"حجم مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
+                   Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}"
+                   PromptToTelegram(Text)
+                   PublicVarible.last_execution_time = current_time
+
+
+             ## لگ صعودی
+             end_index = -16
+             current_index = -3
+             count = 1
+             high_low_diff = 0.0
+             Text = None       
+             if (FrameRatesM5.iloc[-2]['low'] < FrameRatesM5.iloc[-3]['low']) : #or (FrameRatesM5.iloc[-2]['high'] < FrameRatesM5.iloc[-3]['high']) :
+                   while current_index > end_index : 
+                       Now_c_H = FrameRatesM5.iloc[current_index]['high']
+                       Old_c_H = FrameRatesM5.iloc[current_index - 1]['high'] 
+                       Now_c_L = FrameRatesM5.iloc[current_index]['low']
+                       Old_c_L = FrameRatesM5.iloc[current_index - 1]['low']
+                       if  Now_c_L > Old_c_L :#and Now_c_H > Old_c_H :
+                          count += 1 
+                          current_index -= 1
+                       else : 
+                           break
+             if count > 1 : 
+                high_low_diff = round((abs(FrameRatesM5.iloc[current_index : -2]['high'].max() - FrameRatesM5.iloc[current_index]['low'])) / (SymbolInfo.point) , 2)
+                if high_low_diff < (200 * ATR_Value * 0.9) : return
+                PublicVarible.Baseroof = FrameRatesM5.iloc[current_index : -2]['high'].max()
+                PublicVarible.Basefloor = FrameRatesM5.iloc[-2]['low']
+                range_height = round(abs(PublicVarible.Baseroof - PublicVarible.Basefloor) / (SymbolInfo.point) / 10, 2)
+                if round(range_height / high_low_diff * 1000,1) > 50 : return
+                print(f"Up high_low_diff: {high_low_diff}  and  PublicVarible.Baseroof: {PublicVarible.Baseroof}  and  PublicVarible.Basefloor: {PublicVarible.Basefloor} and  Range arraye : {abs(PublicVarible.Basefloor - PublicVarible.Baseroof) / (SymbolInfo.point)} \n")
+                current_time = time.time()
+                if current_time - PublicVarible.last_execution_time >= 300:  
+                   Text = f"{self.Pair}\n"
+                   Text += f"M5 لگ صعودی و رنج# ... 🟢 \n"
+                   Text += f"ارتفاع لگ: {round(high_low_diff, 2) / 10} pip\n"
+                   Text += f"تعداد کندل: {count}\n"
+                   Text += f"سقف: {PublicVarible.Baseroof} \n"
+                   Text += f"کف : {PublicVarible.Basefloor} \n"
+                   Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff * 1000,1) } % \n"
+                   Text += f"ارتفاع رنج: {range_height} pip \n"
+                   Text += f"حجم مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
+                   Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}"
+
+                   PromptToTelegram(Text)
+                   PublicVarible.last_execution_time = current_time
+
+             if FrameRatesM5.iloc[-2]['close'] > PublicVarible.Baseroof and PublicVarible.Baseroof != 0 : 
+                print(f"price is {FrameRatesM5.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof} ")
+                if current_time - PublicVarible.last_execution_time >= 300:   
+                   Text = f"price is {FrameRatesM5.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof} "
+                   PromptToTelegram(Text)  
+                   PublicVarible.last_execution_time = current_time  
+#Buy
                 buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
                 if buy_positions_with_open_prices:
                  for ticket, open_price in buy_positions_with_open_prices.items():
@@ -127,35 +209,14 @@ class SupplyDemandStrategyV9():
                      if position_info.symbol == self.Pair :
                         Botdashboard(53 , self.Pair)
                         return
-                
-                BaseHigh = self.FindSwingHigh(FrameRatesM5, SymbolInfo.point,0,0,0)  
-                if SellAllow == 1 : Botdashboard(63 , self.Pair)
-                else : Botdashboard(64 , self.Pair)
-                SymbolInfo = MT5.symbol_info(self.Pair)
-                
-                if BaseHigh == 1 and SellAllow :                                                                  ######### شرط اصلی پیدا کردن نقطه ورود به معامله ##########   STH30slope < 0 and RSIslope < -0.5 and StochRSI_k2 > 80 
-                   write_trade_info_to_file(self.Pair ,"Sell" , BaseHigh, 0, 0, 0 , 0 ,0 , DirectionM15 )
-                   EntryPrice = SymbolInfo.bid                                                                                        ######### قیمت  ورود به معامله ##########
-                   Volume = self.CalcLotSize(Point= SymbolInfo.point)                                                                 #########  محاسه حجم ورود به معامله ##########
-                   TP1 = EntryPrice + (abs(FrameRatesM5.iloc[-3]['close'] - EntryPrice)* 2) 
-                   SL =  EntryPrice - (TP1 - EntryPrice)                                                                                 #########  تعیین حدسود معامله ########## 
-                   if time.time() - PublicVarible.last_message_time1 >= 5 :
-                       PublicVarible.last_message_time1 = time.time()
-                       Text = "🔺V9 -M5- Find Spike\n"
-                       Text += f"{SymbolInfo.name}\n"
-                       Text += "Sell\n"
-                       Text += f"Volume: {str(Volume)}\n"
-                       Text += f"Price: {str(EntryPrice)}\n"
-                       Text += f"S/L: {str(SL)}\n"
-                       Text += f"T/P: {str(TP1)}"
-                       PromptToTelegram(Text)
-                       print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                       Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                       OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= f"V9 - M5") #########  ارسال اطلاعات فروش به تابع  ########## 
-                   
-             ############################# شرط معامله خرید  #####################################
-                      
-             if DirectionM15 == -1:     
+
+             if FrameRatesM5.iloc[-2]['close'] < PublicVarible.Basefloor and PublicVarible.Basefloor != 0 : 
+                print(f"price is {FrameRatesM5.iloc[-2]['close']} and Under floor {PublicVarible.Basefloor} ")
+                if current_time - PublicVarible.last_execution_time >= 300:   
+                   Text = f"price is {FrameRatesM5.iloc[-2]['close']} and Under floor {PublicVarible.Basefloor}  "
+                   PromptToTelegram(Text)  
+                   PublicVarible.last_execution_time = current_time  
+#Sell
                 sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
                 if sell_positions_with_open_prices:
                   for ticket, open_price in sell_positions_with_open_prices.items():
@@ -163,91 +224,12 @@ class SupplyDemandStrategyV9():
                     for position_info in positions:
                      if position_info.symbol == self.Pair :
                         Botdashboard(54 , self.Pair)
-                        return 
-                BaseLow = self.FindSwingLow(FrameRatesM5, SymbolInfo.point,0,0,0)
-                if BuyAllow == 1 : Botdashboard(63 , self.Pair)
-                else : Botdashboard(64 , self.Pair)
-                SymbolInfo = MT5.symbol_info(self.Pair)
+                        return
+
+
                 
-                if (BaseLow == -1) and BuyAllow :                                                        # ######## شرط اصلی پیدا کردن نقطه ورود به معامله ########## (BaseLow == 1 or BaseLow == 2 or BaseLow == 3 or BaseLow == 4 or BaseLow == 5) and RSIslope > 0.5  and StochRSI_k2 < 20  
-                   write_trade_info_to_file(self.Pair ,"Buy" , BaseLow, 0, 0, 0 , 0 , 0 , DirectionM15 )
-                   EntryPrice = SymbolInfo.ask                                                           ######### قیمت  ورود به معامله ##########
-                   Volume = self.CalcLotSize(Point= SymbolInfo.point)                                    #########  محاسه حجم ورود به معامله ##########
-                   TP1 = EntryPrice - (abs(FrameRatesM5.iloc[-3]['close'] - EntryPrice)* 2) 
-                   SL = EntryPrice + (EntryPrice - TP1)
-                   if time.time() - PublicVarible.last_message_time1 >= 5 :
-                       PublicVarible.last_message_time1 = time.time()
-                       Text = "🔻 V9 -M5-Find Spike\n"
-                       Text += f"{SymbolInfo.name}\n"
-                       Text += "Buy\n"
-                       Text += f"Volume: {str(Volume)}\n"
-                       Text += f"Price: {str(EntryPrice)}\n"
-                       Text += f"S/L: {str(SL)}\n"
-                       Text += f"T/P: {str(TP1)}"
-                       PromptToTelegram(Text)
-                       print(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                       Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                       OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= f"V9 - M5 ") #########  ارسال اطلاعات فروش به تابع  ##########    
-                      
+      
 ########################################################################################################
-      def FindSwingHigh(self, FrameRates, Point,M5RSI,StochRSI_k2,RSIslope):
-          SymbolInfo = MT5.symbol_info(self.Pair)
-          Base = 0
-          O1 = FrameRates.iloc[-2]['open']
-          C1 = FrameRates.iloc[-2]['close']
-          L1 = FrameRates.iloc[-2]['low']
-          H1 = FrameRates.iloc[-2]['high']
-          O2 = FrameRates.iloc[-3]['open']
-          H2 = FrameRates.iloc[-3]['high']
-          L2 = FrameRates.iloc[-3]['low']
-          C2 = FrameRates.iloc[-3]['close']
-          O3 = FrameRates.iloc[-4]['open']
-          C3 = FrameRates.iloc[-4]['close']
-          
-          if C3 >= O3 and C1 < O1 and ((O1 - C1) > 40 * SymbolInfo.point) and C2 < O2 and ((O2 - C2)> 30 * SymbolInfo.point) and L1 < L2 and H1 < H2 and (O1 - C1) > (O2 - C2) : 
-             
-             #if time.time() - PublicVarible.last_message_time >= 5 :
-             #    PublicVarible.last_message_time = time.time()
-             #    PromptToTelegram(f"الگوی سر و شانه نزولی پیدا کردم  ...{SymbolInfo.name} مقدار RSI : {round(M5RSI,2)}  مقدار استوک {round(StochRSI_k2,2)} شیب خط RSI: {round(RSIslope,2)} ")
-             print("Bearish Leg found ...")
-             Base = -1 
-
-          return (Base)
-
-########################################################################################################
-      def FindSwingLow(self, FrameRates, Point,M5RSI,StochRSI_k2,RSIslope):
-          SymbolInfo = MT5.symbol_info(self.Pair)
-          Base = 0
-          O1 = FrameRates.iloc[-2]['open']
-          C1 = FrameRates.iloc[-2]['close']
-          L1 = FrameRates.iloc[-2]['low']
-          H1 = FrameRates.iloc[-2]['high']
-          O2 = FrameRates.iloc[-3]['open']
-          H2 = FrameRates.iloc[-3]['high']
-          L2 = FrameRates.iloc[-3]['low']
-          C2 = FrameRates.iloc[-3]['close']
-          O3 = FrameRates.iloc[-4]['open']
-          C3 = FrameRates.iloc[-4]['close']
-
-          if C3 <= O3 and  C1 > O1 and ((C1 - O1) > 40 * SymbolInfo.point) and C2 > O2 and ((C2 - O2)> 30 * SymbolInfo.point) and L1 > L2 and H1 > H2 and (C1 - O1) > (C2 - O2): 
-             #if time.time() - PublicVarible.last_message_time >= 5 :
-             #   PublicVarible.last_message_time = time.time()
-             #   #PromptToTelegram(f"الگوی سر و شانه صعودی پیدا کردم  ...{SymbolInfo.name} مقدار RSI : {round(M5RSI,2)} مقدار استوک :{round(StochRSI_k2,2)} شیب خط RSI: {round(RSIslope,2)} ")
-             print("Bullish Leg found ...")
-             Base = 1 
-              
-          return (Base)
-
-########################################################################################################
-      def CalcLotSize(self,Point):
-        Volume = GetBalance() // 300 * 0.01
-        if  Volume < 0.01 : 
-            Volume = 0.01
-        return Volume
-########################################################################################################
-def CloseAllPosi(Pair:str):
-     #MT5.Close(symbol= Pair)
-   #  Prompt(f"Market trend is changed and All orders successfully closed, Balance: {str(GetBalance())}$")
-   #  PromptToTelegram(Text= f"Market trend is changed and All orders successfully closed" + "\n" + f"💰 Balance: {str(GetBalance())}$")
-     return True
-########################################################################################################
+def CalcLotSize():
+    balance = GetBalance()
+    return math.sqrt(balance) / 500

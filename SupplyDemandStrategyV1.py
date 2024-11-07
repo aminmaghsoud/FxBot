@@ -72,27 +72,44 @@ class SupplyDemandStrategyV1():
              Sell_pin = 0
              Buy_pin = 0
 
-             if C2 < O2 and (abs(L2-C2)/SymbolInfo.point) < ((abs(C2-O2)/SymbolInfo.point)*0.2) and C2 < L3 : 
+             if C2 < O2 and (abs(L2-C2)/SymbolInfo.point) < ((abs(C2-O2)/SymbolInfo.point)*0.5) and C2 < L3 : 
+               print("Key Bar Founded ...")
                for i in range(-3 , -5 , -1) : 
                    if FrameRatesM5.iloc[i]['close'] > FrameRatesM5.iloc[i]['open'] :
                         Up_shadow = abs(FrameRatesM5.iloc[i]['high'] - FrameRatesM5.iloc[i]['close']) / SymbolInfo.point
                    else : 
                         Up_shadow = abs(FrameRatesM5.iloc[i]['high'] - FrameRatesM5.iloc[i]['open'] ) / SymbolInfo.point
+                   
+                   if FrameRatesM5.iloc[i]['close'] > FrameRatesM5.iloc[i]['open'] :
+                        Down_shadow = abs(FrameRatesM5.iloc[i]['low'] - FrameRatesM5.iloc[i]['open']) / SymbolInfo.point
+                   else : 
+                        Down_shadow = abs(FrameRatesM5.iloc[i]['low'] - FrameRatesM5.iloc[i]['close'] ) / SymbolInfo.point
+
                    body = abs(FrameRatesM5.iloc[i]['close'] - FrameRatesM5.iloc[i]['open']) / SymbolInfo.point
-                   if (Up_shadow * 0.3) > body and FrameRatesM5.iloc[-2]['close'] < FrameRatesM5.iloc[i]['low'] : 
+
+                   if (Up_shadow * 0.3) > body and FrameRatesM5.iloc[-2]['close'] < FrameRatesM5.iloc[i]['low']  and (Up_shadow * 0.30) > Down_shadow  : 
                        Sell_pin = 1
-                       print("Swing High Founded ...")
+                       print("Signal Bar Founded ...")
                        break
-             elif C2 > O2 and (abs(H2-C2)/SymbolInfo.point) < ((abs(C2-O2)/SymbolInfo.point)*0.2) and C2 > H3 : 
+                   
+             elif C2 > O2 and (abs(H2-C2)/SymbolInfo.point) < ((abs(C2-O2)/SymbolInfo.point)*0.5) and C2 > H3 : 
+               print("Key Bar Founded ...")
                for i in range(-3 , -5 , -1) : 
                    if FrameRatesM5.iloc[i]['close'] > FrameRatesM5.iloc[i]['open'] :
-                        Down_shadow = abs(FrameRatesM5.iloc[i]['low'] - FrameRatesM5.iloc[i]['close']) / SymbolInfo.point
+                        Down_shadow = abs(FrameRatesM5.iloc[i]['low'] - FrameRatesM5.iloc[i]['open']) / SymbolInfo.point
                    else : 
-                        Down_shadow = abs(FrameRatesM5.iloc[i]['low'] - FrameRatesM5.iloc[i]['open'] ) / SymbolInfo.point
+                        Down_shadow = abs(FrameRatesM5.iloc[i]['low'] - FrameRatesM5.iloc[i]['close'] ) / SymbolInfo.point
+
+                   if FrameRatesM5.iloc[i]['close'] > FrameRatesM5.iloc[i]['open'] :
+                        Up_shadow = abs(FrameRatesM5.iloc[i]['high'] - FrameRatesM5.iloc[i]['close']) / SymbolInfo.point
+                   else : 
+                        Up_shadow = abs(FrameRatesM5.iloc[i]['high'] - FrameRatesM5.iloc[i]['open'] ) / SymbolInfo.point
+                   
+
                    body = abs(FrameRatesM5.iloc[i]['close'] - FrameRatesM5.iloc[i]['open']) / SymbolInfo.point
-                   if (Down_shadow * 0.3) > body and FrameRatesM5.iloc[-2]['close'] > FrameRatesM5.iloc[i]['high']: 
+                   if (Down_shadow * 0.3) > body and FrameRatesM5.iloc[-2]['close'] > FrameRatesM5.iloc[i]['high'] and (Down_shadow * 0.30) > Up_shadow : 
                        Buy_pin = 1
-                       print("Swing Low Founded ...")
+                       print("Signal Bar Founded ...")
                        break
              else : 
                    print("Swing Not Found and Return")

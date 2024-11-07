@@ -1,21 +1,21 @@
-﻿from math import floor
-from mimetypes import init
-from multiprocessing.pool import CLOSE
-from pickle import NONE
-from xmlrpc.client import DateTime
-from matplotlib.colors import Normalize
+﻿#from math import floor
+#from mimetypes import init
+#from multiprocessing.pool import CLOSE
+#from pickle import NONE
+#from xmlrpc.client import DateTime
+#from matplotlib.colors import Normalize
 import pandas_ta as PTA
 import pandas as PD
-from scipy.signal import normalize
+#from scipy.signal import normalize
 from Utility import *
 from Trade import *
-import PublicVarible
+#import PublicVarible
 import time
 import MetaTrader5 as MT5
 from colorama import init, Fore, Back, Style
-import ta
-import numpy as np
-from datetime import datetime
+#import ta
+#import numpy as np
+#from datetime import datetime
 
 
 class SupplyDemandStrategyV2():
@@ -28,7 +28,7 @@ class SupplyDemandStrategyV2():
 ##############################################################################################################################################################
       def Main(self):
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ StrategyV2 M5 Spike --------------")
-          CloseAllPosition(self.Pair)
+          """CloseAllPosition(self.Pair)
           
           GreenPair  = ['EURUSDb' , 'EURCHFb' , 'EURCADb' , 'EURGBPb' , 'USDCHFb' ,'USDJPYb' ]
           YellowPair	= ['AUDCADb' , 'NZDUSDb' , 'AUDNZDb' , 'EURAUDb' , 'CADJPYb' ,  'AUDUSDb'] 
@@ -75,7 +75,7 @@ class SupplyDemandStrategyV2():
                   if position_info.symbol == self.Pair :
                      Botdashboard(53 , self.Pair)
                      return 
-                  
+                  """
           high_low_diff = 0 
           SymbolInfo = MT5.symbol_info(self.Pair)
           if SymbolInfo is not None :
@@ -97,7 +97,7 @@ class SupplyDemandStrategyV2():
                    
              
 ########################################################################################### بررسی شروط اولیه  #########################################################################################################
-             current_datetime = datetime.now()
+             """current_datetime = datetime.now()
              LastCandle = FrameRatesM15.iloc[-1]
              minutes_to_exclude = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
 
@@ -107,7 +107,7 @@ class SupplyDemandStrategyV2():
              if ((current_datetime.hour > 20 and current_datetime.minute == 0)) : # or ((current_datetime.weekday() == 4 and current_datetime.hour >= 21  and current_datetime.minute == 0)) : 
                 PublicVarible.CanOpenOrder = False  
              if current_datetime.hour == 2 and current_datetime.minute in minutes_to_exclude :
-                PublicVarible.CanOpenOrder = False  
+                PublicVarible.CanOpenOrder = False  """
 ########################################################################################### دریافت اطلاعات تایم فریم ها و محاسبه اندیکاتور #########################################################################################################
              adx = PTA.adx( high= FrameRatesM15['high'], low= FrameRatesM15['low'], close= FrameRatesM15['close'], length= 14 )
              adx_Signal = adx.iloc[-2][0]
@@ -223,20 +223,20 @@ class SupplyDemandStrategyV2():
                       elif Market_Direction == -1 :
                             Text +=f"معامله : فروش (مدیریت شود) / SELL  \n" 
                       else : Text += f" روندها غیر همجهت \n" 
-                      Text += f"لگ نزولی ... 🔴 \n"
+                      Text += f" M5 لگ نزولی ... 🔴 \n"
                       Text += f"ارتفاع لگ: {round(high_low_diff,2) / 10 } pip\n"
                       Text += f"ارتفاع رنج: {round(abs(Basefloor - Baseroof) / (SymbolInfo.point) /10 , 2)} pip \n"
                       Text += f"ظرفیت سود: {round((round(high_low_diff,2) - (abs(Basefloor - Baseroof) / (SymbolInfo.point)) )/10 , 2)} pip \n"
                       Text += f"تعداد کندل: {count}\n"
-                      Text += f"ADX: {round(adx_Signal , 2)}\n"
-                      Text += f"CCI: {round(cci_Signal , 2)}\n"
+                      #Text += f"ADX: {round(adx_Signal , 2)}\n"
+                      #Text += f"CCI: {round(cci_Signal , 2)}\n"
                       if    Market_Direction == 1 : Text += f"روند مارکت : Up"  
                       elif  Market_Direction == -1 : Text += f"روند مارکت : Down"  
                       else : Text += f"روند مارکت : No Direc..."  
                       PromptToTelegram(Text)
                       #shape = draw_rectangle(self.Pair,Baseroof,Basefloor)
                       
-                   if Market_Direction == -1 and cci_Signal > 90  : 
+                   """if Market_Direction == -1 and cci_Signal > 90  : 
                       
                       EntryPrice = SymbolInfo.ask                                                                                        ######### قیمت  ورود به معامله ##########
                       SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
@@ -264,7 +264,7 @@ class SupplyDemandStrategyV2():
                       write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )
                       print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                       Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                      OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
+                      OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")"""
 
 
              ## لگ صعودی
@@ -320,20 +320,20 @@ class SupplyDemandStrategyV2():
                       elif Market_Direction == -1 :
                             Text +=f"معامله : فروش (مدیریت شود) / SELL  \n"  
                       else : Text += f" روندها غیر همجهت \n" 
-                      Text += f"لگ صعودی ... 🟢 \n"
+                      Text += f"M5 لگ صعودی ... 🟢 \n"
                       Text += f"ارتفاع لگ: {round(high_low_diff,2) / 10 } pip\n"
                       Text += f"ارتفاع رنج: {round(abs(Basefloor - Baseroof) / (SymbolInfo.point) /10 , 2)} pip \n"
                       Text += f"ظرفیت سود: {round((round(high_low_diff,2) - (abs(Basefloor - Baseroof) / (SymbolInfo.point)) )/10 , 2)} pip \n"
                       Text += f"تعداد کندل: {count}\n"
-                      Text += f"ADX: {round(adx_Signal , 2)}\n"
-                      Text += f"CCI: {round(cci_Signal , 2)}\n"
+                      #Text += f"ADX: {round(adx_Signal , 2)}\n"
+                      #Text += f"CCI: {round(cci_Signal , 2)}\n"
                       if    Market_Direction == 1 : Text += f"روند مارکت : Up"  
                       elif  Market_Direction == -1 : Text += f"روند مارکت : Down"  
                       else : Text += f"روند مارکت : No Direc..."  
                       PromptToTelegram(Text)
                       #shape = draw_rectangle(self.Pair,Baseroof,Basefloor)
                    
-                   if Market_Direction == -1 and cci_Signal > -90 :
+                   """if Market_Direction == -1 and cci_Signal > -90 :
                        EntryPrice = SymbolInfo.ask                                                                                        ######### قیمت  ورود به معامله ##########
                        SL = PriceST1 + ( SymbolInfo.point * 50)                                                                               #########  تعیین حدضرر معامله #########
                        Balance = GetBalance()
@@ -359,7 +359,7 @@ class SupplyDemandStrategyV2():
                        write_trade_info_to_file(self.Pair ,"Buy" , EntryPrice, SL, TP1, Direction )
                        print(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                        Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                       OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5") 
+                       OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5") """
                        
 ########################################################################################################
 def CalcLotSize():

@@ -55,7 +55,7 @@ BrokerTimeZone = pytz.timezone("Asia/Istanbul")  #Etc/GMT-3
 Executor = concurrent.futures.ThreadPoolExecutor()
 TelegramToken = ""
 TelegramBot = None
-TelegramChatId = [152284556 , 388239785 , 98785822]
+TelegramChatId = [152284556 , 388239785 , 98785822 , 1864188026]
 LastTelegramUpdateId = -1
 # آخرین زمانی که ربات اعلام آماده بودن کرده است
 LastDatetimeRobotIsReady = None
@@ -74,8 +74,12 @@ LastSellPrice = 0
 MFIover = 0 
 firstBuy = 100
 firstSell = 100
-last_message_time = time.time()
-last_message_time1 = time.time()
+last_message_time = 0
+last_message_time1 = 0
+last_execution_time = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
+Basefloor = 0.0
+Baseroof = 0.0
+
 risk = 2
 current_datetime = datetime.now()
 if  current_datetime.weekday() in [1 , 3  , 4]  : 
