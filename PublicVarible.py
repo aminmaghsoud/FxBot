@@ -77,6 +77,8 @@ firstSell = 100
 last_message_time = 0
 last_message_time1 = 0
 last_execution_time = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
+last_execution_time1 = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
+
 Basefloor = 0.0
 Baseroof = 0.0
 

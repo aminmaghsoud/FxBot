@@ -132,15 +132,16 @@ class SupplyDemandStrategyV9():
              if count > 1 : 
                 high_low_diff = round((abs( FrameRatesM5['low'].iloc[current_index : -2 ].min() - FrameRatesM5.iloc[current_index]['high'])) / (SymbolInfo.point),2)
                 if high_low_diff < (200 * ATR_Value * 0.9) : return
+                if round(round(abs(FrameRatesM5.iloc[-2]['high'] - FrameRatesM5['low'].iloc[current_index : -2 ].min()) / (SymbolInfo.point) / 10, 2) / high_low_diff * 1000,1) > 50 : return
+
                 PublicVarible.Basefloor = FrameRatesM5['low'].iloc[current_index : -2 ].min()
                 PublicVarible.Baseroof = FrameRatesM5.iloc[-2]['high']
                 range_height = round(abs(PublicVarible.Baseroof - PublicVarible.Basefloor) / (SymbolInfo.point) / 10, 2)
-                if round(range_height / high_low_diff * 1000,1) > 50 : return
                 print(f"Down high_low_diff: {high_low_diff}  and  PublicVarible.Baseroof: {PublicVarible.Baseroof}  and  PublicVarible.Basefloor: {PublicVarible.Basefloor} and  Range arraye : {abs(PublicVarible.Basefloor - PublicVarible.Baseroof) / (SymbolInfo.point)} \n")
                 current_time = time.time()
                 if current_time - PublicVarible.last_execution_time >= 300:  
                    Text = f"{self.Pair}\n"
-                   Text += f"M5 لگ نزولی و رنج# ... 🔴 \n"
+                   Text += f"M5️⃣ لگ نزولی و رنج# ... 🔴🔴 \n"
                    Text += f"ارتفاع لگ: {round(high_low_diff, 2) / 10} pip\n"
                    Text += f"تعداد کندل: {count}\n"
                    Text += f"سقف: {PublicVarible.Baseroof} \n"
@@ -173,15 +174,16 @@ class SupplyDemandStrategyV9():
              if count > 1 : 
                 high_low_diff = round((abs(FrameRatesM5.iloc[current_index : -2]['high'].max() - FrameRatesM5.iloc[current_index]['low'])) / (SymbolInfo.point) , 2)
                 if high_low_diff < (200 * ATR_Value * 0.9) : return
+                if round((round(abs((FrameRatesM5.iloc[current_index : -2]['high'].max()) - ( FrameRatesM5.iloc[-2]['low'])) / (SymbolInfo.point) / 10, 2)) / high_low_diff * 1000,1) > 50 : return
+
                 PublicVarible.Baseroof = FrameRatesM5.iloc[current_index : -2]['high'].max()
                 PublicVarible.Basefloor = FrameRatesM5.iloc[-2]['low']
                 range_height = round(abs(PublicVarible.Baseroof - PublicVarible.Basefloor) / (SymbolInfo.point) / 10, 2)
-                if round(range_height / high_low_diff * 1000,1) > 50 : return
                 print(f"Up high_low_diff: {high_low_diff}  and  PublicVarible.Baseroof: {PublicVarible.Baseroof}  and  PublicVarible.Basefloor: {PublicVarible.Basefloor} and  Range arraye : {abs(PublicVarible.Basefloor - PublicVarible.Baseroof) / (SymbolInfo.point)} \n")
                 current_time = time.time()
                 if current_time - PublicVarible.last_execution_time >= 300:  
                    Text = f"{self.Pair}\n"
-                   Text += f"M5 لگ صعودی و رنج# ... 🟢 \n"
+                   Text += f"M5️⃣ لگ صعودی و رنج# ... 🟢🟢 \n"
                    Text += f"ارتفاع لگ: {round(high_low_diff, 2) / 10} pip\n"
                    Text += f"تعداد کندل: {count}\n"
                    Text += f"سقف: {PublicVarible.Baseroof} \n"
@@ -198,7 +200,7 @@ class SupplyDemandStrategyV9():
                 print(f"price is {FrameRatesM5.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof} ")
                 if current_time - PublicVarible.last_execution_time >= 300:   
                    Text = f"price is {FrameRatesM5.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof} "
-                   PromptToTelegram(Text)  
+                   #PromptToTelegram(Text)  
                    PublicVarible.last_execution_time = current_time  
 #Buy
                 buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
@@ -214,7 +216,7 @@ class SupplyDemandStrategyV9():
                 print(f"price is {FrameRatesM5.iloc[-2]['close']} and Under floor {PublicVarible.Basefloor} ")
                 if current_time - PublicVarible.last_execution_time >= 300:   
                    Text = f"price is {FrameRatesM5.iloc[-2]['close']} and Under floor {PublicVarible.Basefloor}  "
-                   PromptToTelegram(Text)  
+                   #PromptToTelegram(Text)  
                    PublicVarible.last_execution_time = current_time  
 #Sell
                 sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
