@@ -79,7 +79,7 @@ class SupplyDemandStrategyV3():
                    Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff1 * 1000,1) } % \n"
                    Text += f"ارتفاع رنج: {range_height} pip \n"
                    Text += f"حجم مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
-                   Text += f"زمان کندل: {current_datetime1.hour}:{current_datetime1.minute}"
+                   Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}"
                    PromptToTelegram(Text)
                    PublicVarible.last_execution_time1 = current_time1
 
@@ -121,7 +121,7 @@ class SupplyDemandStrategyV3():
                    Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff1 * 1000,1) } % \n"
                    Text += f"ارتفاع رنج: {range_height} pip \n"
                    Text += f"حجم مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
-                   Text += f"زمان کندل: {current_datetime1.hour}:{current_datetime1.minute}"
+                   Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}"
 
                    PromptToTelegram(Text)
                    PublicVarible.last_execution_time1 = current_time1
