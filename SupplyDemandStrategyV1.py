@@ -63,7 +63,7 @@ class SupplyDemandStrategyV1():
              H2 = FrameRatesM5.iloc[-2]['high']
              L2 = FrameRatesM5.iloc[-2]['low']
              H3 = FrameRatesM5.iloc[-3]['high']
-             L3 = FrameRatesM5.iloc[-3]['low']
+             L3 = FrameRatesM5.iloc[-3]['low'] 
              
              if abs(C2 - O2) / SymbolInfo.point < 15 :
                 print("Candle is small ...")

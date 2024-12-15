@@ -61,7 +61,7 @@ class SupplyDemandStrategyV3():
                            break
              if count1 > 1 : 
                 high_low_diff1 = round((abs( FrameRatesH1['low'].iloc[current_index1 : -2 ].min() - FrameRatesH1.iloc[current_index1]['high'])) / (SymbolInfo.point),2)
-                if high_low_diff1 < (1500 * ATR_Value * 0.9) : return
+                if high_low_diff1 < (300 * ATR_Value * 0.9) : return
                 if round(round(abs(FrameRatesH1.iloc[-2]['high'] - FrameRatesH1['low'].iloc[current_index1 : -2 ].min()) / (SymbolInfo.point) / 10, 2) / high_low_diff1 * 1000,1) > 50 : return
 
                 PublicVarible.Basefloor = FrameRatesH1['low'].iloc[current_index1 : -2 ].min()
@@ -103,7 +103,7 @@ class SupplyDemandStrategyV3():
                            break
              if count1 > 1 : 
                 high_low_diff1 = round((abs(FrameRatesH1.iloc[current_index1 : -2]['high'].max() - FrameRatesH1.iloc[current_index1]['low'])) / (SymbolInfo.point) , 2)
-                if high_low_diff1 < (1500 * ATR_Value * 0.9) : return
+                if high_low_diff1 < (300 * ATR_Value * 0.9) : return
                 if round((round(abs((FrameRatesH1.iloc[current_index1 : -2]['high'].max()) - ( FrameRatesH1.iloc[-2]['low'])) / (SymbolInfo.point) / 10, 2)) / high_low_diff1 * 1000,1) > 50 : return
 
                 PublicVarible.Baseroof = FrameRatesH1.iloc[current_index1 : -2]['high'].max()
