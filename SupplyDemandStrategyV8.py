@@ -4,7 +4,7 @@ from Trade import *
 import time
 import MetaTrader5 as MT5
 from colorama import init, Fore, Back, Style
-
+import PublicVarible
 class SupplyDemandStrategyV8():
       Pair = ""
       TimeFrame = MT5.TIMEFRAME_M15
@@ -130,8 +130,9 @@ class SupplyDemandStrategyV8():
                 print(f"price is {FrameRatesM15.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof} ")
                 if current_time1 - PublicVarible.H1last_execution_time15 >= 300:   
                    Text = f"price is {FrameRatesM15.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof} "
-                   #PromptToTelegram(Text)  
+                   PromptToTelegram(Text)  
                    PublicVarible.H1last_execution_time15 = current_time1  
+                   PublicVarible.Basefloor = PublicVarible.Baseroof = 0
 #Buy
                 buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
                 if buy_positions_with_open_prices:
@@ -147,7 +148,8 @@ class SupplyDemandStrategyV8():
                 if current_time1 - PublicVarible.H1last_execution_time15 >= 300:   
                    Text = f"price is {FrameRatesM15.iloc[-2]['close']} and Under floor {PublicVarible.Basefloor}  "
                    #PromptToTelegram(Text)  
-                   PublicVarible.H1last_execution_time15 = current_time1  
+                   PublicVarible.H1last_execution_time15 = current_time1
+                   PublicVarible.Basefloor = PublicVarible.Baseroof = 0
 #Sell
                 sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
                 if sell_positions_with_open_prices:
@@ -156,10 +158,10 @@ class SupplyDemandStrategyV8():
                     for position_info in positions:
                      if position_info.symbol == self.Pair :
                         Botdashboard(54 , self.Pair)
-                        return
+                        return"""
 
 
-                """
+                
       
 ########################################################################################################
 def CalcLotSize():

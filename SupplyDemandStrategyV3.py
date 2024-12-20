@@ -4,7 +4,7 @@ from Trade import *
 import time
 import MetaTrader5 as MT5
 from colorama import init, Fore, Back, Style
-
+import PublicVarible
 class SupplyDemandStrategyV3():
       Pair = ""
       TimeFrame = MT5.TIMEFRAME_H1

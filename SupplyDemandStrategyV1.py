@@ -16,6 +16,7 @@ from colorama import init, Fore, Back, Style
 import ta
 #import numpy as np
 from datetime import datetime
+import PublicVarible
 
 
 class SupplyDemandStrategyV1():

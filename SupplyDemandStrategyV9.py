@@ -4,7 +4,7 @@ from Trade import *
 import time
 import MetaTrader5 as MT5
 from colorama import init, Fore, Back, Style
-
+import PublicVarible
 class SupplyDemandStrategyV9():
       Pair = ""
       TimeFrame = MT5.TIMEFRAME_M5
@@ -148,7 +148,8 @@ class SupplyDemandStrategyV9():
                    Text += f"کف : {PublicVarible.Basefloor} \n"
                    Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff * 1000,1) } % \n"
                    Text += f"ارتفاع رنج: {range_height} pip \n"
-                   Text += f"حجم مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
+                   Text += f"حجم کل مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
+                   Text += f"حجم پله : {round(Balace * 0.0015 / range_height / 3 , 2)} \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}"
                    PromptToTelegram(Text)
                    PublicVarible.last_execution_time = current_time
@@ -190,7 +191,8 @@ class SupplyDemandStrategyV9():
                    Text += f"کف : {PublicVarible.Basefloor} \n"
                    Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff * 1000,1) } % \n"
                    Text += f"ارتفاع رنج: {range_height} pip \n"
-                   Text += f"حجم مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
+                   Text += f"حجم کل مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
+                   Text += f"حجم پله : {round(Balace * 0.0015 / range_height / 3 , 2)} \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}"
 
                    PromptToTelegram(Text)
@@ -199,9 +201,10 @@ class SupplyDemandStrategyV9():
              if FrameRatesM5.iloc[-2]['close'] > PublicVarible.Baseroof and PublicVarible.Baseroof != 0 : 
                 print(f"price is {FrameRatesM5.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof} ")
                 if current_time - PublicVarible.last_execution_time >= 300:   
-                   Text = f"price is {FrameRatesM5.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof} "
-                   #PromptToTelegram(Text)  
-                   PublicVarible.last_execution_time = current_time  
+                   Text = f"price is {FrameRatesM5.iloc[-2]['close']} and 🔺Upper #Roof {PublicVarible.Baseroof} "
+                   PromptToTelegram(Text)  
+                   PublicVarible.last_execution_time = current_time 
+                   PublicVarible.Baseroof = PublicVarible.Basefloor = 0  
 #Buy
                 buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
                 if buy_positions_with_open_prices:
@@ -215,9 +218,10 @@ class SupplyDemandStrategyV9():
              if FrameRatesM5.iloc[-2]['close'] < PublicVarible.Basefloor and PublicVarible.Basefloor != 0 : 
                 print(f"price is {FrameRatesM5.iloc[-2]['close']} and Under floor {PublicVarible.Basefloor} ")
                 if current_time - PublicVarible.last_execution_time >= 300:   
-                   Text = f"price is {FrameRatesM5.iloc[-2]['close']} and Under floor {PublicVarible.Basefloor}  "
-                   #PromptToTelegram(Text)  
+                   Text = f"price is {FrameRatesM5.iloc[-2]['close']} and 🔻Under #floor {PublicVarible.Basefloor}  "
+                   PromptToTelegram(Text)  
                    PublicVarible.last_execution_time = current_time  
+                   PublicVarible.Baseroof = PublicVarible.Basefloor = 0  
 #Sell
                 sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
                 if sell_positions_with_open_prices:

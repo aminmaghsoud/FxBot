@@ -6,7 +6,7 @@ from colorama import init, Fore, Back, Style
 from datetime import datetime
 import PublicVarible
 import pandas_ta as PTA
-
+import PublicVarible
 
 class SupplyDemandStrategyV4():
       Pair = ""

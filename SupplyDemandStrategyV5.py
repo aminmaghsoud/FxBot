@@ -9,7 +9,7 @@ from Trade import *
 import PublicVarible
 from ZigzagIndicator2 import *
 import MetaTrader5 as MT5
-
+import PublicVarible
 
 class SupplyDemandStrategyV5():
       Pair = ""
