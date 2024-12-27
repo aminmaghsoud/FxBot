@@ -7,7 +7,7 @@ from colorama import init, Fore, Back, Style
 import PublicVarible
 class SupplyDemandStrategyV7():
       Pair = ""
-      TimeFrame = MT5.TIMEFRAME_M5
+      TimeFrame = MT5.TIMEFRAME_M1
 ########################################################################################################
       def __init__(self, Pair):
           self.Pair = Pair
@@ -19,7 +19,7 @@ class SupplyDemandStrategyV7():
           high_low_diff = 0 
           SymbolInfo = MT5.symbol_info(self.Pair)
           if SymbolInfo is not None :
-             RatesM1 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 250)
+             RatesM1 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M1, 0, 250)
              if RatesM1 is not None:
                 FrameRatesM1 = PD.DataFrame(RatesM1)
                 if not FrameRatesM1.empty: 
