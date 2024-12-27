@@ -117,14 +117,14 @@ class SupplyDemandStrategyV9():
              Text = None
              current_time = time.time()
 
-             if (FrameRatesM5.iloc[-2]['high'] > FrameRatesM5.iloc[-3]['high']) : #or (FrameRatesM5.iloc[-2]['low'] > FrameRatesM5.iloc[-3]['low']) : 
+             if (FrameRatesM5.iloc[-2]['high'] > FrameRatesM5.iloc[-3]['high']) and (FrameRatesM5.iloc[-2]['low'] > FrameRatesM5.iloc[-3]['low']) : 
                    while current_index > end_index : 
                        Now_c_H = FrameRatesM5.iloc[current_index]['high']
                        Old_c_H = FrameRatesM5.iloc[current_index - 1]['high'] 
                        Now_c_L = FrameRatesM5.iloc[current_index]['low']
                        Old_c_L = FrameRatesM5.iloc[current_index - 1]['low']
                        
-                       if Now_c_H < Old_c_H : #and Now_c_L < Old_c_L :
+                       if Now_c_H < Old_c_H and Now_c_L < Old_c_L :
                           count += 1 
                           current_index -= 1
                        else : 
@@ -134,22 +134,22 @@ class SupplyDemandStrategyV9():
                 if high_low_diff < (200 * ATR_Value * 0.9) : return
                 if round(round(abs(FrameRatesM5.iloc[-2]['high'] - FrameRatesM5['low'].iloc[current_index : -2 ].min()) / (SymbolInfo.point) / 10, 2) / high_low_diff * 1000,1) > 50 : return
 
-                PublicVarible.Basefloor = FrameRatesM5['low'].iloc[current_index : -2 ].min()
-                PublicVarible.Baseroof = FrameRatesM5.iloc[-2]['high']
-                range_height = round(abs(PublicVarible.Baseroof - PublicVarible.Basefloor) / (SymbolInfo.point) / 10, 2)
-                print(f"Down high_low_diff: {high_low_diff}  and  PublicVarible.Baseroof: {PublicVarible.Baseroof}  and  PublicVarible.Basefloor: {PublicVarible.Basefloor} and  Range arraye : {abs(PublicVarible.Basefloor - PublicVarible.Baseroof) / (SymbolInfo.point)} \n")
+                PublicVarible.Basefloor5 = FrameRatesM5['low'].iloc[current_index : -2 ].min()
+                PublicVarible.Baseroof5 = FrameRatesM5.iloc[-2]['high']
+                range_height = round(abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)
+                print(f"Down high_low_diff: {high_low_diff}  and  PublicVarible.Baseroof5: {PublicVarible.Baseroof5}  and  PublicVarible.Basefloor5: {PublicVarible.Basefloor5} and  Range arraye : {abs(PublicVarible.Basefloor5 - PublicVarible.Baseroof5) / (SymbolInfo.point)} \n")
                 current_time = time.time()
                 if current_time - PublicVarible.last_execution_time >= 300:  
                    Text = f"{self.Pair}\n"
                    Text += f"M5️⃣ لگ نزولی و رنج# ... 🔴🔴 \n"
                    Text += f"ارتفاع لگ: {round(high_low_diff, 2) / 10} pip\n"
                    Text += f"تعداد کندل: {count}\n"
-                   Text += f"سقف: {PublicVarible.Baseroof} \n"
-                   Text += f"کف : {PublicVarible.Basefloor} \n"
+                   Text += f"سقف: {PublicVarible.Baseroof5} \n"
+                   Text += f"کف : {PublicVarible.Basefloor5} \n"
                    Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff * 1000,1) } % \n"
                    Text += f"ارتفاع رنج: {range_height} pip \n"
                    Text += f"حجم کل مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
-                   Text += f"حجم پله : {round(Balace * 0.0015 / range_height / 3 , 2)} \n"
+                   Text += f"حجم پله : {round(Balace * 0.0015 / range_height / 3 , 2)} \n"    
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}"
                    PromptToTelegram(Text)
                    PublicVarible.last_execution_time = current_time
@@ -161,13 +161,13 @@ class SupplyDemandStrategyV9():
              count = 1
              high_low_diff = 0.0
              Text = None       
-             if (FrameRatesM5.iloc[-2]['low'] < FrameRatesM5.iloc[-3]['low']) : #or (FrameRatesM5.iloc[-2]['high'] < FrameRatesM5.iloc[-3]['high']) :
+             if (FrameRatesM5.iloc[-2]['low'] < FrameRatesM5.iloc[-3]['low']) and (FrameRatesM5.iloc[-2]['high'] < FrameRatesM5.iloc[-3]['high']) :
                    while current_index > end_index : 
                        Now_c_H = FrameRatesM5.iloc[current_index]['high']
                        Old_c_H = FrameRatesM5.iloc[current_index - 1]['high'] 
                        Now_c_L = FrameRatesM5.iloc[current_index]['low']
                        Old_c_L = FrameRatesM5.iloc[current_index - 1]['low']
-                       if  Now_c_L > Old_c_L :#and Now_c_H > Old_c_H :
+                       if  Now_c_L > Old_c_L and Now_c_H > Old_c_H :
                           count += 1 
                           current_index -= 1
                        else : 
@@ -177,18 +177,18 @@ class SupplyDemandStrategyV9():
                 if high_low_diff < (200 * ATR_Value * 0.9) : return
                 if round((round(abs((FrameRatesM5.iloc[current_index : -2]['high'].max()) - ( FrameRatesM5.iloc[-2]['low'])) / (SymbolInfo.point) / 10, 2)) / high_low_diff * 1000,1) > 50 : return
 
-                PublicVarible.Baseroof = FrameRatesM5.iloc[current_index : -2]['high'].max()
-                PublicVarible.Basefloor = FrameRatesM5.iloc[-2]['low']
-                range_height = round(abs(PublicVarible.Baseroof - PublicVarible.Basefloor) / (SymbolInfo.point) / 10, 2)
-                print(f"Up high_low_diff: {high_low_diff}  and  PublicVarible.Baseroof: {PublicVarible.Baseroof}  and  PublicVarible.Basefloor: {PublicVarible.Basefloor} and  Range arraye : {abs(PublicVarible.Basefloor - PublicVarible.Baseroof) / (SymbolInfo.point)} \n")
+                PublicVarible.Baseroof5 = FrameRatesM5.iloc[current_index : -2]['high'].max()
+                PublicVarible.Basefloor5 = FrameRatesM5.iloc[-2]['low']
+                range_height = round(abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)
+                print(f"Up high_low_diff: {high_low_diff}  and  PublicVarible.Baseroof5: {PublicVarible.Baseroof5}  and  PublicVarible.Basefloor5: {PublicVarible.Basefloor5} and  Range arraye : {abs(PublicVarible.Basefloor5 - PublicVarible.Baseroof5) / (SymbolInfo.point)} \n")
                 current_time = time.time()
                 if current_time - PublicVarible.last_execution_time >= 300:  
                    Text = f"{self.Pair}\n"
                    Text += f"M5️⃣ لگ صعودی و رنج# ... 🟢🟢 \n"
                    Text += f"ارتفاع لگ: {round(high_low_diff, 2) / 10} pip\n"
                    Text += f"تعداد کندل: {count}\n"
-                   Text += f"سقف: {PublicVarible.Baseroof} \n"
-                   Text += f"کف : {PublicVarible.Basefloor} \n"
+                   Text += f"سقف: {PublicVarible.Baseroof5} \n"
+                   Text += f"کف : {PublicVarible.Basefloor5} \n"
                    Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff * 1000,1) } % \n"
                    Text += f"ارتفاع رنج: {range_height} pip \n"
                    Text += f"حجم کل مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
@@ -198,13 +198,13 @@ class SupplyDemandStrategyV9():
                    PromptToTelegram(Text)
                    PublicVarible.last_execution_time = current_time
 
-             if FrameRatesM5.iloc[-2]['close'] > PublicVarible.Baseroof and PublicVarible.Baseroof != 0 : 
-                print(f"price is {FrameRatesM5.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof} ")
+             if FrameRatesM5.iloc[-2]['close'] > PublicVarible.Baseroof5 and PublicVarible.Baseroof5 != 0 : 
+                print(f"price is {FrameRatesM5.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof5} ")
                 if current_time - PublicVarible.last_execution_time >= 300:   
-                   Text = f"price is {FrameRatesM5.iloc[-2]['close']} and 🔺Upper #Roof {PublicVarible.Baseroof} "
+                   Text = f"price is {FrameRatesM5.iloc[-2]['close']} and 🔺Upper #Roof {PublicVarible.Baseroof5} "
                    PromptToTelegram(Text)  
                    PublicVarible.last_execution_time = current_time 
-                   PublicVarible.Baseroof = PublicVarible.Basefloor = 0  
+                   PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0  
 #Buy
                 buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
                 if buy_positions_with_open_prices:
@@ -215,13 +215,13 @@ class SupplyDemandStrategyV9():
                         Botdashboard(53 , self.Pair)
                         return
 
-             if FrameRatesM5.iloc[-2]['close'] < PublicVarible.Basefloor and PublicVarible.Basefloor != 0 : 
-                print(f"price is {FrameRatesM5.iloc[-2]['close']} and Under floor {PublicVarible.Basefloor} ")
+             if FrameRatesM5.iloc[-2]['close'] < PublicVarible.Basefloor5 and PublicVarible.Basefloor5 != 0 : 
+                print(f"price is {FrameRatesM5.iloc[-2]['close']} and Under floor {PublicVarible.Basefloor5} ")
                 if current_time - PublicVarible.last_execution_time >= 300:   
-                   Text = f"price is {FrameRatesM5.iloc[-2]['close']} and 🔻Under #floor {PublicVarible.Basefloor}  "
+                   Text = f"price is {FrameRatesM5.iloc[-2]['close']} and 🔻Under #floor {PublicVarible.Basefloor5}  "
                    PromptToTelegram(Text)  
                    PublicVarible.last_execution_time = current_time  
-                   PublicVarible.Baseroof = PublicVarible.Basefloor = 0  
+                   PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0  
 #Sell
                 sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
                 if sell_positions_with_open_prices:

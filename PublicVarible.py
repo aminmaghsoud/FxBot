@@ -82,7 +82,8 @@ last_execution_time30 = 0
 last_execution_time1 = 0 
 Basefloor = 0.0
 Baseroof = 0.0
-
+Basefloor5 = 0.0
+Baseroof5 = 0.0
 risk = 2
 current_datetime = datetime.now()
 if  current_datetime.weekday() in [1 , 3  , 4]  : 
