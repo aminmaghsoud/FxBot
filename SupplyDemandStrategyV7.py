@@ -135,16 +135,16 @@ class SupplyDemandStrategyV7():
                 if round(round(abs(FrameRatesM1.iloc[-2]['high'] - FrameRatesM1['low'].iloc[current_index : -2 ].min()) / (SymbolInfo.point) / 10, 2) / high_low_diff * 1000,1) > 50 : return
 
                 PublicVarible.Basefloor5 = FrameRatesM1['low'].iloc[current_index : -2 ].min()
-                PublicVarible.Baseroof5 = FrameRatesM1.iloc[-2]['high']
-                range_height = round(abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)
-                print(f"Down high_low_diff: {high_low_diff}  and  PublicVarible.Baseroof5: {PublicVarible.Baseroof5}  and  PublicVarible.Basefloor5: {PublicVarible.Basefloor5} and  Range arraye : {abs(PublicVarible.Basefloor5 - PublicVarible.Baseroof5) / (SymbolInfo.point)} \n")
+                PublicVarible.Baseroof = FrameRatesM1.iloc[-2]['high']
+                range_height = round(abs(PublicVarible.Baseroof - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)
+                print(f"Down high_low_diff: {high_low_diff}  and  PublicVarible.Baseroof: {PublicVarible.Baseroof}  and  PublicVarible.Basefloor5: {PublicVarible.Basefloor5} and  Range arraye : {abs(PublicVarible.Basefloor5 - PublicVarible.Baseroof) / (SymbolInfo.point)} \n")
                 current_time = time.time()
                 if current_time - PublicVarible.last_execution_time >= 300:  
                    Text = f"{self.Pair}\n"
                    Text += f"M1 لگ نزولی و رنج# ... 🔴🔴🔴🔴 \n"
                    Text += f"ارتفاع لگ: {round(high_low_diff, 2) / 10} pip\n"
                    Text += f"تعداد کندل: {count}\n"
-                   Text += f"سقف: {PublicVarible.Baseroof5} \n"
+                   Text += f"سقف: {PublicVarible.Baseroof} \n"
                    Text += f"کف : {PublicVarible.Basefloor5} \n"
                    Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff * 1000,1) } % \n"
                    Text += f"ارتفاع رنج: {range_height} pip \n"
@@ -177,17 +177,17 @@ class SupplyDemandStrategyV7():
                 if high_low_diff < (200 * ATR_Value * 0.9) : return
                 if round((round(abs((FrameRatesM1.iloc[current_index : -2]['high'].max()) - ( FrameRatesM1.iloc[-2]['low'])) / (SymbolInfo.point) / 10, 2)) / high_low_diff * 1000,1) > 50 : return
 
-                PublicVarible.Baseroof5 = FrameRatesM1.iloc[current_index : -2]['high'].max()
+                PublicVarible.Baseroof = FrameRatesM1.iloc[current_index : -2]['high'].max()
                 PublicVarible.Basefloor5 = FrameRatesM1.iloc[-2]['low']
-                range_height = round(abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)
-                print(f"Up high_low_diff: {high_low_diff}  and  PublicVarible.Baseroof5: {PublicVarible.Baseroof5}  and  PublicVarible.Basefloor5: {PublicVarible.Basefloor5} and  Range arraye : {abs(PublicVarible.Basefloor5 - PublicVarible.Baseroof5) / (SymbolInfo.point)} \n")
+                range_height = round(abs(PublicVarible.Baseroof - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)
+                print(f"Up high_low_diff: {high_low_diff}  and  PublicVarible.Baseroof: {PublicVarible.Baseroof}  and  PublicVarible.Basefloor5: {PublicVarible.Basefloor5} and  Range arraye : {abs(PublicVarible.Basefloor5 - PublicVarible.Baseroof) / (SymbolInfo.point)} \n")
                 current_time = time.time()
                 if current_time - PublicVarible.last_execution_time >= 300:  
                    Text = f"{self.Pair}\n"
                    Text += f"M1 لگ صعودی و رنج# ... 🟢🟢🟢🟢 \n"
                    Text += f"ارتفاع لگ: {round(high_low_diff, 2) / 10} pip\n"
                    Text += f"تعداد کندل: {count}\n"
-                   Text += f"سقف: {PublicVarible.Baseroof5} \n"
+                   Text += f"سقف: {PublicVarible.Baseroof} \n"
                    Text += f"کف : {PublicVarible.Basefloor5} \n"
                    Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff * 1000,1) } % \n"
                    Text += f"ارتفاع رنج: {range_height} pip \n"
@@ -198,13 +198,13 @@ class SupplyDemandStrategyV7():
                    PromptToTelegram(Text)
                    PublicVarible.last_execution_time = current_time
 
-             if FrameRatesM1.iloc[-2]['close'] > PublicVarible.Baseroof5 and PublicVarible.Baseroof5 != 0 : 
-                print(f"price is {FrameRatesM1.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof5} ")
+             if FrameRatesM1.iloc[-2]['close'] > PublicVarible.Baseroof and PublicVarible.Baseroof != 0 : 
+                print(f"price is {FrameRatesM1.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof} ")
                 if current_time - PublicVarible.last_execution_time >= 300:   
-                   Text = f"price is {FrameRatesM1.iloc[-2]['close']} and 🔺Upper #Roof {PublicVarible.Baseroof5} "
+                   Text = f"price is {FrameRatesM1.iloc[-2]['close']} and 🔺Upper #Roof {PublicVarible.Baseroof} "
                    PromptToTelegram(Text)  
                    PublicVarible.last_execution_time = current_time 
-                   PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0  
+                   PublicVarible.Baseroof = PublicVarible.Basefloor5 = 0  
 #Buy
                 buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
                 if buy_positions_with_open_prices:
@@ -221,7 +221,7 @@ class SupplyDemandStrategyV7():
                    Text = f"price is {FrameRatesM1.iloc[-2]['close']} and 🔻Under #floor {PublicVarible.Basefloor5}  "
                    PromptToTelegram(Text)  
                    PublicVarible.last_execution_time = current_time  
-                   PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0  
+                   PublicVarible.Baseroof = PublicVarible.Basefloor5 = 0  
 #Sell
                 sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
                 if sell_positions_with_open_prices:
