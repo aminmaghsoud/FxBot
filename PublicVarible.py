@@ -80,6 +80,7 @@ last_execution_time = 0  # در ابتدا 0 یا هر مقدار مناسب د�
 last_execution_time15 = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_time30 = 0 
 last_execution_time1 = 0 
+last_execution_timeM1 = 0
 Basefloor = 0.0
 Baseroof = 0.0
 Basefloor5 = 0.0
