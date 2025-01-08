@@ -117,7 +117,7 @@ class SupplyDemandStrategyV7():
              Text = None
              current_time = time.time()
 
-             if (FrameRatesM1.iloc[-2]['high'] > FrameRatesM1.iloc[-3]['high']) and (FrameRatesM1.iloc[-2]['low'] > FrameRatesM1.iloc[-3]['low']) : 
+             if (FrameRatesM1.iloc[-2]['high'] > FrameRatesM1.iloc[-3]['high']) : #and (FrameRatesM1.iloc[-2]['low'] > FrameRatesM1.iloc[-3]['low']) : 
                    while current_index > end_index : 
                        Now_c_H = FrameRatesM1.iloc[current_index]['high']
                        Old_c_H = FrameRatesM1.iloc[current_index - 1]['high'] 
@@ -161,7 +161,7 @@ class SupplyDemandStrategyV7():
              count = 1
              high_low_diff = 0.0
              Text = None       
-             if (FrameRatesM1.iloc[-2]['low'] < FrameRatesM1.iloc[-3]['low']) and (FrameRatesM1.iloc[-2]['high'] < FrameRatesM1.iloc[-3]['high']) :
+             if (FrameRatesM1.iloc[-2]['low'] < FrameRatesM1.iloc[-3]['low']) : # and (FrameRatesM1.iloc[-2]['high'] < FrameRatesM1.iloc[-3]['high']) :
                    while current_index > end_index : 
                        Now_c_H = FrameRatesM1.iloc[current_index]['high']
                        Old_c_H = FrameRatesM1.iloc[current_index - 1]['high'] 

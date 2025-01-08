@@ -45,19 +45,19 @@ class SupplyDemandStrategyV9():
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = (entry_price + take_profit) / 2
                                      # اعمال تغییرات
-                                     ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
+                                     #ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
                                      print(" Buy Position Tp and Sl Modified to Bearish Status") 
                                  elif SymbolInfo.ask >= abs(abs(entry_price - take_profit) * 0.75 + entry_price):
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = abs(abs(entry_price - take_profit) * 0.25 + entry_price) #(entry_price + take_profit) / 2
                                      # اعمال تغییرات
-                                     ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
+                                     #ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
                                      print(" Buy Position Tp and Sl Modified to Bearish Status")
                                  elif SymbolInfo.ask >= abs(abs(entry_price - take_profit) * 0.50 + entry_price):
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = entry_price
                                      # اعمال تغییرات
-                                     ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
+                                     #ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
                                      print(" Buy Position Tp and Sl Modified to Bearish Status")
                                  else:
                                      print(f" Condition not met for ticket                             {ticket}" , "\n")
@@ -79,19 +79,19 @@ class SupplyDemandStrategyV9():
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = (entry_price + take_profit) / 2
                                      # اعمال تغییرات
-                                     ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
+                                     #ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
                                      print(" Sell Position Tp and Sl Modified to Bearish Status")
                                  elif SymbolInfo.bid <= abs(abs(entry_price - take_profit) * 0.75 - entry_price):
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = abs(abs(entry_price - take_profit) * 0.25 - entry_price)
                                      # اعمال تغییرات
-                                     ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
+                                     #ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
                                      print(" Sell Position Tp and Sl Modified to Bearish Status")
                                  elif SymbolInfo.bid <= abs(abs(entry_price - take_profit) * 0.50 - entry_price):
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = entry_price
                                      # اعمال تغییرات
-                                     ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
+                                     #ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
                                      print(" Sell Position Tp and Sl Modified to Bearish Status")
                                  else:
                                      print(f" Condition not met for ticket                             {ticket}" , "\n")
@@ -117,14 +117,14 @@ class SupplyDemandStrategyV9():
              Text = None
              current_time = time.time()
 
-             if (FrameRatesM5.iloc[-2]['high'] > FrameRatesM5.iloc[-3]['high']) and (FrameRatesM5.iloc[-2]['low'] > FrameRatesM5.iloc[-3]['low']) : 
+             if (FrameRatesM5.iloc[-2]['high'] > FrameRatesM5.iloc[-3]['high']) :# and (FrameRatesM5.iloc[-2]['low'] > FrameRatesM5.iloc[-3]['low']) : 
                    while current_index > end_index : 
                        Now_c_H = FrameRatesM5.iloc[current_index]['high']
                        Old_c_H = FrameRatesM5.iloc[current_index - 1]['high'] 
                        Now_c_L = FrameRatesM5.iloc[current_index]['low']
                        Old_c_L = FrameRatesM5.iloc[current_index - 1]['low']
                        
-                       if Now_c_H < Old_c_H and Now_c_L < Old_c_L :
+                       if Now_c_H < Old_c_H :# and Now_c_L < Old_c_L :
                           count += 1 
                           current_index -= 1
                        else : 
@@ -148,8 +148,8 @@ class SupplyDemandStrategyV9():
                    Text += f"کف : {PublicVarible.Basefloor5} \n"
                    Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff * 1000,1) } % \n"
                    Text += f"ارتفاع رنج: {range_height} pip \n"
-                   Text += f"حجم کل مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
-                   Text += f"حجم پله : {round(Balace * 0.0015 / range_height / 3 , 2)} \n"    
+                   Text += f"حجم کل مجاز : {round(Balace * 0.001 / range_height , 2)} \n"
+                   Text += f"حجم پله : {round(Balace * 0.001 / range_height / 3 , 2)} \n"    
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}"
                    PromptToTelegram(Text)
                    PublicVarible.last_execution_time = current_time
@@ -161,13 +161,13 @@ class SupplyDemandStrategyV9():
              count = 1
              high_low_diff = 0.0
              Text = None       
-             if (FrameRatesM5.iloc[-2]['low'] < FrameRatesM5.iloc[-3]['low']) and (FrameRatesM5.iloc[-2]['high'] < FrameRatesM5.iloc[-3]['high']) :
+             if (FrameRatesM5.iloc[-2]['low'] < FrameRatesM5.iloc[-3]['low']) :# and (FrameRatesM5.iloc[-2]['high'] < FrameRatesM5.iloc[-3]['high']) :
                    while current_index > end_index : 
                        Now_c_H = FrameRatesM5.iloc[current_index]['high']
                        Old_c_H = FrameRatesM5.iloc[current_index - 1]['high'] 
                        Now_c_L = FrameRatesM5.iloc[current_index]['low']
                        Old_c_L = FrameRatesM5.iloc[current_index - 1]['low']
-                       if  Now_c_L > Old_c_L and Now_c_H > Old_c_H :
+                       if  Now_c_L > Old_c_L :# and Now_c_H > Old_c_H :
                           count += 1 
                           current_index -= 1
                        else : 
@@ -191,8 +191,8 @@ class SupplyDemandStrategyV9():
                    Text += f"کف : {PublicVarible.Basefloor5} \n"
                    Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff * 1000,1) } % \n"
                    Text += f"ارتفاع رنج: {range_height} pip \n"
-                   Text += f"حجم کل مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
-                   Text += f"حجم پله : {round(Balace * 0.0015 / range_height / 3 , 2)} \n"
+                   Text += f"حجم کل مجاز : {round(Balace * 0.001 / range_height , 2)} \n"
+                   Text += f"حجم پله : {round(Balace * 0.001 / range_height / 3 , 2)} \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}"
 
                    PromptToTelegram(Text)
