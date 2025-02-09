@@ -6,7 +6,6 @@ from datetime import datetime
 import tkinter as tk
 import sys
 from threading import Thread
-import json
 ########################################################################################################
 #ConnectionString = ("Driver={ODBC Driver 18 for SQL Server}; Server=.; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;")
 ConnectionString = (r"Driver={ODBC Driver 18 for SQL Server}; Server=.\FXBOT; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;") 
@@ -59,8 +58,7 @@ TelegramBot = None
 TelegramChatId = [152284556 , 388239785 , 98785822 , 1864188026]
 LastTelegramUpdateId = -1
 # آخرین زمانی که ربات اعلام آماده بودن کرده است
-LastDatetimeRobotIsReady = None 
-
+LastDatetimeRobotIsReady = None
 ########################################################################################################
 ########################################### Strategy Settings ##########################################
 ########################################################################################################

@@ -116,6 +116,24 @@ class SupplyDemandStrategyV9():
             
              Text = None
              current_time = time.time()
+             trend_C = 0
+             close_C = FrameRatesM5.iloc[-2]['close']
+             high_C = FrameRatesM5.iloc[-2]['high'] 
+             low_C = FrameRatesM5.iloc[-2]['low']
+             One_third_UP = high_C - ((high_C - low_C) / 3)
+             One_third_Down = low_C + ((high_C - low_C) / 3)
+             if  close_C >= One_third_UP :
+                 trend_C = +1
+             elif close_C <= One_third_Down :
+                 trend_C = -1
+                 
+             if trend_C == 0 :
+                 print("** Mid **")
+             elif trend_C == +1 : 
+                  print("** One_third_UP **")
+             else :  print("** One_third_Down **")
+                          
+
 
              if (FrameRatesM5.iloc[-2]['high'] > FrameRatesM5.iloc[-3]['high']) :# and (FrameRatesM5.iloc[-2]['low'] > FrameRatesM5.iloc[-3]['low']) : 
                    while current_index > end_index : 
@@ -148,8 +166,8 @@ class SupplyDemandStrategyV9():
                    Text += f"کف : {PublicVarible.Basefloor5} \n"
                    Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff * 1000,1) } % \n"
                    Text += f"ارتفاع رنج: {range_height} pip \n"
-                   Text += f"حجم کل مجاز : {round(Balace * 0.001 / range_height , 2)} \n"
-                   Text += f"حجم پله : {round(Balace * 0.001 / range_height / 3 , 2)} \n"    
+                   Text += f"حجم کل مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
+                   Text += f"حجم پله : {round(Balace * 0.0015 / range_height / 3 , 2)} \n"    
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}"
                    PromptToTelegram(Text)
                    PublicVarible.last_execution_time = current_time
@@ -191,8 +209,8 @@ class SupplyDemandStrategyV9():
                    Text += f"کف : {PublicVarible.Basefloor5} \n"
                    Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff * 1000,1) } % \n"
                    Text += f"ارتفاع رنج: {range_height} pip \n"
-                   Text += f"حجم کل مجاز : {round(Balace * 0.001 / range_height , 2)} \n"
-                   Text += f"حجم پله : {round(Balace * 0.001 / range_height / 3 , 2)} \n"
+                   Text += f"حجم کل مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
+                   Text += f"حجم پله : {round(Balace * 0.0015 / range_height / 3 , 2)} \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}"
 
                    PromptToTelegram(Text)
@@ -202,9 +220,14 @@ class SupplyDemandStrategyV9():
                 print(f"price is {FrameRatesM5.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof5} ")
                 if current_time - PublicVarible.last_execution_time >= 300:   
                    Text = f"price is {FrameRatesM5.iloc[-2]['close']} and 🔺Upper #Roof {PublicVarible.Baseroof5} "
+                   if trend_C == 0 :
+                      Text = f" قدرت ها برابر است 🏓"
+                   elif trend_C == +1 : 
+                       Text = f"قدرت در دست خریداران است 🐮 "
+                   else :  Text =  f"قدرت در دست فروشندگان است 🐻 "
                    PromptToTelegram(Text)  
                    PublicVarible.last_execution_time = current_time 
-                   PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0  
+                   
 #Buy
                 buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
                 if buy_positions_with_open_prices:
@@ -213,15 +236,28 @@ class SupplyDemandStrategyV9():
                    for position_info in positions:
                      if position_info.symbol == self.Pair :
                         Botdashboard(53 , self.Pair)
-                        return
+                        #return
+                     
+                EntryPrice = SymbolInfo.bid 
+                Volume = 0.03                                               ######### قیمت  ورود به معامله ########
+                SL = PublicVarible.Basefloor5 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
+                TP1 = (abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)   
+                if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroof5) < abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)) and trend_C == +1 :
+                  Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                  OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
+                PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0  
 
              if FrameRatesM5.iloc[-2]['close'] < PublicVarible.Basefloor5 and PublicVarible.Basefloor5 != 0 : 
                 print(f"price is {FrameRatesM5.iloc[-2]['close']} and Under floor {PublicVarible.Basefloor5} ")
                 if current_time - PublicVarible.last_execution_time >= 300:   
-                   Text = f"price is {FrameRatesM5.iloc[-2]['close']} and 🔻Under #floor {PublicVarible.Basefloor5}  "
+                   Text = f"price is {FrameRatesM5.iloc[-2]['close']} and 🔻Under #floor {PublicVarible.Basefloor5} \n "
+                   if trend_C == 0 :
+                      Text = f" قدرت ها برابر است 🏓"
+                   elif trend_C == +1 : 
+                       Text = f"قدرت در دست خریداران است 🐮 "
+                   else :  Text =  f"قدرت در دست فروشندگان است 🐻 "
                    PromptToTelegram(Text)  
                    PublicVarible.last_execution_time = current_time  
-                   PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0  
 #Sell
                 sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
                 if sell_positions_with_open_prices:
@@ -230,9 +266,16 @@ class SupplyDemandStrategyV9():
                     for position_info in positions:
                      if position_info.symbol == self.Pair :
                         Botdashboard(54 , self.Pair)
-                        return
-
-
+                        #return
+                
+                EntryPrice = SymbolInfo.ask  
+                Volume = 0.03                                    ######### قیمت  ورود به معامله ########
+                SL =PublicVarible.Baseroof5 + ( SymbolInfo.point * 50)         #########  تعیین حدضرر معامله #########
+                TP1 = EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100) 
+                if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5) < abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) ) and trend_C == -1 :
+                  Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                  OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V2 - M5")
+                PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0
                 
       
 ########################################################################################################

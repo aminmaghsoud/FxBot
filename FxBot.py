@@ -25,7 +25,7 @@ import pandas_ta as PTA
 import asyncio
 import telegram
 import psutil
-
+import json
 ########################################################################################################
 class FxBot():
       def __init__(self):
@@ -33,7 +33,7 @@ class FxBot():
           print("*************************************")
 ########################################################################################################
       def Main(self, BotId:int):
-         
+          
           GetConfiguration(BotId = BotId)
           Prompt("*************************************")
 
@@ -112,9 +112,6 @@ class FxBot():
                        if Item['Tick'] != LastTick.time:
                           Item['Tick'] = LastTick.time
                           
-                          
-
-
                           # بروزرسانی داده های مالی
                           SymbolInfo = MT5.symbol_info(Item['Name'])
                           print (Fore.BLACK,Back.LIGHTWHITE_EX,"Item Name                                               Result",Back.LIGHTBLUE_EX,"     Smart Pirouz is hunting ...    ", datetime.now().time(),Back.RESET,Fore.RESET,"\n" )
@@ -134,18 +131,18 @@ class FxBot():
                           #  PromptToTelegram(Text= "📌 Robot Pirouz is ready, market is open")
 
                           #A = SupplyDemandStrategyV7(Pair = Item['Name']) #M1
-                          B = SupplyDemandStrategyV8(Pair = Item['Name']) #M15
-                          D = SupplyDemandStrategyV1(Pair = Item['Name']) #لگ سریع
-                          E = SupplyDemandStrategyV2(Pair = Item['Name']) #M30
+                          #B = SupplyDemandStrategyV8(Pair = Item['Name']) #M15
+                          #D = SupplyDemandStrategyV1(Pair = Item['Name']) #لگ سریع
+                          #E = SupplyDemandStrategyV2(Pair = Item['Name']) #M30
                           C = SupplyDemandStrategyV9(Pair = Item['Name']) #M5
-                          F = SupplyDemandStrategyV3(Pair = Item['Name']) #H1
+                          #F = SupplyDemandStrategyV3(Pair = Item['Name']) #H1
                           #G = SupplyDemandStrategyV4(Pair = Item['Name'])
                           #PublicVarible.Executor.submit(A.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #Posision Modify olny
-                          PublicVarible.Executor.submit(B.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #XAUUSD M1
-                          PublicVarible.Executor.submit(D.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #XAUUSD M5
-                          PublicVarible.Executor.submit(E.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #Leg and trade
+                          #PublicVarible.Executor.submit(B.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #XAUUSD M1
+                          #PublicVarible.Executor.submit(D.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #XAUUSD M5
+                          #PublicVarible.Executor.submit(E.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) #Leg and trade
                           PublicVarible.Executor.submit(C.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
-                          PublicVarible.Executor.submit(F.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M15
+                          #PublicVarible.Executor.submit(F.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M15
                           #PublicVarible.Executor.submit(G.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # XAUUSD M5 Spike
 
 
