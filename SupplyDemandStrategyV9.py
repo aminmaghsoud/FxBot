@@ -45,13 +45,13 @@ class SupplyDemandStrategyV9():
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = (entry_price + take_profit) / 2
                                      # اعمال تغییرات
-                                     #ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
+                                     ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
                                      print(" Buy Position Tp and Sl Modified to Bearish Status") 
                                  elif SymbolInfo.ask >= abs(abs(entry_price - take_profit) * 0.75 + entry_price):
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = abs(abs(entry_price - take_profit) * 0.25 + entry_price) #(entry_price + take_profit) / 2
                                      # اعمال تغییرات
-                                     #ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
+                                     ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
                                      print(" Buy Position Tp and Sl Modified to Bearish Status")
                                  elif SymbolInfo.ask >= abs(abs(entry_price - take_profit) * 0.50 + entry_price):
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
@@ -79,13 +79,13 @@ class SupplyDemandStrategyV9():
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = (entry_price + take_profit) / 2
                                      # اعمال تغییرات
-                                     #ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
+                                     ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
                                      print(" Sell Position Tp and Sl Modified to Bearish Status")
                                  elif SymbolInfo.bid <= abs(abs(entry_price - take_profit) * 0.75 - entry_price):
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = abs(abs(entry_price - take_profit) * 0.25 - entry_price)
                                      # اعمال تغییرات
-                                     #ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
+                                     ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
                                      print(" Sell Position Tp and Sl Modified to Bearish Status")
                                  elif SymbolInfo.bid <= abs(abs(entry_price - take_profit) * 0.50 - entry_price):
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
@@ -100,7 +100,7 @@ class SupplyDemandStrategyV9():
              current_datetime = datetime.now()
              LastCandle = FrameRatesM5.iloc[-1]
              minutes_to_exclude = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
-             if (LastCandle['datetime'].hour in [0 , 1]) or ((current_datetime.weekday() == 4 and current_datetime.hour > 20)) or (current_datetime.minute not in minutes_to_exclude ) :#or current_datetime.second > 20  : 
+             if (LastCandle['datetime'].hour in [0 , 1]) or ((current_datetime.weekday() == 4 and current_datetime.hour > 20)) or PublicVarible.CanOpenOrder == False : #or (current_datetime.minute not in minutes_to_exclude ) :#or current_datetime.second > 20  : 
                 Botdashboard(4 , self.Pair)
                 return 
              ATR = PTA.atr(high = FrameRatesM5['high'],low = FrameRatesM5['low'], close = FrameRatesM5['close'],length=14)
@@ -219,12 +219,12 @@ class SupplyDemandStrategyV9():
              if FrameRatesM5.iloc[-2]['close'] > PublicVarible.Baseroof5 and PublicVarible.Baseroof5 != 0 : 
                 print(f"price is {FrameRatesM5.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof5} ")
                 if current_time - PublicVarible.last_execution_time >= 300:   
-                   Text = f"price is {FrameRatesM5.iloc[-2]['close']} and 🔺Upper #Roof {PublicVarible.Baseroof5} "
+                   Text = f"price is {FrameRatesM5.iloc[-2]['close']} and 🔺Upper #Roof {PublicVarible.Baseroof5} \n "
                    if trend_C == 0 :
-                      Text = f" قدرت ها برابر است 🏓"
+                      Text += f" قدرت ها برابر است 🏓"
                    elif trend_C == +1 : 
-                       Text = f"قدرت در دست خریداران است 🐮 "
-                   else :  Text =  f"قدرت در دست فروشندگان است 🐻 "
+                       Text += f"قدرت در دست خریداران است 🐮 "
+                   else :  Text +=  f"قدرت در دست فروشندگان است 🐻 "
                    PromptToTelegram(Text)  
                    PublicVarible.last_execution_time = current_time 
                    
@@ -236,13 +236,13 @@ class SupplyDemandStrategyV9():
                    for position_info in positions:
                      if position_info.symbol == self.Pair :
                         Botdashboard(53 , self.Pair)
-                        #return
+                        return
                      
                 EntryPrice = SymbolInfo.bid 
                 Volume = 0.03                                               ######### قیمت  ورود به معامله ########
-                SL = PublicVarible.Basefloor5 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
-                TP1 = (abs(EntryPrice - SL) * 1 ) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)   
-                if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroof5) < abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)) and trend_C == +1 :
+                SL = PublicVarible.Basefloor5 - ( SymbolInfo.point * 50) #EntryPrice - round(ATR_Value * 1.5 , 2)  #PublicVarible.Basefloor5 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
+                TP1 = abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)   
+                if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroof5) < abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)) and trend_C == +1 : # and PublicVarible.hmaSignal == 1 :
                   Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                   OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
                 PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0  
@@ -252,10 +252,10 @@ class SupplyDemandStrategyV9():
                 if current_time - PublicVarible.last_execution_time >= 300:   
                    Text = f"price is {FrameRatesM5.iloc[-2]['close']} and 🔻Under #floor {PublicVarible.Basefloor5} \n "
                    if trend_C == 0 :
-                      Text = f" قدرت ها برابر است 🏓"
+                      Text += f" قدرت ها برابر است 🏓"
                    elif trend_C == +1 : 
-                       Text = f"قدرت در دست خریداران است 🐮 "
-                   else :  Text =  f"قدرت در دست فروشندگان است 🐻 "
+                       Text += f"قدرت در دست خریداران است 🐮 "
+                   else :  Text +=  f"قدرت در دست فروشندگان است 🐻 "
                    PromptToTelegram(Text)  
                    PublicVarible.last_execution_time = current_time  
 #Sell
@@ -266,13 +266,13 @@ class SupplyDemandStrategyV9():
                     for position_info in positions:
                      if position_info.symbol == self.Pair :
                         Botdashboard(54 , self.Pair)
-                        #return
+                        return
                 
                 EntryPrice = SymbolInfo.ask  
                 Volume = 0.03                                    ######### قیمت  ورود به معامله ########
-                SL =PublicVarible.Baseroof5 + ( SymbolInfo.point * 50)         #########  تعیین حدضرر معامله #########
-                TP1 = EntryPrice - (abs(EntryPrice - SL) * 1 )   #SymbolInfo.ask - ( SymbolInfo.point * 100) 
-                if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5) < abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) ) and trend_C == -1 :
+                SL = PublicVarible.Baseroof5 + ( SymbolInfo.point * 50) #EntryPrice + round(ATR_Value * 1.5 , 2) #PublicVarible.Baseroof5 + ( SymbolInfo.point * 50)         #########  تعیین حدضرر معامله #########
+                TP1 = EntryPrice - abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)  #SymbolInfo.ask - ( SymbolInfo.point * 100) 
+                if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5) < abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) ) and trend_C == -1 : #and PublicVarible.hmaSignal == -1:
                   Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                   OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V2 - M5")
                 PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0
