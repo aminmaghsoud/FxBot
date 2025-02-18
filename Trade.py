@@ -3,77 +3,6 @@ from Utility import *
 import PublicVarible
 
 
-#def ModifyPosition(Position, NewStopLoss:float = None, NewTakeProfit:float = None, Deviation:int = 0):
-#    SymbolInfo = MT5.symbol_info(Position.iloc[-1].symbol)
-#    if SymbolInfo is None:
-#       print(f"Symbol {Position.iloc[-1].symbol} is None")
-#       Prompt(f"Symbol {Position.iloc[-1].symbol} is None")
-#       return
-#
-#    if NewStopLoss == None and NewTakeProfit == None: 
-#       return
-#
-#    if (Position.iloc[-1].type == MT5.POSITION_TYPE_BUY):
-#       Type = MT5.ORDER_TYPE_SELL
-#       Price = MT5.symbol_info_tick(Position.iloc[-1].symbol).bid
-#    else:
-#       Type = MT5.ORDER_TYPE_BUY
-#       Price = MT5.symbol_info_tick(Position.iloc[-1].symbol).ask
-#    
-#    Prompt("Modify order for {}".format(Position.iloc[-1].symbol))
-#    Request = {
-#        "action": MT5.TRADE_ACTION_SLTP,
-#        "symbol": Position.iloc[-1].symbol,
-#        "position": Position.iloc[-1].ticket,
-#        "sl": NewStopLoss,
-#        "tp": NewTakeProfit,
-#    }
-#
-#    if NewStopLoss == None:
-#       del Request['sl']
-#       
-#    if NewTakeProfit == None:
-#       del Request['tp']
-#
-#   
-#    print(Request)
-#    Result = MT5.order_check(Request)
-#    print(Result)
-#
-#    Result = MT5.order_send(Request)
-#    print(Result)
-#    return 0
-########################################################################################################
-#def ClosePosition(Position):
-#    SymbolInfo = MT5.symbol_info(Position.symbol)
-#    if SymbolInfo is None:
-#       print(f"Symbol {Position.symbol} is None")
-#       Prompt(f"Symbol {Position.symbol} is None")
-#       return
-#
-#    if (Position.type == MT5.POSITION_TYPE_BUY):
-#       Type = MT5.ORDER_TYPE_SELL
-#       Price = MT5.symbol_info_tick(Position.symbol).bid
-#    else:
-#       Type = MT5.ORDER_TYPE_BUY
-#       Price = MT5.symbol_info_tick(Position.symbol).ask
-#
-#    Request = {
-#               "action": MT5.TRADE_ACTION_DEAL,
-#               "symbol": Position.symbol,
-#               "volume": Position.volume,
-#               "type": Type,
-#               "position": Position.ticket,
-#               "price": Price,
-#               "deviation": 0,
-#               "magic": 0,
-#               "type_time": MT5.ORDER_TIME_GTC,
-#               "type_filling": MT5.symbol_info(Position.symbol).filling_mode
-#              }
-#
-#    print(Request)
-#    ResultClosePosition = MT5.order_send(Request)
-#    print(ResultClosePosition)
 ########################################################################################################
 def OrderBuy(Pair, Volume:float, StopLoss:float = None, TakeProfit:float = None, Deviation:int = 0, Comment:str = ""):
     SymbolInfo = MT5.symbol_info(Pair)
@@ -308,80 +237,102 @@ def OrderSellStop(Pair, Volume:float, Price:float, StopLoss:float = None, TakePr
     #else:
     #    Prompt("A maximum of {} orders can be open".format(MaxOpenTrades))
 ########################################################################################################
-def OrderBuyLimit(Pair, Volume:float, StopLoss, TakeProfit, Deviation):
+def OrderBuyLimit(Pair, Volume: float, EntryPrice, StopLoss, TakeProfit, Deviation):
     Prompt("Buy limit method for {}".format(Pair))
+
     if MT5.positions_total() < PublicVarible.MaxOpenTrades:
-          #SL = Price - StopLoss * Point if StopLoss != 0 else Price - StopLoss * Point
-          #TP = Price + TakeProfit * Point if TakeProfit != 0 else Price + TakeProfit * Point
-          Request = {
-                     "action": MT5.TRADE_ACTION_PENDING,
-                     "symbol": Pair,
-                     "volume": Volume,
-                     "type": MT5.ORDER_TYPE_BUY_LIMIT,
-                     #"sl": SL,
-                     #"tp": TP,
-                     "deviation": Deviation,
-                     "magic": 234000,
-                     "comment": "Sent buy limit order",
-                     "type_time": MT5.ORDER_TIME_GTC,
-                     "type_filling": MT5.ORDER_FILLING_RETURN
-                    }
-          Result = MT5.order_send(Request)
-          Prompt("Order Send by {} {} lots at {} with deviation={} points".format(Pair, Volume, Deviation))
-          if Result.retcode != MT5.TRADE_RETCODE_DONE:
-             Prompt("Order Send failed, retcode={}".format(Result.retcode))
-             ResultDict = Result._asdict()
-             for field in ResultDict.keys():
-                 Prompt("   {}={}".format(field,ResultDict[field]))
-                 if field == "request":
-                    TraderequestDict=ResultDict[field]._asdict()
-                    for tradereq_filed in TraderequestDict:
-                        Prompt("       traderequest: {}={}".format(tradereq_filed,TraderequestDict[tradereq_filed]))
-          else:
-             Prompt("Order Send for {} done!, ".format(Pair, Result))
+        Price = EntryPrice  # قیمت ورود سفارش Buy Limit
+
+        SL = Price - StopLoss * MT5.symbol_info(Pair).point if StopLoss > 0 else 0
+        TP = Price + TakeProfit * MT5.symbol_info(Pair).point if TakeProfit > 0 else 0
+
+        Request = {
+            "action": MT5.TRADE_ACTION_PENDING,
+            "symbol": Pair,
+            "volume": Volume,
+            "price": Price,  # قیمت ورود سفارش
+            "type": MT5.ORDER_TYPE_BUY_LIMIT,
+            "sl": SL if StopLoss > 0 else 0,  # مقدار 0 یعنی بدون SL
+            "tp": TP if TakeProfit > 0 else 0,  # مقدار 0 یعنی بدون TP
+            "deviation": Deviation,
+            "magic": 234000,
+            "comment": "Sent buy limit order",
+            "type_time": MT5.ORDER_TIME_GTC,
+            "type_filling": MT5.ORDER_FILLING_RETURN
+        }
+
+        Result = MT5.order_send(Request)
+
+        Prompt("Order sent for {}: {} lots at {} with deviation={} points".format(Pair, Volume, Price, Deviation))
+
+        if Result.retcode != MT5.TRADE_RETCODE_DONE:
+            Prompt("Order send failed, retcode={}".format(Result.retcode))
+            ResultDict = Result._asdict()
+            for field in ResultDict.keys():
+                Prompt("   {}={}".format(field, ResultDict[field]))
+                if field == "request":
+                    TraderequestDict = ResultDict[field]._asdict()
+                    for tradereq_field in TraderequestDict:
+                        Prompt("       traderequest: {}={}".format(tradereq_field, TraderequestDict[tradereq_field]))
+        else:
+            Prompt("Order sent for {} done!".format(Pair))
+
     else:
         Prompt("A maximum of {} orders can be open".format(PublicVarible.MaxOpenTrades))
 ########################################################################################################
-def OrderSellLimit(Pair, Volume:float, StopLoss, TakeProfit, Deviation):
+def OrderSellLimit(Pair, Volume: float, EntryPrice, StopLoss, TakeProfit, Deviation):
     Prompt("Sell limit method for {}".format(Pair))
+
     if MT5.positions_total() < PublicVarible.MaxOpenTrades:
-       SymbolInfo = MT5.symbol_info(Pair)
-       if SymbolInfo is None:
-          Prompt("Symbol Info {} is None".format(Pair))
-       else:
-          Point = SymbolInfo.point
-          Price = SymbolInfo.bid
-          SL = Price + StopLoss * Point if StopLoss != 0 else Price + StopLoss * Point
-          TP = Price - TakeProfit * Point if TakeProfit != 0 else Price - TakeProfit * Point
-          Request = {
-                     "action": MT5.TRADE_ACTION_PENDING,
-                     "symbol": Pair,
-                     "volume": Volume,
-                     "type": MT5.ORDER_TYPE_SELL_LIMIT,
-                     "price": Price,
-                     "sl": SL,
-                     "tp": TP,
-                     "deviation": Deviation,
-                     "magic": 234000,
-                     "comment": "Sent sell limit order",
-                     "type_time": MT5.ORDER_TIME_GTC,
-                     "type_filling": MT5.ORDER_FILLING_RETURN
-                    }
-          Result = MT5.order_send(Request)
-          Prompt("Order Send by {} {} lots at {} with deviation={} points".format(Pair, Volume, Price, Deviation))
-          if Result.retcode != MT5.TRADE_RETCODE_DONE:
-             Prompt("Order Send failed, retcode={}".format(Result.retcode))
-             ResultDict = Result._asdict()
-             for field in ResultDict.keys():
-                 Prompt("   {}={}".format(field,ResultDict[field]))
-                 if field == "request":
-                    TraderequestDict=ResultDict[field]._asdict()
-                    for tradereq_filed in TraderequestDict:
-                        Prompt("       traderequest: {}={}".format(tradereq_filed,TraderequestDict[tradereq_filed]))
-          else:
-             Prompt("Order Send for {} done!, ".format(Pair, Result))
+        SymbolInfo = MT5.symbol_info(Pair)
+        if SymbolInfo is None:
+            Prompt("Symbol Info {} is None".format(Pair))
+            return  # خروج از تابع در صورت نبود اطلاعات
+
+        Point = SymbolInfo.point
+        Ask = SymbolInfo.ask  # قیمت Ask برای بررسی مقدار EntryPrice
+
+        if EntryPrice <= Ask:
+            Prompt("Invalid EntryPrice: {}. Must be above Ask ({})".format(EntryPrice, Ask))
+            return  # ورود نامعتبر
+
+        SL = EntryPrice + StopLoss * Point if StopLoss > 0 else 0
+        TP = EntryPrice - TakeProfit * Point if TakeProfit > 0 else 0
+
+        Request = {
+            "action": MT5.TRADE_ACTION_PENDING,
+            "symbol": Pair,
+            "volume": Volume,
+            "type": MT5.ORDER_TYPE_SELL_LIMIT,
+            "price": EntryPrice,  # مقدار قیمت ورودی اصلاح شد
+            "sl": SL if StopLoss > 0 else 0,
+            "tp": TP if TakeProfit > 0 else 0,
+            "deviation": Deviation,
+            "magic": 234000,
+            "comment": "Sent sell limit order",
+            "type_time": MT5.ORDER_TIME_GTC,
+            "type_filling": MT5.ORDER_FILLING_RETURN
+        }
+
+        Result = MT5.order_send(Request)
+
+        Prompt("Order sent for {}: {} lots at {} with deviation={} points".format(Pair, Volume, EntryPrice, Deviation))
+
+        if Result.retcode != MT5.TRADE_RETCODE_DONE:
+            Prompt("Order send failed, retcode={}".format(Result.retcode))
+            ResultDict = Result._asdict()
+            for field in ResultDict.keys():
+                Prompt("   {}={}".format(field, ResultDict[field]))
+                if field == "request":
+                    TraderequestDict = ResultDict[field]._asdict()
+                    for tradereq_field in TraderequestDict:
+                        Prompt("       traderequest: {}={}".format(tradereq_field, TraderequestDict[tradereq_field]))
+        else:
+            Prompt("Order sent for {} done!".format(Pair))
+
     else:
         Prompt("A maximum of {} orders can be open".format(PublicVarible.MaxOpenTrades))
+
 ########################################################################################################
 def ModifyTPSLPosition(Position, NewTakeProfit: float = None, NewStopLoss: float = None, Deviation: int = 0):
     # چک کردن اگر Position یک دیکشنری است یا یک DataFrame

@@ -15,7 +15,7 @@ class SupplyDemandStrategyV9():
 ##############################################################################################################################################################
       def Main(self):
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ Strategy V9 M5 Range and Spike --")
-          
+          Time_Signal = 1
           high_low_diff = 0 
           SymbolInfo = MT5.symbol_info(self.Pair)
           if SymbolInfo is not None :
@@ -100,21 +100,14 @@ class SupplyDemandStrategyV9():
              current_datetime = datetime.now()
              LastCandle = FrameRatesM5.iloc[-1]
              minutes_to_exclude = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
-             if (LastCandle['datetime'].hour in [0 , 1]) or ((current_datetime.weekday() == 4 and current_datetime.hour > 20)) or PublicVarible.CanOpenOrder == False : #or (current_datetime.minute not in minutes_to_exclude ) :#or current_datetime.second > 20  : 
+             if (LastCandle['datetime'].hour in [0 , 1 , 8 , 15 , 16, 17])  or PublicVarible.CanOpenOrder == False : #or ((current_datetime.weekday() == 4 and current_datetime.hour > 20)) or (current_datetime.minute not in minutes_to_exclude ) :#or current_datetime.second > 20  : 
                 Botdashboard(4 , self.Pair)
-                return 
+                Time_Signal = 0  
              ATR = PTA.atr(high = FrameRatesM5['high'],low = FrameRatesM5['low'], close = FrameRatesM5['close'],length=14)
              ATR_Value = ATR.iloc[-1]
              print("ATR_Value" , ATR_Value)
 ########################################################################################### دریافت اطلاعات تایم فریم ها و محاسبه اندیکاتور #########################################################################################################
              Balace = GetBalance()
-             ## لگ نزولی
-             end_index = -16
-             current_index = -3
-             count = 1
-             high_low_diff = 0.0
-            
-             Text = None
              current_time = time.time()
              trend_C = 0
              close_C = FrameRatesM5.iloc[-2]['close']
@@ -126,15 +119,22 @@ class SupplyDemandStrategyV9():
                  trend_C = +1
              elif close_C <= One_third_Down :
                  trend_C = -1
-                 
              if trend_C == 0 :
                  print("** Mid **")
              elif trend_C == +1 : 
                   print("** One_third_UP **")
              else :  print("** One_third_Down **")
-                          
+             print("Baseroof5 : " , PublicVarible.Baseroof5)
+             print("Close -2 : " , FrameRatesM5.iloc[-2]['close'])
+             print("Basefloor5 : " , PublicVarible.Basefloor5)
+             
 
-
+             ## لگ نزولی
+             end_index = -16
+             current_index = -3
+             count = 1
+             high_low_diff = 0.0
+             Text = None
              if (FrameRatesM5.iloc[-2]['high'] > FrameRatesM5.iloc[-3]['high']) :# and (FrameRatesM5.iloc[-2]['low'] > FrameRatesM5.iloc[-3]['low']) : 
                    while current_index > end_index : 
                        Now_c_H = FrameRatesM5.iloc[current_index]['high']
@@ -149,12 +149,12 @@ class SupplyDemandStrategyV9():
                            break
              if count > 1 : 
                 high_low_diff = round((abs( FrameRatesM5['low'].iloc[current_index : -2 ].min() - FrameRatesM5.iloc[current_index]['high'])) / (SymbolInfo.point),2)
-                if high_low_diff < (200 * ATR_Value * 0.9) : return
+                if high_low_diff < (200 * ATR_Value * 0.9) and high_low_diff > (1200 * ATR_Value) : return
                 if round(round(abs(FrameRatesM5.iloc[-2]['high'] - FrameRatesM5['low'].iloc[current_index : -2 ].min()) / (SymbolInfo.point) / 10, 2) / high_low_diff * 1000,1) > 50 : return
 
                 PublicVarible.Basefloor5 = FrameRatesM5['low'].iloc[current_index : -2 ].min()
                 PublicVarible.Baseroof5 = FrameRatesM5.iloc[-2]['high']
-                range_height = round(abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)
+                PublicVarible.range_height = round(abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)
                 print(f"Down high_low_diff: {high_low_diff}  and  PublicVarible.Baseroof5: {PublicVarible.Baseroof5}  and  PublicVarible.Basefloor5: {PublicVarible.Basefloor5} and  Range arraye : {abs(PublicVarible.Basefloor5 - PublicVarible.Baseroof5) / (SymbolInfo.point)} \n")
                 current_time = time.time()
                 if current_time - PublicVarible.last_execution_time >= 300:  
@@ -164,10 +164,10 @@ class SupplyDemandStrategyV9():
                    Text += f"تعداد کندل: {count}\n"
                    Text += f"سقف: {PublicVarible.Baseroof5} \n"
                    Text += f"کف : {PublicVarible.Basefloor5} \n"
-                   Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff * 1000,1) } % \n"
-                   Text += f"ارتفاع رنج: {range_height} pip \n"
-                   Text += f"حجم کل مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
-                   Text += f"حجم پله : {round(Balace * 0.0015 / range_height / 3 , 2)} \n"    
+                   Text += f"نسبت رنج به لگ: {round(PublicVarible.range_height / high_low_diff * 1000,1) } % \n"
+                   Text += f"ارتفاع رنج: {PublicVarible.range_height} pip \n"
+                   Text += f"حجم کل مجاز : {round(Balace * (PublicVarible.risk/1000) / PublicVarible.range_height , 2)} \n"
+                   Text += f"حجم پله : {round(Balace * (PublicVarible.risk/1000) / PublicVarible.range_height / 3 , 2)} \n"    
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}"
                    PromptToTelegram(Text)
                    PublicVarible.last_execution_time = current_time
@@ -192,12 +192,12 @@ class SupplyDemandStrategyV9():
                            break
              if count > 1 : 
                 high_low_diff = round((abs(FrameRatesM5.iloc[current_index : -2]['high'].max() - FrameRatesM5.iloc[current_index]['low'])) / (SymbolInfo.point) , 2)
-                if high_low_diff < (200 * ATR_Value * 0.9) : return
+                if high_low_diff < (200 * ATR_Value * 0.9) and high_low_diff > (1200 * ATR_Value) : return
                 if round((round(abs((FrameRatesM5.iloc[current_index : -2]['high'].max()) - ( FrameRatesM5.iloc[-2]['low'])) / (SymbolInfo.point) / 10, 2)) / high_low_diff * 1000,1) > 50 : return
 
                 PublicVarible.Baseroof5 = FrameRatesM5.iloc[current_index : -2]['high'].max()
                 PublicVarible.Basefloor5 = FrameRatesM5.iloc[-2]['low']
-                range_height = round(abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)
+                PublicVarible.range_height = round(abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)
                 print(f"Up high_low_diff: {high_low_diff}  and  PublicVarible.Baseroof5: {PublicVarible.Baseroof5}  and  PublicVarible.Basefloor5: {PublicVarible.Basefloor5} and  Range arraye : {abs(PublicVarible.Basefloor5 - PublicVarible.Baseroof5) / (SymbolInfo.point)} \n")
                 current_time = time.time()
                 if current_time - PublicVarible.last_execution_time >= 300:  
@@ -207,15 +207,15 @@ class SupplyDemandStrategyV9():
                    Text += f"تعداد کندل: {count}\n"
                    Text += f"سقف: {PublicVarible.Baseroof5} \n"
                    Text += f"کف : {PublicVarible.Basefloor5} \n"
-                   Text += f"نسبت رنج به لگ: {round(range_height / high_low_diff * 1000,1) } % \n"
-                   Text += f"ارتفاع رنج: {range_height} pip \n"
-                   Text += f"حجم کل مجاز : {round(Balace * 0.0015 / range_height , 2)} \n"
-                   Text += f"حجم پله : {round(Balace * 0.0015 / range_height / 3 , 2)} \n"
+                   Text += f"نسبت رنج به لگ: {round(PublicVarible.range_height / high_low_diff * 1000,1) } % \n"
+                   Text += f"ارتفاع رنج: {PublicVarible.range_height} pip \n"
+                   Text += f"حجم کل مجاز : {round(Balace * (PublicVarible.risk/1000) / PublicVarible.range_height , 2)} \n"
+                   Text += f"حجم پله : {round(Balace * (PublicVarible.risk/1000) / PublicVarible.range_height / 3 , 2)} \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}"
 
                    PromptToTelegram(Text)
                    PublicVarible.last_execution_time = current_time
-
+             
              if FrameRatesM5.iloc[-2]['close'] > PublicVarible.Baseroof5 and PublicVarible.Baseroof5 != 0 : 
                 print(f"price is {FrameRatesM5.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof5} ")
                 if current_time - PublicVarible.last_execution_time >= 300:   
@@ -227,7 +227,6 @@ class SupplyDemandStrategyV9():
                    else :  Text +=  f"قدرت در دست فروشندگان است 🐻 "
                    PromptToTelegram(Text)  
                    PublicVarible.last_execution_time = current_time 
-                   
 #Buy
                 buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
                 if buy_positions_with_open_prices:
@@ -237,14 +236,22 @@ class SupplyDemandStrategyV9():
                      if position_info.symbol == self.Pair :
                         Botdashboard(53 , self.Pair)
                         return
-                     
-                EntryPrice = SymbolInfo.bid 
-                Volume = 0.03                                               ######### قیمت  ورود به معامله ########
+                EntryPrice = SymbolInfo.ask
+                Entryheight = round(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroof5) / (SymbolInfo.point) / 10, 2)      
+                Volume = round(Balace * (PublicVarible.risk/1000) / Entryheight , 2)                                             ######### قیمت  ورود به معامله ########
                 SL = PublicVarible.Basefloor5 - ( SymbolInfo.point * 50) #EntryPrice - round(ATR_Value * 1.5 , 2)  #PublicVarible.Basefloor5 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
                 TP1 = abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) + EntryPrice  #SymbolInfo.bid + ( SymbolInfo.point * 100)   
-                if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroof5) < abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)) and trend_C == +1 : # and PublicVarible.hmaSignal == 1 :
+                write_trade_info_to_file(self.Pair ,"Buy", EntryPrice, SL, TP1, trend_C )
+                if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroof5) < (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)/2)) and trend_C == +1 and Time_Signal == 1 : # and PublicVarible.hmaSignal == 1 :
                   Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                   OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
+                else : 
+                    TextN = f"\n self.Pair | pos = Buy | EntryPrice = {EntryPrice} | SL = {SL} | TP1 = {TP1} | trend_C = {trend_C} \n"
+                    TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5)) - (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)/2)} (If NEG T is True)" 
+                    write_None(self.Pair , TextN )
+                  
+                  #EntryPrice = PublicVarible.Baseroof5 + ( SymbolInfo.point * 50)
+                  #OrderBuyLimit(Pair= self.Pair, Volume= Volume , EntryPrice = EntryPrice , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
                 PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0  
 
              if FrameRatesM5.iloc[-2]['close'] < PublicVarible.Basefloor5 and PublicVarible.Basefloor5 != 0 : 
@@ -269,12 +276,18 @@ class SupplyDemandStrategyV9():
                         return
                 
                 EntryPrice = SymbolInfo.ask  
-                Volume = 0.03                                    ######### قیمت  ورود به معامله ########
+                Entryheight = round(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)      
+                Volume = round(Balace * (PublicVarible.risk/1000) / Entryheight , 2)
                 SL = PublicVarible.Baseroof5 + ( SymbolInfo.point * 50) #EntryPrice + round(ATR_Value * 1.5 , 2) #PublicVarible.Baseroof5 + ( SymbolInfo.point * 50)         #########  تعیین حدضرر معامله #########
                 TP1 = EntryPrice - abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)  #SymbolInfo.ask - ( SymbolInfo.point * 100) 
-                if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5) < abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) ) and trend_C == -1 : #and PublicVarible.hmaSignal == -1:
+                if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5) < (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)/2) ) and trend_C == -1 and Time_Signal == 1 : #and PublicVarible.hmaSignal == -1:
                   Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                   OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V2 - M5")
+                  write_trade_info_to_file(self.Pair ,"Sell", EntryPrice, SL, TP1, 0 )
+                else : 
+                    TextN = f"\n self.Pair | pos = Sell | EntryPrice = {EntryPrice} | SL = {SL} | TP1 = {TP1} | trend_C = {trend_C} \n"
+                    TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5)) - (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)/2)} (If NEG T is True)" 
+                    write_None(self.Pair , TextN )
                 PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0
                 
       

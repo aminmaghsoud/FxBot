@@ -44,7 +44,6 @@ MarketIsOpen = False
 StartBot = True
 # آیا ربات میتواند سفارشی باز کند
 CanOpenOrder = True
-CanOpenOrderST = True
 # تاریخ ایجاد ربات
 CreateAt = None
 # تاریخ انقضاء ربات
@@ -96,8 +95,9 @@ elif  current_datetime.weekday() in [0 , 2]  :
   risk = 3
 trade_datetime = datetime.now()
 Quick_trade = True
-lot_size = 0.01
-CanOpenOrder = True
+lot_size = 0.02
+BaseFind = 0
+range_height = 0
 
 def update_variables(new_risk, new_lot_size, new_quick_trade, new_can_open_order):
     PublicVarible.risk = new_risk
