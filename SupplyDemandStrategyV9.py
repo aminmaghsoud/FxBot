@@ -2,6 +2,7 @@
 from Utility import *
 from Trade import *
 import time
+from datetime import datetime
 import MetaTrader5 as MT5
 from colorama import init, Fore, Back, Style
 import PublicVarible
@@ -97,12 +98,36 @@ class SupplyDemandStrategyV9():
                                      print(f" Condition not met for ticket                             {ticket}" , "\n")
 
 ########################################################################################### دریافت اطلاعات تایم فریم ها و محاسبه اندیکاتور #########################################################################################################
+             # دریافت زمان فعلی
+
              current_datetime = datetime.now()
-             LastCandle = FrameRatesM5.iloc[-2]
-             minutes_to_exclude = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
-             if (LastCandle['datetime'].hour in [0 , 1 , 9 , 10 , 15 , 16, 17 , 22 , 23])  or PublicVarible.CanOpenOrder == False : #or ((current_datetime.weekday() == 4 and current_datetime.hour > 20)) or (current_datetime.minute not in minutes_to_exclude ) :#or current_datetime.second > 20  : 
-                Botdashboard(4 , self.Pair)
-                Time_Signal = 0  
+             # تعریف بازه‌های زمانی ممنوعه
+             restricted_time_ranges = [
+                (0, 0, 2, 0),    # 00:00 تا 02:00
+                (4, 10, 4, 40),  # 04:10 تا 04:40
+                (9, 45, 13, 0),  # 9:45 تا 13:00
+                (16, 0, 19, 0),  # 16:00 تا 19:00
+                (22, 0, 23, 59)  # 22:00 تا 23:59
+             ]
+             # بررسی اینکه آیا ساعت جاری در یکی از بازه‌های ممنوعه است یا خیر
+             in_restricted_time = any(
+                start_h * 60 + start_m <= current_datetime.hour * 60 + current_datetime.minute <= end_h * 60 + end_m
+                for start_h, start_m, end_h, end_m in restricted_time_ranges
+             )
+             # اگر در بازه‌ی زمانی ممنوعه هستیم، برنامه متوقف شود
+             print ("in_restricted_time" , in_restricted_time)
+             print ("current_datetime" , current_datetime)
+             print("Before Update - CanOpenOrder:", PublicVarible.CanOpenOrder)  # مقدار قبل از تغییر
+
+             restricted_hours = {7, 13, 19}
+             if current_datetime.minute == 0 and current_datetime.hour in restricted_hours:
+                PublicVarible.CanOpenOrder = False
+
+             if in_restricted_time or not PublicVarible.CanOpenOrder :
+                 Botdashboard(4, self.Pair)
+                 Time_Signal = 0
+
+             
              ATR = PTA.atr(high = FrameRatesM5['high'],low = FrameRatesM5['low'], close = FrameRatesM5['close'],length=14)
              ATR_Value = ATR.iloc[-1]
              #print("ATR_Value" , ATR_Value)
@@ -167,8 +192,8 @@ class SupplyDemandStrategyV9():
                    Text += f"کف : {PublicVarible.Basefloor5} \n"
                    Text += f"نسبت رنج به لگ: {round(PublicVarible.range_height / high_low_diff * 1000,1) } % \n"
                    Text += f"ارتفاع رنج: {PublicVarible.range_height} pip \n"
-                   Text += f"حجم کل مجاز : {round(Balace * (PublicVarible.risk/1000) / PublicVarible.range_height , 2)} \n"
-                   Text += f"حجم پله : {round(Balace * (PublicVarible.risk/1000) / PublicVarible.range_height / 3 , 2)} \n"    
+                   Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_height , 2)} \n"
+                   #Text += f"حجم پله : {round(Balace * (PublicVarible.risk/1000) / PublicVarible.range_height / 3 , 2)} \n"    
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}"
                    PromptToTelegram(Text)
                    PublicVarible.last_execution_time = current_time
@@ -209,8 +234,8 @@ class SupplyDemandStrategyV9():
                    Text += f"کف : {PublicVarible.Basefloor5} \n"
                    Text += f"نسبت رنج به لگ: {round(PublicVarible.range_height / high_low_diff * 1000,1) } % \n"
                    Text += f"ارتفاع رنج: {PublicVarible.range_height} pip \n"
-                   Text += f"حجم کل مجاز : {round(Balace * (PublicVarible.risk/1000) / PublicVarible.range_height , 2)} \n"
-                   Text += f"حجم پله : {round(Balace * (PublicVarible.risk/1000) / PublicVarible.range_height / 3 , 2)} \n"
+                   Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_height , 2)} \n"
+                   #Text += f"حجم پله : {round(Balace * (PublicVarible.risk/1000) / PublicVarible.range_height / 3 , 2)} \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}"
 
                    PromptToTelegram(Text)
@@ -236,17 +261,20 @@ class SupplyDemandStrategyV9():
                      if position_info.symbol == self.Pair :
                         Botdashboard(53 , self.Pair)
                         return
+                     
                 EntryPrice = SymbolInfo.ask
-                Entryheight = round(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)      
-                Volume = round(Balace * (PublicVarible.risk/1000) / Entryheight , 2)                                             ######### قیمت  ورود به معامله ########
-                SL = PublicVarible.Basefloor5 - ( SymbolInfo.point * 50) #EntryPrice - round(ATR_Value * 1.5 , 2)  #PublicVarible.Basefloor5 - ( SymbolInfo.point * 50)    #########  تعیین حدضرر معامله #########
-                TP1 =  EntryPrice + abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)#SymbolInfo.bid + ( SymbolInfo.point * 100)   
+                SL = PublicVarible.Basefloor5 - ( SymbolInfo.point * 50)   #########  تعیین حدضرر معامله #########
+                TP1 =  SymbolInfo.ask + abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)#SymbolInfo.bid + ( SymbolInfo.point * 100) 
+                Entryheight = round(abs(EntryPrice - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)      
+                Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)   
                 TextN = f"\nVolume = {Volume} \n"
                 TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroof5)) - (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)*0.75)} (If NEG T is True)" 
-                write_trade_info_to_file(self.Pair ,"Buy", EntryPrice, SL, TP1, TextN )
-
+                write_trade_info_to_file(self.Pair ,"Buy", SymbolInfo.ask, SL, TP1, TextN )
                 if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroof5) < (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) * 0.75 )) and trend_C == +1 and Time_Signal == 1 : # and PublicVarible.hmaSignal == 1 :
                   Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                  EntryPrice = SymbolInfo.ask
+                  Entryheight = round(abs(EntryPrice - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)      
+                  Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2) 
                   OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
                 else : 
                     TextN = f"\n self.Pair | pos = Buy | EntryPrice = {EntryPrice} | SL = {SL} | TP1 = {TP1} \n"
@@ -278,17 +306,20 @@ class SupplyDemandStrategyV9():
                         Botdashboard(54 , self.Pair)
                         return
                 
-                EntryPrice = SymbolInfo.ask  
-                Entryheight = round(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroof5) / (SymbolInfo.point) / 10, 2)      
-                Volume = round(Balace * (PublicVarible.risk/1000) / Entryheight , 2)
-                SL = PublicVarible.Baseroof5 + ( SymbolInfo.point * 50) #EntryPrice + round(ATR_Value * 1.5 , 2) #PublicVarible.Baseroof5 + ( SymbolInfo.point * 50)         #########  تعیین حدضرر معامله #########
-                TP1 = EntryPrice - abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)  #SymbolInfo.ask - ( SymbolInfo.point * 100) 
+                EntryPrice = SymbolInfo.bid 
+                SL = PublicVarible.Baseroof5 + ( SymbolInfo.point * 50)        #########  تعیین حدضرر معامله #########
+                TP1 = SymbolInfo.bid   - abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)  #SymbolInfo.ask - ( SymbolInfo.point * 100) 
+                Entryheight = round(abs(EntryPrice - PublicVarible.Baseroof5) / (SymbolInfo.point) / 10, 2)      
+                Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)
                 TextN = f"\nVolume = {Volume} \n"
                 TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5)) - (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)*0.75)} (If NEG T is True)\n" 
-                write_trade_info_to_file(self.Pair ,"Sell", EntryPrice, SL, TP1, TextN )
+                write_trade_info_to_file(self.Pair ,"Sell", SymbolInfo.bid  , SL, TP1, TextN )
 
                 if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5) < (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)* 0.75) ) and trend_C == -1 and Time_Signal == 1 : #and PublicVarible.hmaSignal == -1:
                   Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                  EntryPrice = SymbolInfo.bid  
+                  Entryheight = round(abs(EntryPrice - PublicVarible.Baseroof5) / (SymbolInfo.point) / 10, 2)      
+                  Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)
                   OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V2 - M5")
                   
                 else : 

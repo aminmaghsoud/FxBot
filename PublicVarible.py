@@ -43,7 +43,7 @@ MarketIsOpen = False
 # آیا ربات فعال است
 StartBot = True
 # آیا ربات میتواند سفارشی باز کند
-CanOpenOrder = True
+CanOpenOrder = False
 # تاریخ ایجاد ربات
 CreateAt = None
 # تاریخ انقضاء ربات
