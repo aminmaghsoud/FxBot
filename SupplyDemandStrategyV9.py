@@ -99,7 +99,7 @@ class SupplyDemandStrategyV9():
 
 ########################################################################################### دریافت اطلاعات تایم فریم ها و محاسبه اندیکاتور #########################################################################################################
              # دریافت زمان فعلی
-
+             current_time = time.time()
              current_datetime = datetime.now()
              # تعریف بازه‌های زمانی ممنوعه
              restricted_time_ranges = [
@@ -121,7 +121,13 @@ class SupplyDemandStrategyV9():
 
              restricted_hours = {7, 13, 19}
              if current_datetime.minute == 0 and current_datetime.hour in restricted_hours:
-                PublicVarible.CanOpenOrder = False
+                #PublicVarible.CanOpenOrder = False
+                PublicVarible.risk = 1
+                if current_time - PublicVarible.last_execution_time >= 60 :
+                  Text = f"⏰ Time : {current_datetime} and CanOpenOrder = False 🔒"
+                  PromptToTelegram(Text)
+                  PublicVarible.last_execution_time = current_time
+
 
              if in_restricted_time or not PublicVarible.CanOpenOrder :
                  Botdashboard(4, self.Pair)
@@ -133,25 +139,37 @@ class SupplyDemandStrategyV9():
              #print("ATR_Value" , ATR_Value)
 ########################################################################################### دریافت اطلاعات تایم فریم ها و محاسبه اندیکاتور #########################################################################################################
              Balace = GetBalance()
-             current_time = time.time()
+             
              trend_C = 0
              close_C = FrameRatesM5.iloc[-2]['close']
              high_C = FrameRatesM5.iloc[-2]['high'] 
              low_C = FrameRatesM5.iloc[-2]['low']
+             high_C_O = FrameRatesM5.iloc[-3]['high'] 
+             low_C_O = FrameRatesM5.iloc[-3]['low']
              One_third_UP = high_C - ((high_C - low_C) / 3)
              One_third_Down = low_C + ((high_C - low_C) / 3)
-             if  close_C >= One_third_UP :
+                 
+             if  close_C >= One_third_UP and close_C > high_C_O  :
                  trend_C = +1
-             elif close_C <= One_third_Down :
+             elif close_C <= One_third_Down and close_C < low_C_O:
                  trend_C = -1
+             elif close_C > One_third_Down and close_C < One_third_UP and close_C > high_C_O :
+                 trend_C = +2
+             elif close_C > One_third_Down and close_C < One_third_UP and  close_C < low_C_O :
+                 trend_C = -2
+                 
              if trend_C == 0 :
                  print("** Mid **")
              elif trend_C == +1 : 
-                  print("** One_third_UP **")
-             else :  print("** One_third_Down **")
+                  print("** One_third_UP Major **")
+             elif trend_C == +2 : 
+                  print("** One_third_UP Minor **")
+             elif trend_C == -1 : 
+                  print("** One_third_Down Major **")
+             else: print("** One_third_Down Minor **")
+
              print(f"\n Baseroof5 : {PublicVarible.Baseroof5}")
-             print("Close -2 : " , FrameRatesM5.iloc[-2]['close'])
-             print("Volume -2 : " , FrameRatesM5.iloc[-2]['tick_volume'])
+             print("Close -2 : " , close_C)
              print("Basefloor5 : " , PublicVarible.Basefloor5)
              
 
@@ -162,7 +180,7 @@ class SupplyDemandStrategyV9():
              count = 1
              high_low_diff = 0.0
              Text = None
-             if (FrameRatesM5.iloc[-2]['high'] > FrameRatesM5.iloc[-3]['high']) :# and (FrameRatesM5.iloc[-2]['low'] > FrameRatesM5.iloc[-3]['low']) : 
+             if (high_C > high_C_O) :# and (FrameRatesM5.iloc[-2]['low'] > FrameRatesM5.iloc[-3]['low']) : 
                    while current_index > end_index : 
                        Now_c_H = FrameRatesM5.iloc[current_index]['high']
                        Old_c_H = FrameRatesM5.iloc[current_index - 1]['high'] 
@@ -205,7 +223,7 @@ class SupplyDemandStrategyV9():
              count = 1
              high_low_diff = 0.0
              Text = None       
-             if (FrameRatesM5.iloc[-2]['low'] < FrameRatesM5.iloc[-3]['low']) :# and (FrameRatesM5.iloc[-2]['high'] < FrameRatesM5.iloc[-3]['high']) :
+             if (low_C < low_C_O) :# and (FrameRatesM5.iloc[-2]['high'] < FrameRatesM5.iloc[-3]['high']) :
                    while current_index > end_index : 
                        Now_c_H = FrameRatesM5.iloc[current_index]['high']
                        Old_c_H = FrameRatesM5.iloc[current_index - 1]['high'] 
@@ -270,11 +288,12 @@ class SupplyDemandStrategyV9():
                 TextN = f"\nVolume = {Volume} \n"
                 TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroof5)) - (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)*0.75)} (If NEG T is True)" 
                 write_trade_info_to_file(self.Pair ,"Buy", SymbolInfo.ask, SL, TP1, TextN )
-                if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroof5) < (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) * 0.75 )) and trend_C == +1 and Time_Signal == 1 : # and PublicVarible.hmaSignal == 1 :
+                if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroof5) < (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) * 0.75 )) and (trend_C == +1 or trend_C == +2) and Time_Signal == 1 : # and PublicVarible.hmaSignal == 1 :
                   Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                   EntryPrice = SymbolInfo.ask
                   Entryheight = round(abs(EntryPrice - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)      
                   Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2) 
+                  if trend_C == 2 : Volume = round(Volume/2,2)
                   OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
                 else : 
                     TextN = f"\n self.Pair | pos = Buy | EntryPrice = {EntryPrice} | SL = {SL} | TP1 = {TP1} \n"
@@ -315,11 +334,12 @@ class SupplyDemandStrategyV9():
                 TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5)) - (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)*0.75)} (If NEG T is True)\n" 
                 write_trade_info_to_file(self.Pair ,"Sell", SymbolInfo.bid  , SL, TP1, TextN )
 
-                if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5) < (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)* 0.75) ) and trend_C == -1 and Time_Signal == 1 : #and PublicVarible.hmaSignal == -1:
+                if (abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5) < (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)* 0.75) ) and (trend_C == -1 or trend_C == -2) and Time_Signal == 1 : #and PublicVarible.hmaSignal == -1:
                   Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                   EntryPrice = SymbolInfo.bid  
                   Entryheight = round(abs(EntryPrice - PublicVarible.Baseroof5) / (SymbolInfo.point) / 10, 2)      
                   Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)
+                  if trend_C == -2 : Volume = round(Volume/2,2)
                   OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V2 - M5")
                   
                 else : 

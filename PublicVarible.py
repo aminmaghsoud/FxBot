@@ -1,12 +1,10 @@
 ﻿import concurrent.futures
 import pytz
 from Utility import *
-import time
 from datetime import datetime
 import tkinter as tk
 import sys
 from threading import Thread
-import json
 ########################################################################################################
 #ConnectionString = ("Driver={ODBC Driver 18 for SQL Server}; Server=.; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;")
 ConnectionString = (r"Driver={ODBC Driver 18 for SQL Server}; Server=.\FXBOT; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;") 

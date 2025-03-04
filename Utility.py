@@ -1,8 +1,6 @@
-﻿import json
-import math
+﻿import math
 from pickle import TRUE
 import MetaTrader5 as MT5
-import pytz
 from datetime import datetime, timedelta
 import pandas as PD
 import pandas_ta as PTA
@@ -12,13 +10,10 @@ import PublicVarible
 import pyodbc
 import warnings
 import requests
-import urllib.parse
 from colorama import Fore, init , Back
 import os
-import asyncio
 import telegram
 from art import *
-import Utility
 
 
 
@@ -1111,102 +1106,4 @@ def get_all_buy_positions(Pair):
          return all_buy_positions
     
 
-
-def draw_rectangle(symbol, price1, price2, duration_hours=1):
-    # زمان فعلی سیستم
-    current_time = datetime.now()
-
-    # زمان بعد از مدت مشخص (در اینجا یک ساعت)
-    end_time = current_time + timedelta(hours=duration_hours)
-
-    # فرمت زمان برای استفاده در MQL5
-    current_time_str = current_time.strftime('%Y.%m.%d %H:%M')
-    end_time_str = end_time.strftime('%Y.%m.%d %H:%M')
-
-    # تعریف کد MQL5
-    script_code = f"""
-void OnStart()
-  {{
-   // Define the coordinates of the rectangle
-   datetime time1 = D'{current_time_str}';
-   double price1 = {price1};
-   datetime time2 = D'{end_time_str}';
-   double price2 = {price2};
-
-   // Draw the rectangle on the specified symbol chart
-   if(SymbolSelect("{symbol}", true))
-   {{
-       long rect_handle = ObjectCreate("{symbol}", "MyRectangle", OBJ_RECTANGLE, 0, time1, price1, time2, price2);
-       if(rect_handle == 0)
-       {{
-           Print("Failed to create rectangle on {symbol}!");
-       }}
-       else
-       {{
-           ObjectSetInteger("{symbol}", "MyRectangle", OBJPROP_COLOR, clrRed);
-           ObjectSetInteger("{symbol}", "MyRectangle", OBJPROP_WIDTH, 2);
-       }}
-   }}
-   else
-   {{
-       Print("Failed to select {symbol}!");
-   }}
-  }}
-"""
-
-ConnectionString = (r"Driver={ODBC Driver 18 for SQL Server}; Server=.\FXBOT; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;") 
-def update_pair_values(pair_name, new_roof, new_floor, new_diff,new_message):
-    try:
-        # اتصال به دیتابیس
-        conn = pyodbc.connect(ConnectionString)
-        cursor = conn.cursor()
-        
-        # اجرای کوئری برای بروزرسانی داده‌ها در جدول Base
-        update_query = """
-            UPDATE Base
-            SET roof = ?, floor = ?, diff = ? , message = ?
-            WHERE Pair = ?
-        """
-        cursor.execute(update_query, (new_roof, new_floor, new_diff, new_message ,pair_name))
-        
-        # تایید تغییرات
-        conn.commit()
-        
-        # چاپ پیام موفقیت
-        print(f"Values updated for Pair: {pair_name}")
-        
-        # بستن cursor و اتصال
-        cursor.close()
-        conn.close()
-        return True
-    except pyodbc.Error as e:
-        print("Error in connection or update operation", e)
-        return False
-    
-ConnectionString = (r"Driver={ODBC Driver 18 for SQL Server}; Server=.\FXBOT; Database=FxBotDB; UID=sa; PWD=qazwsx!@#6027; Encrypt=no;") 
-def get_pair_values(pair_name):
-    try:
-        # اتصال به دیتابیس
-        conn = pyodbc.connect(ConnectionString)
-        cursor = conn.cursor()
-        
-        # اجرای کوئری برای خواندن داده‌ها از جدول Base
-        select_query = "SELECT roof, floor, diff , message FROM Base WHERE Pair = ?"
-        cursor.execute(select_query, (pair_name,))
-        row = cursor.fetchone()
-        
-        if row:
-            # بازگرداندن مقادیر به صورت سه متغیر مجزا
-            return row.roof, row.floor, row.diff , row.message
-        else:
-            print(f"No data found for Pair: {pair_name}")
-            return False, False, False , False
-        
-        # بستن cursor و اتصال
-        cursor.close()
-        conn.close()
-        
-    except pyodbc.Error as e:
-        print("Error in connection or select operation", e)
-        return False, False, False , False
 
