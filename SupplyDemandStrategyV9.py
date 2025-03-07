@@ -17,7 +17,7 @@ class SupplyDemandStrategyV9():
       def Main(self):
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ Strategy V9 M5 Range and Spike --")
           # ارسال پیام
-          chat_ids = [152284556 , 388239785 , 98785822 , 1864188026 , 92618613 , 76616815]
+          chat_ids = [152284556 , 388239785 , 98785822 , 1864188026 , 92618613 , 76616815 , 6958871546]
           
           Time_Signal = 1
           high_low_diff = 0 
@@ -274,7 +274,7 @@ class SupplyDemandStrategyV9():
                 print(f"price is {FrameRatesM5.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof5} ")
                 if current_time - PublicVarible.last_execution_timeS  >= 300:   
                    Text = f"🚨🚧  🔺Buy Position🔺  🚧🚨 \n"
-                   Text = f"price:{FrameRatesM5.iloc[-2]['close']}$🔺Upper #Roof {PublicVarible.Baseroof5}$ \n "
+                   Text += f"price:{FrameRatesM5.iloc[-2]['close']}$🔺Upper #Roof {PublicVarible.Baseroof5}$ \n "
                    if trend_C == 0 :
                       Text += f" قدرت فروشنده و خریدار #برابر است 🏓 \n"
                       Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
