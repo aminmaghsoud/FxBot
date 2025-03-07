@@ -68,7 +68,7 @@ def LoadFromCSV(FileName:str, DateTimeColumnName:str):
        return None
 ########################################################################################################
 def GetConfiguration(BotId:int):
-    Text = "🔸Hello, dear" + "\n" + "I am IRAN BANOO ... Iranian cheetah!" + "\n" + "Smart and expert trading robot in the forex market. As you know, financial markets are risky, but I am ready to gain maximum profit and prevent losses by relying on my creative abilities in quick trend detection, capital management and trading management." + "\n"
+    Text = "🔸Hello, dear" + "\n" + "من پیروز هستم... یوزپلنگ ایرانی! 🐆 یک ربات معامله‌گر هوشمند و متخصص در بازار فارکس. همان‌طور که می‌دانید، بازارهای مالی پرریسک هستند، اما من با تکیه بر توانایی‌های خلاقانه‌ام در شناسایی سریع روندها، مدیریت سرمایه و کنترل معاملات، آماده‌ام تا بیشترین سود را کسب کرده و از ضررها جلوگیری کنم. 🚀" + "\n"
     if not MT5.initialize():
        Prompt("Initialize() Failed, Error Code = {}".format(MT5.last_error()))
        PromptToTelegram(Text= "Initialize() Failed, Error Code = {}".format(MT5.last_error()))
@@ -354,14 +354,14 @@ def Statistics():
              Text += "\n" + f" ⚠️ Tradeing Risk >> High 🔴 "
     elif PublicVarible.risk == 2 : 
              Prompt(f"Risk: Medium")
-             Text += "\n" + f" ⚠️ Tradeing Risk >> Medium 🟢"
+             Text += "\n" + f" ⚠️ Tradeing Risk >> Medium 🟡"
     elif PublicVarible.risk == 1 : 
              Prompt(f"Risk: Low")
-             Text += "\n" + f" ⚠️ Tradeing Risk >> Low 🟡"
-    if PublicVarible.Quick_trade == False : 
-             Text += "\n" + f" ⚠️ Quck tread if OFF 🟢 "
-    elif PublicVarible.Quick_trade == True : 
-             Text += "\n" + f" ⚠️ Quck tread if ON 🔴 "
+             Text += "\n" + f" ⚠️ Tradeing Risk >> Low 🟢"
+    #if PublicVarible.Quick_trade == False : 
+             #Text += "\n" + f" ⚠️ Quck tread if OFF 🟢 "
+    #elif PublicVarible.Quick_trade == True : 
+            # Text += "\n" + f" ⚠️ Quck tread if ON 🔴 "
     PromptToTelegram(Text= Text)
 ########################################################################################################
 def ForceCloseAllPosition():
@@ -1105,5 +1105,24 @@ def get_all_buy_positions(Pair):
          
          return all_buy_positions
     
+
+import requests
+
+def send_telegram_messages(text, chat_ids):
+    token = "8041867463:AAEUH_w2CYFne521LxNVsuR6hiuqk-75pfQ"
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+
+    responses = {}
+    for chat_id in chat_ids:
+        payload = {
+            "chat_id": chat_id,
+            "text": text,
+            "parse_mode": "HTML"
+        }
+        response = requests.post(url, json=payload)
+        responses[chat_id] = response.json()
+
+    return responses
+
 
 

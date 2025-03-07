@@ -42,7 +42,7 @@ class FxBot():
           if Balance >= 1000:
               A =  Balance // 1000
               Balance = round(A * 1000)
-
+          
           PublicVarible.LastStoplossChange = None
           PublicVarible.lastclose = 0
           PublicVarible.Botstatus = 0
