@@ -17,7 +17,6 @@ class SupplyDemandStrategyV9():
       def Main(self):
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ Strategy V9 M5 Range and Spike --")
           # ارسال پیام
-          chat_ids = [152284556 , 388239785 , 98785822 , 1864188026 , 92618613 , 76616815 , 6958871546]
           
           Time_Signal = 1
           high_low_diff = 0 
@@ -133,7 +132,7 @@ class SupplyDemandStrategyV9():
                   Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
                   PromptToTelegram(Text)
                   Text = f"⚠️!سلام! ⚠️اطلاعات ارائه شده در این بات صرفا جنبه #آموزشی داشته و سازنده مسئولیتی در قبال ضرر احتمالی شما ندارد \n"
-                  results = send_telegram_messages(Text, chat_ids)
+                  results = send_telegram_messages(Text, PublicVarible.chat_ids)
                   PublicVarible.last_execution_timeT = current_time
                   
 
@@ -223,7 +222,7 @@ class SupplyDemandStrategyV9():
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}\n"
                    Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
                    #PromptToTelegram(Text)
-                   results = send_telegram_messages(Text, chat_ids)
+                   results = send_telegram_messages(Text, PublicVarible.chat_ids)
                    PublicVarible.last_execution_time = current_time
 
 
@@ -266,14 +265,14 @@ class SupplyDemandStrategyV9():
                    #Text += f"حجم پله : {round(Balace * (PublicVarible.risk/1000) / PublicVarible.range_height / 3 , 2)} \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute} \n"
                    Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
-                   results = send_telegram_messages(Text, chat_ids)
+                   results = send_telegram_messages(Text, PublicVarible.chat_ids)
                    #PromptToTelegram(Text)
                    PublicVarible.last_execution_time = current_time
              
              if FrameRatesM5.iloc[-2]['close'] > PublicVarible.Baseroof5 and PublicVarible.Baseroof5 != 0 : 
                 print(f"price is {FrameRatesM5.iloc[-2]['close']} and Upper Roof {PublicVarible.Baseroof5} ")
                 if current_time - PublicVarible.last_execution_timeS  >= 300:   
-                   Text = f"🚨🚧  🔺Buy Position🔺  🚧🚨 \n"
+                   Text = f"🚨🚧  🔺Buy Position🔺  🚧🚨 \n \n"
                    Text += f"price:{FrameRatesM5.iloc[-2]['close']}$🔺Upper #Roof {PublicVarible.Baseroof5}$ \n "
                    if trend_C == 0 :
                       Text += f" قدرت فروشنده و خریدار #برابر است 🏓 \n"
@@ -285,7 +284,7 @@ class SupplyDemandStrategyV9():
                        Text += f"خروج قیمت از #سقف با قدرت #معمولی توسط خریداران 🐮 \n"
                        Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
                    #PromptToTelegram(Text)  
-                   results = send_telegram_messages(Text, chat_ids)
+                   results = send_telegram_messages(Text, PublicVarible.chat_ids)
                    PublicVarible.last_execution_timeS = current_time 
 #Buy
                 buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
@@ -324,7 +323,7 @@ class SupplyDemandStrategyV9():
              if FrameRatesM5.iloc[-2]['close'] < PublicVarible.Basefloor5 and PublicVarible.Basefloor5 != 0 : 
                 print(f"price is {FrameRatesM5.iloc[-2]['close']} and Under floor {PublicVarible.Basefloor5} ")
                 if current_time - PublicVarible.last_execution_timeS >= 300:   
-                   Text = f"🚨🚧  🔻Sell Position🔻  🚧🚨 \n"
+                   Text = f"🚨🚧  🔻Sell Position🔻  🚧🚨 \n\n"
                    Text += f"price:{FrameRatesM5.iloc[-2]['close']}$ 🔻Under #floor {PublicVarible.Basefloor5}$ \n "
                    if trend_C == 0 :
                       Text += f" قدرت فروشنده و خریدار #برابر است 🏓 \n"
@@ -336,7 +335,7 @@ class SupplyDemandStrategyV9():
                        Text +=  f"خروج قیمت از #کف با قدرت #معمولی توسط فروشندگان 🐻 \n"
 
                    #PromptToTelegram(Text)
-                   results = send_telegram_messages(Text, chat_ids)  
+                   results = send_telegram_messages(Text, PublicVarible.chat_ids)  
                    PublicVarible.last_execution_timeS = current_time  
 #Sell
                 sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########

@@ -9,7 +9,6 @@ from SupplyDemandStrategyV9 import *
 from Utility import *
 import sys
 from colorama import init, Fore, Back, Style
-
 ########################################################################################################
 class FxBot():
       def __init__(self):
@@ -83,12 +82,15 @@ class FxBot():
                    #system( 'cls' )
                    
                    for Item in PublicVarible.Pair:
+                           
+                       
                        LastTick = MT5.symbol_info_tick(Item['Name'])
                        if Item['Tick'] != LastTick.time:
                           Item['Tick'] = LastTick.time
                           
                           # بروزرسانی داده های مالی
                           SymbolInfo = MT5.symbol_info(Item['Name'])
+                          telalert()
                           print (Fore.BLACK,Back.LIGHTWHITE_EX,"Item Name                                               Result",Back.LIGHTBLUE_EX,"     Smart Pirouz is hunting ...    ", datetime.now().time(),Back.RESET,Fore.RESET,"\n" )
                           for index, pair_info in enumerate(PublicVarible.Pair):
                            if pair_info['Name'] == Item['Name']:
@@ -116,6 +118,7 @@ class FxBot():
                            if pair_info['Name'] == Item['Name']:
                                print(f" The index is: {index + 1}")
                                break
+                          telalert()
                           print (Fore.LIGHTWHITE_EX,Back.RED ," Symbol  :  ", SymbolInfo.name,Back.RESET,Fore.RESET,"                                 Point : ","{:.10f}".format(SymbolInfo.point) )
                           print ("            ",Back.RESET,Fore.RESET,"                                           spread: ",round(SymbolInfo.spread,1))
                           print ("            ",Back.RESET,Fore.RESET,"                                           TP pip: ",round(SymbolInfo.spread,1)*3/10 ,"\n" )

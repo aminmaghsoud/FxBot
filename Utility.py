@@ -14,6 +14,8 @@ from colorama import Fore, init , Back
 import os
 import telegram
 from art import *
+import jdatetime
+import requests
 
 
 
@@ -1210,7 +1212,6 @@ def get_all_buy_positions(Pair):
          return all_buy_positions
     
 
-import requests
 
 def send_telegram_messages(text, chat_ids):
     token = "8041867463:AAEUH_w2CYFne521LxNVsuR6hiuqk-75pfQ"
@@ -1228,5 +1229,19 @@ def send_telegram_messages(text, chat_ids):
 
     return responses
 
-
+def telalert() :
+    current_datetime = datetime.now()
+    restricted_hours = {9}
+    if (current_datetime.weekday() == 5) and  (current_datetime.minute == 0) and (current_datetime.second < 2) and (current_datetime.hour in restricted_hours):
+      Text = f"⚠️ توجه ⚠️ \n امروز شنبه مورخ {jdatetime.datetime.now().strftime('%Y-%m-%d')}  بازارهای جهانی فارکس و طلا #تعطیل است"
+      results = send_telegram_messages(Text, PublicVarible.chat_ids)
+    elif (current_datetime.weekday() == 6) and  (current_datetime.minute == 0) and (current_datetime.second < 2) and (current_datetime.hour in restricted_hours):
+      Text = f"⚠️ توجه ⚠️ \n امروز یکشنبه مورخ {jdatetime.datetime.now().strftime('%Y-%m-%d')}  بازارهای جهانی فارکس و طلا #تعطیل است"
+      results = send_telegram_messages(Text, PublicVarible.chat_ids) 
+    elif (current_datetime.weekday() == 6) and  (current_datetime.minute == 0) and (current_datetime.second < 2) and (current_datetime.hour == 21):
+      Text = f"⛔⚠️ توجه ⚠️⛔ \n فردا دوشنبه است و از ساعاتی دیگر بازار باز میشود! حتما #اخبار هفته جاری را مرور کنید"
+      results = send_telegram_messages(Text, PublicVarible.chat_ids) 
+    elif (current_datetime.weekday() == 4) and  (current_datetime.minute == 0) and (current_datetime.second < 2) and (current_datetime.hour == 21):
+      Text = f"⛔⚠️ توجه ⚠️⛔ \n امروز جمعه مورخ {jdatetime.datetime.now().strftime('%Y-%m-%d')} شب آخر بازار است . لطفا معاملات باز خود را مدیریت کنید"
+      results = send_telegram_messages(Text, PublicVarible.chat_ids)  
 
