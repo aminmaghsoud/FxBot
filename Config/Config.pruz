@@ -1,0 +1,27 @@
+﻿BotId=2
+Username=2256891
+Password=CY2YNq%m
+Server=AMarkets-Real
+Timeout=6000
+IsActive=1
+
+
+botName=AMN Bot
+VirtualBalance=3000
+MaxOpenTrades=20
+StakeCurrency=USDT
+LotIncreaseRatio=1000
+StartTimeOfBot=00:00:00.0000000
+EndTimeOfBot=23:59:59.0000000
+StopTradesBeforeNews=10
+StartTradesAfterNews=10
+LastRunTime=2025-03-07 21:25:00
+TelegramToken=7424175180:AAG2AODoYBu4gqDUkgcwdLuYIjhGfu_iWg0
+TelegramChatId=[177496720, 388239785]
+CreateAt=2024-01-01 01:56:00
+ExpireAt=2025-12-25 00:00:00
+Unique=2E8AB919-CFE7-4E91-8CE2-55904851F841
+
+CurrencyPairs= XAUUSDb
+pairName=XAUUSDb
+TimeFrame=M1

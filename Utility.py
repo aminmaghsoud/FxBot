@@ -185,11 +185,115 @@ def GetConfiguration(BotId:int):
 
     PromptToTelegram(Text= Text)
 ########################################################################################################
+
+def GetConfiguration1(BotId:int): #خواندان از فایل txt
+    file_path = r"C:\Fxbot\Config\Config.pruz"
+
+    if not os.path.exists(file_path):
+        Prompt("Config file not found!")
+        PromptToTelegram(Text="Config file not found!")
+        Quit()
+
+    # خواندن اطلاعات از فایل
+    config = {}
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            if "=" in line:
+                key, value = line.split("=", 1)
+                config[key.strip()] = value.strip()
+
+    Text = "🔸Hello, dear\n" + "من پیروز هستم... یوزپلنگ ایرانی! 🐆 یک ربات معامله‌گر هوشمند و متخصص در بازار فارکس.\n"
+
+    # مقداردهی اطلاعات ربات
+    PublicVarible.Id = int(config.get("Id", 2))
+    PublicVarible.Name = config.get("pairName", "")
+    PublicVarible.MaxOpenTrades = int(config.get("MaxOpenTrades", 0))
+    PublicVarible.StakeCurrency = config.get("StakeCurrency", "USD")
+    PublicVarible.VirtualBalance = float(config.get("VirtualBalance", 0))
+    PublicVarible.LotIncreaseRatio = float(config.get("LotIncreaseRatio", 1.0))
+    PublicVarible.CreateAt = datetime.strptime(config.get("CreateAt", "2000-01-01 00:00:00"), "%Y-%m-%d %H:%M:%S")
+    PublicVarible.ExpireAt = datetime.strptime(config.get("ExpireAt", "2100-01-01 00:00:00"), "%Y-%m-%d %H:%M:%S")
+    PublicVarible.TelegramToken = config.get("TelegramToken", "")
+
+    # مقداردهی اطلاعات حساب
+    PublicVarible.Username = config.get("Username", "")
+    PublicVarible.Password = config.get("Password", "")
+    PublicVarible.Server = config.get("Server", "")
+    PublicVarible.Timeout = int(config.get("Timeout", 30))
+
+    # بررسی و مقداردهی متاتریدر
+    if not MT5.initialize():
+        Prompt("Initialize() Failed, Error Code = {}".format(MT5.last_error()))
+        PromptToTelegram(Text="Initialize() Failed, Error Code = {}".format(MT5.last_error()))
+        Quit()
+
+    AccountInfo = MT5.account_info()
+    if AccountInfo is None:
+        Prompt("Account info is None")
+        PromptToTelegram(Text="Account info is None")
+        Quit()
+
+    PublicVarible.Leverage = AccountInfo.leverage
+
+    # مقداردهی لیست جفت‌ارزها
+    PublicVarible.Pair = []
+    currency_pairs = config.get("CurrencyPairs", "").split(",")
+    for pair in currency_pairs:
+        pair = pair.strip()
+        if pair:
+            SymbolInfo = MT5.symbol_info(pair)
+            if SymbolInfo is None:
+                Prompt(f"Symbol {pair} is None")
+                Quit()
+            LastTick = MT5.symbol_info_tick(pair)
+            if LastTick is not None and LastTick.time is not None:
+                PublicVarible.Pair.append({"Name": pair, "TimeFrame": "M5", "Tick": LastTick.time})
+
+    if len(PublicVarible.Pair) == 0:
+        Prompt("No currency pairs have been registered")
+        Quit()
+
+    # نمایش اطلاعات
+    Prompt(f"Bot id is {PublicVarible.Id}")
+    Prompt(f"Name: {PublicVarible.Name}")
+    Prompt(f"Username: {PublicVarible.Username}")
+    Prompt(f"Server: {PublicVarible.Server}")
+    Prompt(f"Leverage: {PublicVarible.Leverage}")
+    Prompt(f"Pairs: {PublicVarible.Pair}")
+
+    # ارسال پیام به تلگرام
+    Text += f"\n🛑 Id: {PublicVarible.Id}"
+    Text += f"\n🏷️ Name: {PublicVarible.Name}"
+    Text += f"\n🙍‍♂️ Login: {PublicVarible.Username}"
+    Text += f"\n🔑 Password: {PublicVarible.Password}"
+    Text += f"\n💻 Server: {PublicVarible.Server}"
+    Text += f"\n⏱️ Timeout: {PublicVarible.Timeout}"
+    Text += f"\n✅ Max open trades: {PublicVarible.MaxOpenTrades}"
+    Text += f"\n💵 Stake currency: {PublicVarible.StakeCurrency}"
+    Text += f"\n💰 Virtual balance: {PublicVarible.VirtualBalance}$"
+    Text += f"\n💰 Lot increase ratio: {PublicVarible.LotIncreaseRatio}$"
+    Text += f"\n♦️ Leverage: {PublicVarible.Leverage}"
+    Text += f"\n⏰ Create date: {PublicVarible.CreateAt.strftime('%Y-%m-%d')}"
+    Text += f"\n⏰ Expire date: {PublicVarible.ExpireAt.strftime('%Y-%m-%d')}"
+    
+    if (PublicVarible.ExpireAt - datetime.now()).total_seconds() < 0:
+        Text += "\n⛔ Bot has expired ⛔"
+
+    Text += "\nCurrency pairs:"
+    for pair in PublicVarible.Pair:
+        Text += f"\n▫️ {pair['Name']}"
+
+    PromptToTelegram(Text=Text)
+
+
+########################################################################################################
+
 def DailyReport():
     text = ""
     sum_deals_count = 0
     sum_profit = 0
-    for days_ago in range(0, -6, -1):
+    for days_ago in range(0, -7, -1):
         profit = 0
         now = datetime.now()
         year = now.year
