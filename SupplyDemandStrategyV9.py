@@ -222,7 +222,7 @@ class SupplyDemandStrategyV9():
                    #Text += f"حجم پله : {round(Balace * (PublicVarible.risk/1000) / PublicVarible.range_height / 3 , 2)} \n"    
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}\n"
                    Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
-                   PromptToTelegram(Text)
+                   #PromptToTelegram(Text)
                    results = send_telegram_messages(Text, chat_ids)
                    PublicVarible.last_execution_time = current_time
 
@@ -267,7 +267,7 @@ class SupplyDemandStrategyV9():
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute} \n"
                    Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
                    results = send_telegram_messages(Text, chat_ids)
-                   PromptToTelegram(Text)
+                   #PromptToTelegram(Text)
                    PublicVarible.last_execution_time = current_time
              
              if FrameRatesM5.iloc[-2]['close'] > PublicVarible.Baseroof5 and PublicVarible.Baseroof5 != 0 : 
@@ -284,7 +284,7 @@ class SupplyDemandStrategyV9():
                    elif trend_C == +2 : 
                        Text += f"خروج قیمت از #سقف با قدرت #معمولی توسط خریداران 🐮 \n"
                        Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
-                   PromptToTelegram(Text)  
+                   #PromptToTelegram(Text)  
                    results = send_telegram_messages(Text, chat_ids)
                    PublicVarible.last_execution_timeS = current_time 
 #Buy
@@ -335,7 +335,7 @@ class SupplyDemandStrategyV9():
                    elif trend_C == -2 :
                        Text +=  f"خروج قیمت از #کف با قدرت #معمولی توسط فروشندگان 🐻 \n"
 
-                   PromptToTelegram(Text)
+                   #PromptToTelegram(Text)
                    results = send_telegram_messages(Text, chat_ids)  
                    PublicVarible.last_execution_timeS = current_time  
 #Sell
