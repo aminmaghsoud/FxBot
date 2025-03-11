@@ -16,7 +16,8 @@ import telegram
 from art import *
 import jdatetime
 import requests
-
+import time
+import MetaTrader5 as MT5
 
 
 warnings.filterwarnings('ignore')
@@ -1245,3 +1246,26 @@ def telalert() :
       Text = f"⛔⚠️ توجه ⚠️⛔ \n امروز جمعه مورخ {jdatetime.datetime.now().strftime('%Y-%m-%d')} شب آخر بازار است . لطفا معاملات باز خود را مدیریت کنید"
       results = send_telegram_messages(Text, PublicVarible.chat_ids)  
 
+
+def delete_all_limit_orders():
+    """
+    حذف تمامی سفارش‌های لیمیت (BUY_LIMIT و SELL_LIMIT) که هنوز اجرا نشده‌اند.
+    """
+    # دریافت لیست سفارش‌های باز
+    orders = MT5.orders_get()
+    if orders:
+        for order in orders:
+            # بررسی نوع سفارش (فقط لیمیت‌ها حذف شوند)
+            if order.type in (MT5.ORDER_TYPE_BUY_LIMIT, MT5.ORDER_TYPE_SELL_LIMIT):
+                request = {
+                    "action": MT5.TRADE_ACTION_REMOVE,
+                    "order": order.ticket,
+                }
+                result = MT5.order_send(request)
+
+                if result.retcode == MT5.TRADE_RETCODE_DONE:
+                    print(f"سفارش {order.ticket} با موفقیت حذف شد.")
+                else:
+                    print(f"خطا در حذف سفارش {order.ticket}: {result.comment}")
+    else:
+        print("هیچ سفارش لیمیتی برای حذف وجود ندارد.")

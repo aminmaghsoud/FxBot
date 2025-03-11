@@ -87,6 +87,9 @@ Baseroof = 0.0
 Basefloor5 = 0.0
 Baseroof5 = 0.0
 risk = 2
+Basetime = 0
+Limittime = 0 
+Exit_C = False
 hmaSignal = 0 
 current_datetime = datetime.now()
 if  current_datetime.weekday() in [1 , 3  , 4]  : 
