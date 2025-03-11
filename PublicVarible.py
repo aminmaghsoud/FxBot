@@ -54,7 +54,7 @@ Executor = concurrent.futures.ThreadPoolExecutor()
 TelegramToken = ""
 TelegramBot = None
 TelegramChatId = [152284556 , 388239785 , 98785822 , 1864188026]
-chat_ids = [152284556 , 388239785 , 98785822 , 1864188026 , 92618613 , 76616815 , 6958871546 , 38776931]
+chat_ids = [152284556 , 388239785 , 98785822 , 1864188026 , 92618613 , 76616815 , 6958871546 , 38776931 , 7318507893]
 
 LastTelegramUpdateId = -1
 # آخرین زمانی که ربات اعلام آماده بودن کرده است
@@ -180,3 +180,5 @@ def create_gui():
 
 gui_thread = Thread(target=create_gui)
 gui_thread.start()
+
+

@@ -1211,7 +1211,6 @@ def get_all_buy_positions(Pair):
          all_buy_positions = buy_positions + sell_positions
          
          return all_buy_positions
-    
 
 
 def send_telegram_messages(text, chat_ids):
@@ -1227,8 +1226,9 @@ def send_telegram_messages(text, chat_ids):
         }
         response = requests.post(url, json=payload)
         responses[chat_id] = response.json()
-
     return responses
+
+
 
 def telalert() :
     current_datetime = datetime.now()
