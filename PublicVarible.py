@@ -54,7 +54,7 @@ Executor = concurrent.futures.ThreadPoolExecutor()
 TelegramToken = ""
 TelegramBot = None
 TelegramChatId = [152284556 , 388239785 , 98785822 , 1864188026]
-chat_ids = [152284556 , 388239785 , 98785822 , 1864188026 , 92618613 , 76616815 , 6958871546 , 38776931 , 7318507893]
+chat_ids = [152284556 , 388239785 , 98785822 , 1864188026 , 92618613 , 76616815 , 6958871546 , 38776931 , 7318507893 , 85415218 , 381177412]
 
 LastTelegramUpdateId = -1
 # آخرین زمانی که ربات اعلام آماده بودن کرده است
@@ -101,7 +101,8 @@ Quick_trade = True
 lot_size = 0.02
 BaseFind = 0
 range_height = 0
-
+List_of_high = 0
+List_of_low = 0
 def update_variables(new_risk, new_lot_size, new_quick_trade, new_can_open_order):
     PublicVarible.risk = new_risk
     PublicVarible.lot_size = new_lot_size
