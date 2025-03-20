@@ -82,6 +82,7 @@ last_execution_timeS = 0  # در ابتدا 0 یا هر مقدار مناسب د
 last_execution_timeT = 0 
 last_execution_time1 = 0 
 last_execution_timeM1 = 0
+last_execution_timeM15 = 0  #V7
 Basefloor = 0.0
 Baseroof = 0.0
 Basefloor5 = 0.0
@@ -91,6 +92,8 @@ Basetime = 0
 Limittime = 0 
 Exit_C = False
 hmaSignal = 0 
+HS_Down = 0 
+HS_Up = 0
 current_datetime = datetime.now()
 if  current_datetime.weekday() in [1 , 3  , 4]  : 
   risk = 1

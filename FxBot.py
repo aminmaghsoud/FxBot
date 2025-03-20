@@ -6,6 +6,9 @@ from datetime import datetime, timedelta
 import PublicVarible
 from Utility import *
 from SupplyDemandStrategyV9 import *
+from SupplyDemandStrategyV8 import *
+from SupplyDemandStrategyV7 import *
+
 from Utility import *
 import sys
 from colorama import init, Fore, Back, Style
@@ -105,10 +108,9 @@ class FxBot():
                           #  PublicVarible.LastDatetimeRobotIsReady = datetime.now() 
                           #  Statistics()
                           #  PromptToTelegram(Text= "📌 Robot Pirouz is ready, market is open")
-
                           C = SupplyDemandStrategyV9(Pair = Item['Name']) #M5
                           PublicVarible.Executor.submit(C.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
-                         
+                        
                           CloseAllPosition(Pair= Item['Name'])
                           
                        else:
