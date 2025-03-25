@@ -8,6 +8,7 @@ from Utility import *
 from SupplyDemandStrategyV9 import *
 from SupplyDemandStrategyV8 import *
 from SupplyDemandStrategyV7 import *
+from SupplyDemandStrategyV6 import *
 
 from Utility import *
 import sys
@@ -85,8 +86,6 @@ class FxBot():
                    #system( 'cls' )
                    
                    for Item in PublicVarible.Pair:
-                           
-                       
                        LastTick = MT5.symbol_info_tick(Item['Name'])
                        if Item['Tick'] != LastTick.time:
                           Item['Tick'] = LastTick.time
@@ -107,10 +106,15 @@ class FxBot():
                           #if (datetime.now() - PublicVarible.LastDatetimeRobotIsReady).total_seconds() / 60 > 120 :
                           #  PublicVarible.LastDatetimeRobotIsReady = datetime.now() 
                           #  Statistics()
-                          #  PromptToTelegram(Text= "📌 Robot Pirouz is ready, market is open")
-                          C = SupplyDemandStrategyV9(Pair = Item['Name']) #M5
+                          A = SupplyDemandStrategyV7(Pair = Item['Name']) #M5 AUDJPY
+                          PublicVarible.Executor.submit(A.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
+                          B = SupplyDemandStrategyV8(Pair = Item['Name']) #M5 USDJPYb
+                          PublicVarible.Executor.submit(B.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
+                          C = SupplyDemandStrategyV9(Pair = Item['Name']) #M5 XAUUSDb
                           PublicVarible.Executor.submit(C.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
-                        
+                          D = SupplyDemandStrategyV6(Pair = Item['Name']) #M5 BTCUSDT
+                          PublicVarible.Executor.submit(D.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
+
                           CloseAllPosition(Pair= Item['Name'])
                           
                        else:

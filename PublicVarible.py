@@ -59,53 +59,96 @@ chat_ids = [152284556 , 388239785 , 98785822 , 1864188026 , 92618613 , 76616815 
 LastTelegramUpdateId = -1
 # آخرین زمانی که ربات اعلام آماده بودن کرده است
 LastDatetimeRobotIsReady = None 
+Botstatus = 0
 
 ########################################################################################################
 ########################################### Strategy Settings ##########################################
 ########################################################################################################
-LossPrecent = 0
-targetProfit = 0
-TrailingTP = 0
-TrailingSL = 0
-LastStoplossChange = None
-lastclose = 0
-Botstatus = 0
-LastBuyPrice = 0
-LastSellPrice = 0
-MFIover = 0 
-firstBuy = 100
-firstSell = 100
-last_message_time = 0
-last_message_time1 = 0
+#LossPrecent = 0
+#targetProfit = 0
+#TrailingTP = 0
+#TrailingSL = 0
+#LastStoplossChange = None
+#lastclose = 0
+#LastBuyPrice = 0
+#LastSellPrice = 0
+#MFIover = 0 
+#firstBuy = 100
+#firstSell = 100
+#last_message_time = 0
+#last_message_time1 = 0
+
+############# xauusd ##################
 last_execution_time = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
-last_execution_timeS = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
-last_execution_timeT = 0 
-last_execution_time1 = 0 
-last_execution_timeM1 = 0
-last_execution_timeM15 = 0  #V7
-Basefloor = 0.0
-Baseroof = 0.0
+last_execution_timeS = 0
+last_execution_timeM15 = 0  
+last_execution_timeT = 0
 Basefloor5 = 0.0
 Baseroof5 = 0.0
-risk = 2
-Basetime = 0
-Limittime = 0 
-Exit_C = False
-hmaSignal = 0 
 HS_Down = 0 
 HS_Up = 0
+range_height = 0
+List_of_high = 0
+List_of_low = 0
+Basetime = 0
+Limittime = 0 
+high_low_diff = 0
+
+
+############# USDJPY ##################
+last_execution_timej = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
+last_execution_timejS = 0 
+Basefloorj = 0.0
+Baseroofj = 0.0
+Basetimej = 0
+range_heightj = 0
+LowerLj = 0
+HigherHj = 0
+HS_DownJ = 0 
+HS_UpJ = 0
+Leg_startj = 0
+high_low_diffj = 0
+
+############# AUDJPY ##################
+last_execution_timeA = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
+last_execution_timeAS = 0 
+BasefloorA = 0.0
+BaseroofA = 0.0
+BasetimeA = 0
+range_heightA = 0
+LowerLA = 0
+HigherHA = 0
+HS_DownA = 0 
+HS_UpA = 0
+high_low_diffA = 0
+
+############# BTCUSD ##################
+last_execution_timeB = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
+last_execution_timeBS = 0 
+BasefloorB = 0.0
+BaseroofB = 0.0
+BasetimeB = 0
+range_heightB = 0
+LowerLB = 0
+HigherHB = 0
+HS_DownB = 0 
+HS_UpB = 0
+high_low_diffB = 0
+
+
+Quick_trade = True
+lot_size = 0.02
+risk = 1
 current_datetime = datetime.now()
 if  current_datetime.weekday() in [1 , 3  , 4]  : 
   risk = 1
 elif  current_datetime.weekday() in [0 , 2]  : 
   risk = 3
 trade_datetime = datetime.now()
-Quick_trade = True
-lot_size = 0.02
-BaseFind = 0
-range_height = 0
-List_of_high = 0
-List_of_low = 0
+
+
+
+
 def update_variables(new_risk, new_lot_size, new_quick_trade, new_can_open_order):
     PublicVarible.risk = new_risk
     PublicVarible.lot_size = new_lot_size

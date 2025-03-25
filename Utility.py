@@ -444,11 +444,11 @@ def Statistics():
     Prompt(f"------------------------------------")
     Text += "\n" + f"------------------------------------"
 
-    Prompt(f"Trailing stoploss: {str(round(PublicVarible.TrailingSL, 2))}$")
-    Text += "\n" + f"💰 Trailing stoploss: {str(round(PublicVarible.TrailingSL, 2))}$"
+    #Prompt(f"Trailing stoploss: {str(round(PublicVarible.TrailingSL, 2))}$")
+    #Text += "\n" + f"💰 Trailing stoploss: {str(round(PublicVarible.TrailingSL, 2))}$"
 
-    Prompt(f"Trailing TakeProfit: {str(round(PublicVarible.TrailingTP, 2))}$")
-    Text += "\n" + f"💰 Trailing takeprofit: {str(round(PublicVarible.TrailingTP, 2))}$"
+    #Prompt(f"Trailing TakeProfit: {str(round(PublicVarible.TrailingTP, 2))}$")
+    #Text += "\n" + f"💰 Trailing takeprofit: {str(round(PublicVarible.TrailingTP, 2))}$"
 
     if PublicVarible.CanOpenOrder == True:
        Prompt(f"Can open new order: Yes")
@@ -470,6 +470,7 @@ def Statistics():
     #elif PublicVarible.Quick_trade == True : 
             # Text += "\n" + f" ⚠️ Quck tread if ON 🔴 "
     PromptToTelegram(Text= Text)
+
 ########################################################################################################
 def ForceCloseAllPosition():
     for Item in PublicVarible.Pair:
@@ -1269,3 +1270,19 @@ def delete_all_limit_orders():
                     print(f"خطا در حذف سفارش {order.ticket}: {result.comment}")
     else:
         print("هیچ سفارش لیمیتی برای حذف وجود ندارد.")
+
+
+def has_pending_limit_orders():
+    """
+    بررسی می‌کند که آیا سفارش لیمیت (BUY_LIMIT یا SELL_LIMIT) باز وجود دارد یا نه.
+    در صورت وجود، مقدار True باز می‌گرداند و در غیر اینصورت False.
+    """
+    # دریافت لیست سفارش‌های باز
+    orders = MT5.orders_get()
+
+    if orders:
+        # بررسی سفارشات لیمیت
+        for order in orders:
+            if order.type in (MT5.ORDER_TYPE_BUY_LIMIT, MT5.ORDER_TYPE_SELL_LIMIT):
+                return True  # اگر سفارش لیمیت پیدا شد، مقدار True باز می‌گرداند
+    return False  # اگر هیچ سفارش لیمیتی وجود نداشت، مقدار False باز می‌گرداند
