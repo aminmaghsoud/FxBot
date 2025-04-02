@@ -108,8 +108,8 @@ class SupplyDemandStrategyV9():
              restricted_time_ranges = [
                 (0, 0, 2, 0),    # 00:00 تا 02:00
                 (3, 24, 3, 36),    # 03:24 تا 03:36
-                (3, 50, 4, 20),  # 04:10 تا 04:40
-                (10, 30, 13, 0),  # 9:45 تا 13:00
+               # (3, 50, 4, 20),  # 04:10 تا 04:40
+                (10, 25, 13, 0),  # 9:45 تا 13:00
                 (15, 45, 18, 45),  # 16:00 تا 19:00
                 (22, 0, 23, 59)  # 22:00 تا 23:59
              ]
@@ -119,13 +119,14 @@ class SupplyDemandStrategyV9():
                 for start_h, start_m, end_h, end_m in restricted_time_ranges
              )
 
-             restricted_hours = {13, 19}
+             restricted_hours = {6 , 13 , 19}
              if current_datetime.minute == 0 and current_datetime.hour in restricted_hours:
-                #PublicVarible.CanOpenOrder = False
+                PublicVarible.CanOpenOrder = False
                 PublicVarible.risk = 1
                 if current_time - PublicVarible.last_execution_timeT >= 60 :
                   Text = f"⏰ Time : {current_datetime} \n"
                   Text += f"Risk changed to Safe Mode 🟢 (Low) \n"
+                  Text += f"Can Open Order Stoped ... \n"
                   Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
                   PromptToTelegram(Text)
                   Text = f"⚠️هشدار⚠️ \n اطلاعات ارائه شده در این بات ، صرفا جنبه #آموزشی داشته و سازنده مسئولیتی در قبال ضرر احتمالی  ندارد . لطفا اصول حرفه ای معامله و مدیریت سرمایه را رعایت فرمائید . "
@@ -397,7 +398,7 @@ class SupplyDemandStrategyV9():
                   EntryPrice = SymbolInfo.ask
                   Entryheight = round(abs(EntryPrice - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)      
                   Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2) 
-                  OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
+                  OrderBuy(Pair= self.Pair, Volume= Volume/2, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
                 
                   EntryPrice = (PublicVarible.Baseroof5 + PublicVarible.Basefloor5)/2
                   #OrderBuyLimit(Pair= self.Pair, Volume= Volume/2 , EntryPrice = EntryPrice , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
@@ -470,7 +471,7 @@ class SupplyDemandStrategyV9():
                   EntryPrice = SymbolInfo.bid  
                   Entryheight = round(abs(EntryPrice - PublicVarible.Baseroof5) / (SymbolInfo.point) / 10, 2)      
                   Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)
-                  OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V9 - M5")
+                  OrderSell(Pair= self.Pair, Volume= Volume/2, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V9 - M5")
 
                   EntryPrice = (PublicVarible.Baseroof5 + PublicVarible.Basefloor5)/2
                   #OrderSellLimit(Pair= self.Pair, Volume= Volume/2 , EntryPrice = EntryPrice , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V9 - M5")

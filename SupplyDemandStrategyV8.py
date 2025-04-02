@@ -126,7 +126,7 @@ class SupplyDemandStrategyV8():
              current_datetime = datetime.now()
              # تعریف بازه‌های زمانی ممنوعه
              restricted_time_ranges = [
-                (0, 0, 3, 30),    
+                (0, 0, 2, 30),    
                 (8, 0, 11, 0),  
                 (15, 45, 18, 45),  
                 (22, 0, 23, 59) 
@@ -373,12 +373,12 @@ class SupplyDemandStrategyV8():
                 EntryPrice = SymbolInfo.ask
                 SL = PublicVarible.Basefloorj - ( SymbolInfo.point * 50)  #((PublicVarible.Baseroofj - PublicVarible.Basefloorj)/2)  #########  تعیین حدضرر معامله #########
                 #TP1 =  PublicVarible.Basefloorj + ( SymbolInfo.point * PublicVarible.high_low_diffj  * 0.9) 
-                #TP1 = SymbolInfo.ask + (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj))
+                TP1 = SymbolInfo.ask + (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj))
                 if PublicVarible.Leg_startj < PublicVarible.Basefloorj : 
                     TP1 =  PublicVarible.Basefloorj + ((PublicVarible.Baseroofj - PublicVarible.Leg_startj)*0.9)
                 elif PublicVarible.Leg_startj > PublicVarible.Baseroofj : 
                     TP1 =  PublicVarible.Basefloorj + ((PublicVarible.Leg_startj - PublicVarible.Basefloorj )*0.9)
-                    
+
                 Entryheight = round(abs(EntryPrice - PublicVarible.Basefloorj) / (SymbolInfo.point) / 10, 2)      
                 Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)   
                 TextN = f"\nVolume = {Volume} \n"
@@ -386,14 +386,13 @@ class SupplyDemandStrategyV8():
                 write_trade_info_to_file(self.Pair ,"Buy", SymbolInfo.ask, SL, TP1, TextN )
 
                 if  trend_C == +1 and Time_Signal == 1  : 
-                   
-                   if round(PublicVarible.range_heightj / PublicVarible.high_low_diffj  * 1000,1) <= 30  and (abs(close_C - PublicVarible.Baseroofj) < (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj) * 0.5 )):       
+                   if  (abs(close_C - PublicVarible.Baseroofj) < (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj) * 0.75 )):       
                      Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                      EntryPrice = SymbolInfo.ask
                      Entryheight = round(abs(EntryPrice - PublicVarible.Basefloorj) / (SymbolInfo.point) / 10, 2)      
                      Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2) 
                      OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V8 j - M5")
-                
+                   """
                    elif round(PublicVarible.range_heightj / PublicVarible.high_low_diffj  * 1000,1) <= 30 and (abs(close_C - PublicVarible.Baseroofj) < (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj)  )) : 
                         EntryPrice = PublicVarible.Baseroofj
                         if not has_pending : 
@@ -407,7 +406,7 @@ class SupplyDemandStrategyV8():
                            OrderBuyLimit(Pair= self.Pair, Volume= Volume , EntryPrice = EntryPrice , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V8 j - M5")
                            PromptToTelegram(f"🚨🚨 \n سفارش #خرید معوق در قیمت \n TP : {TP1} \n Price : {EntryPrice} \n SL : {SL}")
                            PublicVarible.Limittime = current_time
-                       
+                      """
                 else : 
                    TextN = f"\n self.Pair | pos = Buy | EntryPrice = {EntryPrice} | SL = {SL} | TP1 = {TP1} \n"
                    TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroofj)) - (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj)*0.75)} (If NEG T is True)" 
@@ -457,7 +456,7 @@ class SupplyDemandStrategyV8():
                 EntryPrice = SymbolInfo.bid 
                 SL = PublicVarible.Baseroofj + ( SymbolInfo.point * 50)  #((PublicVarible.Baseroofj - PublicVarible.Basefloorj)/2)                     #########  تعیین حدضرر معامله #########
                 #TP1 =  PublicVarible.Baseroofj - ( SymbolInfo.point * PublicVarible.high_low_diffj  * 0.9 )  
-                #TP1 = SymbolInfo.bid - (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj))  #SymbolInfo.ask - ( SymbolInfo.point * 100) 
+                TP1 = SymbolInfo.bid - (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj))  #SymbolInfo.ask - ( SymbolInfo.point * 100) 
                 if PublicVarible.Leg_startj < PublicVarible.Basefloorj : 
                     TP1 =  PublicVarible.Baseroofj - ((PublicVarible.Baseroofj - PublicVarible.Leg_startj)*0.9)
                 elif PublicVarible.Leg_startj > PublicVarible.Baseroofj : 
@@ -470,15 +469,14 @@ class SupplyDemandStrategyV8():
                 write_trade_info_to_file(self.Pair ,"Sell", SymbolInfo.bid  , SL, TP1, TextN )
                 
                 if  (trend_C == -1 ) and Time_Signal == 1 :
-                   
-                   if round(PublicVarible.range_heightj / PublicVarible.high_low_diffj  * 1000,1) <= 30  and (abs(close_C - PublicVarible.Basefloorj) < (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj)* 0.5) ) :
+                   if  (abs(close_C - PublicVarible.Basefloorj) < (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj)* 0.75) ) :
                      Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                      EntryPrice = SymbolInfo.bid  
                      Entryheight = round(abs(EntryPrice - PublicVarible.Baseroofj) / (SymbolInfo.point) / 10, 2)      
                      Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)
                      OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V9 - M5")
 
-                   elif  round(PublicVarible.range_heightj / PublicVarible.high_low_diffj  * 1000,1) <= 30  and (abs(close_C - PublicVarible.Basefloorj) < (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj )))  :
+                   """elif  round(PublicVarible.range_heightj / PublicVarible.high_low_diffj  * 1000,1) <= 30  and (abs(close_C - PublicVarible.Basefloorj) < (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj )))  :
                       EntryPrice = PublicVarible.Basefloorj
                       if not has_pending :
                          OrderSellLimit(Pair= self.Pair, Volume= Volume , EntryPrice = EntryPrice , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V9 - M5")
@@ -490,7 +488,7 @@ class SupplyDemandStrategyV8():
                       if not has_pending :
                          OrderSellLimit(Pair= self.Pair, Volume= Volume , EntryPrice = EntryPrice , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V9 - M5")
                          PromptToTelegram(f"🚨🚨 \n سفارش #فروش معوق در قیمت \n SL : {SL} \n Price : {EntryPrice} \n TP : {TP1}")
-                         PublicVarible.Limittime = current_time
+                         PublicVarible.Limittime = current_time"""
 
                 else : 
                     TextN = f"\n self.Pair | pos = Sell | EntryPrice = {EntryPrice} | SL = {SL} | TP1 = {TP1} \n"
