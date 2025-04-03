@@ -23,7 +23,7 @@ class SupplyDemandStrategyV6():
           high_low_diff = 0 
           SymbolInfo = MT5.symbol_info(self.Pair)
           if SymbolInfo is not None :
-             RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 250)
+             RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 20)
              if RatesM5 is not None:
                 FrameRatesM5 = PD.DataFrame(RatesM5)
                 if not FrameRatesM5.empty: 
@@ -180,7 +180,9 @@ class SupplyDemandStrategyV6():
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}\n"
                    Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
                    #PromptToTelegram(Text)
-                   results = send_telegram_messages(Text, PublicVarible.chat_ids)
+                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)
+                   # ارسال نمودار کندل‌ها
+                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_timeB = current_time
 
 
@@ -232,7 +234,9 @@ class SupplyDemandStrategyV6():
                    Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_heightB , 2)} Lot \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute} \n"
                    Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
-                   results = send_telegram_messages(Text, PublicVarible.chat_ids)
+                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)
+                   # ارسال نمودار کندل‌ها
+                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    #PromptToTelegram(Text)
                    PublicVarible.last_execution_timeB = current_time
 

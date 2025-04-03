@@ -18,7 +18,10 @@ import jdatetime
 import requests
 import time
 import MetaTrader5 as MT5
-
+import matplotlib.pyplot as plt
+import mplfinance as mpf
+from io import BytesIO
+import pandas as pd
 
 warnings.filterwarnings('ignore')
 ########################################################################################################
@@ -1286,3 +1289,142 @@ def has_pending_limit_orders():
             if order.type in (MT5.ORDER_TYPE_BUY_LIMIT, MT5.ORDER_TYPE_SELL_LIMIT):
                 return True  # اگر سفارش لیمیت پیدا شد، مقدار True باز می‌گرداند
     return False  # اگر هیچ سفارش لیمیتی وجود نداشت، مقدار False باز می‌گرداند
+
+
+"""
+def plot_candles_and_send_telegram(FrameRatesM5, pair, Text):
+    try:
+        # اطمینان از وجود ستون‌های مورد نیاز
+        required_columns = ['open', 'high', 'low', 'close']
+        if not all(col in FrameRatesM5.columns for col in required_columns):
+            error_msg = "Warning: Missing required columns in DataFrame"
+            print(error_msg)
+            send_telegram_messages(error_msg, PublicVarible.chat_ids)
+            return False
+
+        # تنظیم تاریخ‌ها به عنوان ایندکس
+        if 'datetime' in FrameRatesM5.columns:
+            FrameRatesM5.set_index('datetime', inplace=True)
+
+        # تنظیم استایل نمودار
+        mc = mpf.make_marketcolors(up='g', down='r', edge='inherit', wick='inherit', volume='inherit')
+        s = mpf.make_mpf_style(marketcolors=mc, gridstyle='')
+
+        # ذخیره نمودار در بافر
+        buf = BytesIO()
+        mpf.plot(FrameRatesM5, 
+                type='candle',
+                style=s,
+                title=f'Candlestick Chart - {pair}',
+                savefig=dict(fname=buf, dpi=300, bbox_inches='tight'))
+        buf.seek(0)
+        
+        # ارسال تصویر به تلگرام
+        send_telegram_photo(buf, PublicVarible.chat_ids, Text)
+        return True
+        
+    except Exception as e:
+        error_msg = f"Error in plot_candles_and_send_telegram: {str(e)}"
+        print(error_msg)
+        send_telegram_messages(error_msg, PublicVarible.chat_ids)
+        return False
+
+
+############################################
+
+def send_telegram_photo(photo_buffer, chat_ids, caption=""):
+    token = "8041867463:AAEUH_w2CYFne521LxNVsuR6hiuqk-75pfQ"
+    url = f"https://api.telegram.org/bot{token}/sendPhoto"
+    
+    responses = {}
+    for chat_id in chat_ids:
+        files = {'photo': ('chart.png', photo_buffer, 'image/png')}
+        data = {
+            'chat_id': chat_id,
+            'caption': caption,
+            'parse_mode': 'HTML'
+        }
+        response = requests.post(url, files=files, data=data)
+        responses[chat_id] = response.json()
+    return responses
+
+
+
+"""
+########################################################################################
+
+def plot_candles_and_send_telegram(FrameRatesM5, pair, Text):
+    """
+    رسم نمودار کندل‌ها و ارسال آن به تلگرام
+    
+    Args:
+        FrameRatesM5 (DataFrame): دیتافریم حاوی اطلاعات کندل‌ها
+        pair (str): نام جفت ارز
+        Text (str): متن توضیحات برای کپشن تصویر
+    """
+    try:
+        # بررسی وجود ستون‌های مورد نیاز
+        required_columns = ['open', 'high', 'low', 'close']
+        if not all(col in FrameRatesM5.columns for col in required_columns):
+            error_msg = "Warning: Missing required columns in DataFrame"
+            print(error_msg)
+            send_telegram_messages(error_msg, PublicVarible.chat_ids)
+            return False
+
+        # تبدیل و تنظیم اندیس به datetime
+        if 'datetime' in FrameRatesM5.columns:
+            FrameRatesM5['datetime'] = pd.to_datetime(FrameRatesM5['datetime'])
+            FrameRatesM5.set_index('datetime', inplace=True)
+
+        # حذف مقادیر NaN
+        FrameRatesM5.dropna(subset=required_columns, inplace=True)
+
+        # تنظیم استایل نمودار
+        mc = mpf.make_marketcolors(up='g', down='r', edge='inherit', wick='inherit', volume='inherit')
+        s = mpf.make_mpf_style(marketcolors=mc, gridstyle='')
+
+        # ذخیره نمودار در بافر
+        buf = BytesIO()
+        mpf.plot(FrameRatesM5, 
+                type='candle',
+                style=s,
+                title=f'Candlestick Chart - {pair}',
+                savefig=dict(fname=buf, dpi=300, bbox_inches='tight'))
+        buf.seek(0)
+        
+        # ارسال تصویر به تلگرام
+        send_telegram_photo(buf, PublicVarible.chat_ids, Text)
+        return True
+        
+    except Exception as e:
+        error_msg = f"Error in plot_candles_and_send_telegram: {str(e)}"
+        print(error_msg)
+        send_telegram_messages(error_msg, PublicVarible.chat_ids)
+        return False
+
+########################################################################################
+
+
+def send_telegram_photo(photo_buffer, chat_ids, caption=""):
+    print(f"Received chat_ids: {chat_ids}, Type: {type(chat_ids)}")  # بررسی مقدار
+
+    TOKEN = "8041867463:AAEUH_w2CYFne521LxNVsuR6hiuqk-75pfQ"
+    url = f"https://api.telegram.org/bot{TOKEN}/sendPhoto"
+
+    responses = {}
+
+    for chat_id in chat_ids:
+        #print(f"Processing chat_id: {chat_id}, Type: {type(chat_id)}")  # بررسی مقدار در حلقه
+        
+        photo_buffer.seek(0)  # بازگرداندن موقعیت بافر به ابتدا
+        files = {'photo': ('chart.png', photo_buffer, 'image/png')}
+        data = {
+            'chat_id': chat_id,
+            'caption': caption,
+            'parse_mode': 'HTML'
+        }
+        response = requests.post(url, files=files, data=data)
+        
+        responses[chat_id] = response.json()
+    
+    return responses

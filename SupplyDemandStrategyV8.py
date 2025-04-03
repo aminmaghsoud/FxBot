@@ -6,6 +6,11 @@ from datetime import datetime
 import MetaTrader5 as MT5
 from colorama import init, Fore, Back, Style
 import PublicVarible
+import matplotlib.pyplot as plt
+import mplfinance as mpf
+from io import BytesIO
+import math
+
 class SupplyDemandStrategyV8():
       Pair = ""
       TimeFrame = MT5.TIMEFRAME_M5
@@ -23,14 +28,13 @@ class SupplyDemandStrategyV8():
           #PublicVarible.high_low_diffj  = 0 
           SymbolInfo = MT5.symbol_info(self.Pair)
           if SymbolInfo is not None :
-             RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 250)
+             RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 20)
              if RatesM5 is not None:
                 FrameRatesM5 = PD.DataFrame(RatesM5)
                 if not FrameRatesM5.empty: 
                    FrameRatesM5['datetime'] = PD.to_datetime(FrameRatesM5['time'], unit='s')
                    FrameRatesM5 = FrameRatesM5.drop('time', axis=1)
                    FrameRatesM5 = FrameRatesM5.set_index(PD.DatetimeIndex(FrameRatesM5['datetime']), drop=True)
-
 
              buy_positions_with_open_prices = get_buy_positions_with_open_prices()
              if buy_positions_with_open_prices:
@@ -250,7 +254,9 @@ class SupplyDemandStrategyV8():
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}\n"
                    Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
                    #PromptToTelegram(Text)
-                   results = send_telegram_messages(Text, PublicVarible.chat_ids)
+                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)
+                   # ارسال نمودار کندل‌ها
+                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_timej = current_time
 
 
@@ -298,8 +304,10 @@ class SupplyDemandStrategyV8():
                    Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_heightj , 2)} Lot \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute} \n"
                    Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
-                   results = send_telegram_messages(Text, PublicVarible.chat_ids)
+                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)
                    #PromptToTelegram(Text)
+                   # ارسال نمودار کندل‌ها
+                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_timej = current_time
 
 ########################  پیداکردن بالاترین سقف و پایین ترین کف رنج   ################################
@@ -374,10 +382,10 @@ class SupplyDemandStrategyV8():
                 SL = PublicVarible.Basefloorj - ( SymbolInfo.point * 50)  #((PublicVarible.Baseroofj - PublicVarible.Basefloorj)/2)  #########  تعیین حدضرر معامله #########
                 #TP1 =  PublicVarible.Basefloorj + ( SymbolInfo.point * PublicVarible.high_low_diffj  * 0.9) 
                 TP1 = SymbolInfo.ask + (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj))
-                if PublicVarible.Leg_startj < PublicVarible.Basefloorj : 
-                    TP1 =  PublicVarible.Basefloorj + ((PublicVarible.Baseroofj - PublicVarible.Leg_startj)*0.9)
-                elif PublicVarible.Leg_startj > PublicVarible.Baseroofj : 
-                    TP1 =  PublicVarible.Basefloorj + ((PublicVarible.Leg_startj - PublicVarible.Basefloorj )*0.9)
+                #if PublicVarible.Leg_startj < PublicVarible.Basefloorj : 
+                 #   TP1 =  PublicVarible.Basefloorj + ((PublicVarible.Baseroofj - PublicVarible.Leg_startj)*0.9)
+                #elif PublicVarible.Leg_startj > PublicVarible.Baseroofj : 
+                 #   TP1 =  PublicVarible.Basefloorj + ((PublicVarible.Leg_startj - PublicVarible.Basefloorj )*0.9)
 
                 Entryheight = round(abs(EntryPrice - PublicVarible.Basefloorj) / (SymbolInfo.point) / 10, 2)      
                 Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)   
@@ -457,10 +465,10 @@ class SupplyDemandStrategyV8():
                 SL = PublicVarible.Baseroofj + ( SymbolInfo.point * 50)  #((PublicVarible.Baseroofj - PublicVarible.Basefloorj)/2)                     #########  تعیین حدضرر معامله #########
                 #TP1 =  PublicVarible.Baseroofj - ( SymbolInfo.point * PublicVarible.high_low_diffj  * 0.9 )  
                 TP1 = SymbolInfo.bid - (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj))  #SymbolInfo.ask - ( SymbolInfo.point * 100) 
-                if PublicVarible.Leg_startj < PublicVarible.Basefloorj : 
-                    TP1 =  PublicVarible.Baseroofj - ((PublicVarible.Baseroofj - PublicVarible.Leg_startj)*0.9)
-                elif PublicVarible.Leg_startj > PublicVarible.Baseroofj : 
-                    TP1 =  PublicVarible.Baseroofj - ((PublicVarible.Leg_startj - PublicVarible.Basefloorj )*0.9)
+                #if PublicVarible.Leg_startj < PublicVarible.Basefloorj : 
+                #    TP1 =  PublicVarible.Baseroofj - ((PublicVarible.Baseroofj - PublicVarible.Leg_startj)*0.9)
+                #elif PublicVarible.Leg_startj > PublicVarible.Baseroofj : 
+                #    TP1 =  PublicVarible.Baseroofj - ((PublicVarible.Leg_startj - PublicVarible.Basefloorj )*0.9)
 
                 Entryheight = round(abs(EntryPrice - PublicVarible.Baseroofj) / (SymbolInfo.point) / 10, 2)      
                 Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)
