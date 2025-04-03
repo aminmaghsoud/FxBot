@@ -375,7 +375,8 @@ class SupplyDemandStrategyV8():
                       PublicVarible.Baseroofj = PublicVarible.Basefloorj = 0
                       Text += f" وضعیت خروج قیمت #نامناسب است \n ⚠️پاک کردن  مقادیر سقف و کف ⚠️"
                    #PromptToTelegram(Text)  
-                   results = send_telegram_messages(Text, PublicVarible.chat_ids)
+                  # results = send_telegram_messages(Text, PublicVarible.chat_ids)
+                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_timejS = current_time 
 #Buy                  
                 EntryPrice = SymbolInfo.ask
@@ -454,9 +455,9 @@ class SupplyDemandStrategyV8():
                    elif trend_C == 1 or trend_C ==2:
                       PublicVarible.Baseroofj = PublicVarible.Basefloorj = 0
                       Text += f" وضعیت خروج قیمت #نامناسب است \n ⚠️پاک کردن  مقادیر سقف و کف ⚠️"
-                   
+                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    #PromptToTelegram(Text)
-                   results = send_telegram_messages(Text, PublicVarible.chat_ids)  
+                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)  
                    PublicVarible.last_execution_timejS = current_time  
 #Sell
                 

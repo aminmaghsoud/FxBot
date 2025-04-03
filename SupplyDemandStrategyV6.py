@@ -305,7 +305,8 @@ class SupplyDemandStrategyV6():
                       PublicVarible.BaseroofB = PublicVarible.BasefloorB = 0
                       Text += f" وضعیت خروج قیمت #نامناسب است \n ⚠️پاک کردن  مقادیر سقف و کف ⚠️"
                    #PromptToTelegram(Text)  
-                   results = send_telegram_messages(Text, PublicVarible.chat_ids)
+                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)
+                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_timeBS = current_time 
 #Buy
                 
@@ -372,7 +373,8 @@ class SupplyDemandStrategyV6():
                       Text += f" وضعیت خروج قیمت #نامناسب است \n ⚠️پاک کردن  مقادیر سقف و کف ⚠️"
                    
                    #PromptToTelegram(Text)
-                   results = send_telegram_messages(Text, PublicVarible.chat_ids)  
+                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)  
+                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_timeBS = current_time  
 #Sell
                 

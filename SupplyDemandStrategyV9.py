@@ -373,7 +373,8 @@ class SupplyDemandStrategyV9():
                       PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0
                       Text += f" وضعیت خروج قیمت #نامناسب است \n ⚠️پاک شدن  مقادیر سقف و کف ⚠️"
                    #PromptToTelegram(Text)  
-                   results = send_telegram_messages(Text, PublicVarible.chat_ids)
+                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
+                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)
                    PublicVarible.last_execution_timeS = current_time 
 #Buy
                 buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
@@ -445,9 +446,9 @@ class SupplyDemandStrategyV9():
                    elif trend_C == 1 or trend_C ==2:
                       PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0
                       Text += f" وضعیت خروج قیمت #نامناسب است \n ⚠️پاک شدن  مقادیر سقف و کف ⚠️"
-                   
+                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    #PromptToTelegram(Text)
-                   results = send_telegram_messages(Text, PublicVarible.chat_ids)  
+                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)  
                    PublicVarible.last_execution_timeS = current_time  
 #Sell
                 sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########

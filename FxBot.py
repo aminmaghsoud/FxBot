@@ -9,7 +9,7 @@ from SupplyDemandStrategyV9 import *
 from SupplyDemandStrategyV8 import *
 from SupplyDemandStrategyV7 import *
 from SupplyDemandStrategyV6 import *
-
+from LegAnalyzer import  *
 from Utility import *
 import sys
 from colorama import init, Fore, Back, Style
@@ -114,6 +114,8 @@ class FxBot():
                           PublicVarible.Executor.submit(C.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
                           D = SupplyDemandStrategyV6(Pair = Item['Name']) #M5 BTCUSDT
                           PublicVarible.Executor.submit(D.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
+                          E = LegAnalyzer(Pair = Item['Name']) #M5 BTCUSDT
+                          PublicVarible.Executor.submit(E.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
 
                           CloseAllPosition(Pair= Item['Name'])
                           

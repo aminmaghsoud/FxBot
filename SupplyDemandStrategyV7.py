@@ -250,7 +250,8 @@ class SupplyDemandStrategyV7():
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}\n"
                    Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
                    #PromptToTelegram(Text)
-                   results = send_telegram_messages(Text, PublicVarible.chat_ids)
+                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
+                  # results = send_telegram_messages(Text, PublicVarible.chat_ids)
                    PublicVarible.last_execution_timeA = current_time
 
 
@@ -302,8 +303,9 @@ class SupplyDemandStrategyV7():
                    Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_heightA , 2)} Lot \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute} \n"
                    Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
-                   results = send_telegram_messages(Text, PublicVarible.chat_ids)
+                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)
                    #PromptToTelegram(Text)
+                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_timeA = current_time
 
 ########################  پیداکردن بالاترین سقف و پایین ترین کف رنج   ################################
@@ -371,7 +373,8 @@ class SupplyDemandStrategyV7():
                       PublicVarible.BaseroofA = PublicVarible.BasefloorA = 0
                       Text += f" وضعیت خروج قیمت #نامناسب است \n ⚠️پاک کردن  مقادیر سقف و کف ⚠️"
                    #PromptToTelegram(Text)  
-                   results = send_telegram_messages(Text, PublicVarible.chat_ids)
+                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
+                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)
                    PublicVarible.last_execution_timeAS = current_time 
 #Buy
                 
@@ -436,9 +439,9 @@ class SupplyDemandStrategyV7():
                    elif trend_C == 1 or trend_C ==2:
                       PublicVarible.BaseroofA = PublicVarible.BasefloorA = 0
                       Text += f" وضعیت خروج قیمت #نامناسب است \n ⚠️پاک کردن  مقادیر سقف و کف ⚠️"
-                   
+                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    #PromptToTelegram(Text)
-                   results = send_telegram_messages(Text, PublicVarible.chat_ids)  
+                  # results = send_telegram_messages(Text, PublicVarible.chat_ids)  
                    PublicVarible.last_execution_timeAS = current_time  
 #Sell
                 

@@ -135,6 +135,16 @@ HS_DownB = 0
 HS_UpB = 0
 high_low_diffB = 0
 
+############# LegAnalyzer ##################
+BasefloorLA = 0.0
+BaseroofLA = 0.0
+range_heightLA = 0
+LowerLLA = 0
+HigherHLA = 0
+HS_DownLA = 0 
+HS_UpLA = 0
+high_low_diffLA = 0
+
 
 Quick_trade = True
 lot_size = 0.02
