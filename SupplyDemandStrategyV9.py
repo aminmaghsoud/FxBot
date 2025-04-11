@@ -18,12 +18,12 @@ class SupplyDemandStrategyV9():
           if self.Pair !='XAUUSDb' : return
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ Strategy V9 M5 XAUUSDb ")
           # ارسال پیام
-          
+          PairNameX = "دلار امریکا/ اونس طلا"
           Time_Signal = 1
           high_low_diff = 0 
           SymbolInfo = MT5.symbol_info(self.Pair)
           if SymbolInfo is not None :
-             RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 20)
+             RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 100)
              if RatesM5 is not None:
                 FrameRatesM5 = PD.DataFrame(RatesM5)
                 if not FrameRatesM5.empty: 
@@ -108,10 +108,9 @@ class SupplyDemandStrategyV9():
              restricted_time_ranges = [
                 (0, 0, 2, 0),    # 00:00 تا 02:00
                 (3, 24, 3, 36),    # 03:24 تا 03:36
-               # (3, 50, 4, 20),  # 04:10 تا 04:40
-                (10, 25, 13, 0),  # 9:45 تا 13:00
-                (15, 45, 18, 45),  # 16:00 تا 19:00
-                (22, 0, 23, 59)  # 22:00 تا 23:59
+                #(10, 25, 13, 0),  # 9:45 تا 13:00
+                #(15, 45, 18, 45),  # 16:00 تا 19:00
+                (23, 0, 23, 59)  # 22:00 تا 23:59
              ]
              # بررسی اینکه آیا ساعت جاری در یکی از بازه‌های ممنوعه است یا خیر
              in_restricted_time = any(
@@ -151,11 +150,29 @@ class SupplyDemandStrategyV9():
 
              if current_time - PublicVarible.Limittime >= 900 and PublicVarible.Limittime != 0 : 
                 delete_all_limit_orders()  
-                PromptToTelegram(f"⚠️ بعلت طولانی شدن زمان باز شدن لیمیت ، سفارش حذف شد!")
+                #PromptToTelegram(f"⚠️ بعلت طولانی شدن زمان باز شدن لیمیت ، سفارش حذف شد!")
                 PublicVarible.Limittime = 0
 
-             print("PublicVarible.Basetime:",PublicVarible.Basetime)
-             print("PublicVarible.Limittime:",PublicVarible.Limittime)
+             buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
+             if buy_positions_with_open_prices:
+                 for ticket, open_price in buy_positions_with_open_prices.items():
+                   positions = MT5.positions_get()
+                   for position_info in positions:
+                     if position_info.symbol == self.Pair :
+                        Botdashboard(53 , self.Pair)
+                        return
+
+             sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
+             if sell_positions_with_open_prices:
+                  for ticket, open_price in sell_positions_with_open_prices.items():
+                    positions = MT5.positions_get()
+                    for position_info in positions:
+                     if position_info.symbol == self.Pair :
+                        Botdashboard(54 , self.Pair)
+                        return
+
+             #print("PublicVarible.Basetime:",PublicVarible.Basetime)
+             #print("PublicVarible.Limittime:",PublicVarible.Limittime)
              trend_C = 0
              close_C = FrameRatesM5.iloc[-2]['close']
              high_C = FrameRatesM5.iloc[-2]['high'] 
@@ -169,27 +186,13 @@ class SupplyDemandStrategyV9():
 #########################  بررسی قدرت کندل خروج    #########################    
              LowerL = PublicVarible.List_of_low
              higherH = PublicVarible.List_of_high
-             print(f"Lower low = {PublicVarible.List_of_low} \nhigher high = {PublicVarible.List_of_high}")
+             #print(f"Lower low = {PublicVarible.List_of_low} \nhigher high = {PublicVarible.List_of_high}")
 
-             if  close_C >= One_third_UP and close_C > high_C_O  :
+             if  close_C >= One_third_UP : #and close_C > high_C_O  :
                  trend_C = +1
-             elif close_C <= One_third_Down and close_C < low_C_O :
+             elif close_C <= One_third_Down : #and close_C < low_C_O :
                  trend_C = -1
-             elif close_C > One_third_Down and close_C < One_third_UP and close_C > high_C_O :
-                 trend_C = +2
-             elif close_C > One_third_Down and close_C < One_third_UP and  close_C < low_C_O :
-                 trend_C = -2
-                 
-             if trend_C == 0 :
-                  print("** Directional Pattern  **")
-             elif trend_C == +1 : 
-                  print("** Strong Bullish Candlestick Pattern **")
-             elif trend_C == +2 : 
-                  print("**Weak Bullish Candlestick Pattern **")
-             elif trend_C == -1 : 
-                  print("** Strong Bearish Candlestick Pattern **")
-             elif trend_C == -2 : 
-                  print("** Weak Bearish Candlestick Pattern **")
+            
 
              print(f"\n Baseroof5 : {PublicVarible.Baseroof5}")
              print("Close -2 : " , close_C)
@@ -217,7 +220,7 @@ class SupplyDemandStrategyV9():
             #### مقداردهی سقف و کف BOS
              if count > 2 : 
                 high_low_diff = round((abs( FrameRatesM5['low'].iloc[current_index : -1 ].min() - FrameRatesM5.iloc[current_index]['high'])) / (SymbolInfo.point),2)
-                if round(round(abs(FrameRatesM5.iloc[-2]['high'] - FrameRatesM5['low'].iloc[current_index : -1 ].min()) / (SymbolInfo.point) / 10, 2) / high_low_diff * 1000,1) < 50 : 
+                if round(round(abs(FrameRatesM5.iloc[-2]['high'] - FrameRatesM5['low'].iloc[current_index : -1 ].min()) / (SymbolInfo.point) / 10, 2) / high_low_diff * 1000,1) < 60 : 
                  
                  if ATR_Value <= 1 : 
                   leg_contorol = (200 * ATR_Value)
@@ -233,7 +236,8 @@ class SupplyDemandStrategyV9():
                   print(f"Down high_low_diff: {high_low_diff} and Baseroof5: {PublicVarible.Baseroof5} and Basefloor5: {PublicVarible.Basefloor5} and Range arraye: {abs(PublicVarible.Basefloor5 - PublicVarible.Baseroof5) / (SymbolInfo.point)} \n")
                   current_time = time.time()
                   if current_time - PublicVarible.last_execution_time >= 300:  
-                   Text = f"{self.Pair}\n"
+                   Text = f"{PairNameX}\n"
+                   Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)\n"
                    Text += f"M5️⃣ لگ نزولی و رنج# ... 🔴🔴 \n"
                    Text += f"تعداد کندل: {count}\n"
                    Text += f"ارتفاع لگ: {round(high_low_diff, 2) / 10} pip\n"
@@ -243,7 +247,13 @@ class SupplyDemandStrategyV9():
                    Text += f"کف رنج : {PublicVarible.Basefloor5} $ \n"
                    Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_height , 2)} Lot \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}\n"
-                   Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
+                   trend5 = analyze_market_power(FrameRatesM5) 
+                   if trend5 == 1 : 
+                      Text += f"🔘 آنالیز چندگانه : قدرت با خریداران "
+                   elif trend5 == -1 :
+                      Text += f"🔘 آنالیز چندگانه : قدرت با فروشندگان "
+                   elif trend5 == 0 :
+                      Text += f"🔘 آنالیز چندگانه : قدرت ها برابر "
                    #PromptToTelegram(Text)
                    #results = send_telegram_messages(Text, PublicVarible.chat_ids)
                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
@@ -269,7 +279,7 @@ class SupplyDemandStrategyV9():
             ## مقداردهی سقف و کف BOS
              if count > 2 : 
               high_low_diff = round((abs(FrameRatesM5.iloc[current_index : -1]['high'].max() - FrameRatesM5.iloc[current_index]['low'])) / (SymbolInfo.point) , 2)
-              if round((round(abs((FrameRatesM5.iloc[current_index : -1]['high'].max()) - ( FrameRatesM5.iloc[-2]['low'])) / (SymbolInfo.point) / 10, 2)) / high_low_diff * 1000,1) < 50 :
+              if round((round(abs((FrameRatesM5.iloc[current_index : -1]['high'].max()) - ( FrameRatesM5.iloc[-2]['low'])) / (SymbolInfo.point) / 10, 2)) / high_low_diff * 1000,1) < 60 :
                  
                  if ATR_Value <= 1 : 
                   leg_contorol = (200 * ATR_Value)
@@ -285,8 +295,9 @@ class SupplyDemandStrategyV9():
                   print(f"Up high_low_diff: {high_low_diff} and Baseroof5: {PublicVarible.Baseroof5} and Basefloor5: {PublicVarible.Basefloor5} and Range arraye: {abs(PublicVarible.Basefloor5 - PublicVarible.Baseroof5) / (SymbolInfo.point)} \n")
                   current_time = time.time()
                   if current_time - PublicVarible.last_execution_time >= 300:  
-                   Text = f"{self.Pair}\n"
+                   Text = f"{PairNameX}\n"
                    Text += f"M5️⃣ لگ صعودی و رنج# ... 🟢🟢 \n"
+                   Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)\n"
                    Text += f"تعداد کندل: {count}\n"
                    Text += f"ارتفاع لگ: {round(high_low_diff, 2) / 10} pip\n"
                    Text += f"ارتفاع رنج: {PublicVarible.range_height} pip \n"
@@ -295,7 +306,13 @@ class SupplyDemandStrategyV9():
                    Text += f"کف رنج : {PublicVarible.Basefloor5} $ \n"
                    Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_height , 2)} Lot \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute} \n"
-                   Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
+                   trend5 = analyze_market_power(FrameRatesM5) 
+                   if trend5 == 1 : 
+                      Text += f"🔘 آنالیز چندگانه : قدرت با خریداران "
+                   elif trend5 == -1 :
+                      Text += f"🔘 آنالیز چندگانه : قدرت با فروشندگان "
+                   elif trend5 == 0 :
+                      Text += f"🔘 آنالیز چندگانه : قدرت ها برابر "
                    #results = send_telegram_messages(Text, PublicVarible.chat_ids)
                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    #PromptToTelegram(Text)
@@ -343,7 +360,7 @@ class SupplyDemandStrategyV9():
 
 #Buy####################  بررسی شرط خروج قیمت از سقف و انجام معامله خرید ######################
              
-             if close_C > PublicVarible.Baseroof5 and close_C < (PublicVarible.Baseroof5 + (SymbolInfo.point * 20)) and PublicVarible.Baseroof5 != 0 :
+             if close_C > PublicVarible.Baseroof5 and close_C < (PublicVarible.Baseroof5 + (SymbolInfo.point * 1)) and PublicVarible.Baseroof5 != 0 :
                 PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0
                 Text = f" مقدار و قدرت خروج قیمت از سقف #نامناسب است \n ⚠️پاک شدن  مقادیر سقف و کف ⚠️"
                 #results = send_telegram_messages(Text, PublicVarible.chat_ids)
@@ -351,61 +368,64 @@ class SupplyDemandStrategyV9():
              elif close_C > (PublicVarible.Baseroof5 + (SymbolInfo.point * 20)) and PublicVarible.Baseroof5 != 0 and close_C > higherH : 
                 print(f"price is {close_C} and Upper Roof {PublicVarible.Baseroof5} ")
                 if current_time - PublicVarible.last_execution_timeS  >= 300:   
-                   Text = f"#Buy Position {self.Pair}\n \n"
-                   Text += f"price:{close_C}$ 🔺Upper Roof {PublicVarible.Baseroof5}$ \n\n "
+                   Text = f"\n⬆️ Buy Position in {self.Pair} \n({PairNameX}) \n"
+                   Text += f"price:{close_C}$ \n🔺Upper Roof {PublicVarible.Baseroof5}$ \n\n"
                    if trend_C == +1 : 
-                       Text += f"خروج قیمت از #سقف با قدرت #زیاد توسط خریداران  🐮 \n "
+                       Text += f"🔘خروج  از سقف:  کندل قدرتمند 🐮 \n"
                        if PublicVarible.HS_Down == 1 : 
-                          Text += f"الکوی سرشانه نزولی رخ داده است \n "
+                          Text += f"🔘 الگوی سر وشانه نزولی \n"
                        elif PublicVarible.HS_Up == 1 : 
-                          Text += f"الکوی سرشانه صعودی رخ داده است \n "
+                          Text += f"🔘 الگوی سر وشانه صعودی \n"
                    elif trend_C == +2 : 
-                       Text += f"خروج قیمت از #سقف با قدرت #معمولی توسط خریداران 🐮 \n ⚠️پاک شدن  مقادیر سقف و کف ⚠️"
+                       Text += f"🔘 خروج از سقف:  کندل قدرتمند 🐮 \n🔘 حذف مقادیر سقف و کف ⚠️\n"
                        if PublicVarible.HS_Down == 1 : 
-                          Text += f"الکوی سرشانه نزولی رخ داده است \n "
+                          Text += f"🔘 الگوی سر وشانه نزولی \n"
                        elif PublicVarible.HS_Up == 1 : 
-                          Text += f"الکوی سرشانه صعودی رخ داده است \n "
+                          Text += f"🔘 الگوی سر وشانه صعودی \n"
                        PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0
                    elif trend_C == 0 :
                       PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0
-                      Text += f" قدرت فروشنده و خریدار #برابر است 🏓 \n ⚠️پاک شدن  مقادیر سقف و کف ⚠️"
+                      Text += f"🔘 قدرت کندل ها : برابر  🏓 \n🔘 حذف مقادیر سقف و کف ⚠️\n"
                    if trend_C == -1 or trend_C == -2 :
                       PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0
-                      Text += f" وضعیت خروج قیمت #نامناسب است \n ⚠️پاک شدن  مقادیر سقف و کف ⚠️"
+                      Text += f"🔘 وضعیت خروج : نامناسب  \n🔘 حذف مقادیر سقف و کف ⚠️\n"
+
+                   trend5 = analyze_market_power(FrameRatesM5) 
+                   if trend5 == 1 : 
+                      Text += f"🔘 آنالیز چندگانه : قدرت با خریداران "
+                   elif trend5 == -1 :
+                      Text += f"🔘 آنالیز چندگانه : قدرت با فروشندگان "
+                   elif trend5 == 0 :
+                      Text += f"🔘 آنالیز چندگانه : قدرت ها برابر "
+                   if trend_C == +1 and trend5 == 1 : 
+                      Text += f"\n✅ موقعیت Buy: مناسب "
+                   else : 
+                      Text += f"\n❌ موقعیت Buy: نامناسب "
+
                    #PromptToTelegram(Text)  
                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    #results = send_telegram_messages(Text, PublicVarible.chat_ids)
                    PublicVarible.last_execution_timeS = current_time 
 #Buy
-                buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
-                if buy_positions_with_open_prices:
-                 for ticket, open_price in buy_positions_with_open_prices.items():
-                   positions = MT5.positions_get()
-                   for position_info in positions:
-                     if position_info.symbol == self.Pair :
-                        Botdashboard(53 , self.Pair)
-                        return
-                     
                 EntryPrice = SymbolInfo.ask
-                SL = PublicVarible.Basefloor5 - ((PublicVarible.Baseroof5 - PublicVarible.Basefloor5)/2)  #########  تعیین حدضرر معامله ######### - ( SymbolInfo.point * 70)  #
-                TP1 =   SymbolInfo.ask + (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) * 1.2)# SymbolInfo.bid + ( SymbolInfo.point * 100) 
+                SL = PublicVarible.Basefloor5 - ((PublicVarible.Baseroof5 - PublicVarible.Basefloor5)*0.75)  #########  تعیین حدضرر معامله ######### - ( SymbolInfo.point * 70)  #
+                TP1 = PublicVarible.Baseroof5 + (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) * 2) 
                 Entryheight = round(abs(EntryPrice - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)      
                 Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)   
                 TextN = f"\nVolume = {Volume} \n"
                 TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroof5)) - (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)*0.75)} (If NEG T is True)" 
                 write_trade_info_to_file(self.Pair ,"Buy", SymbolInfo.ask, SL, TP1, TextN )
 
-                if (abs(close_C - PublicVarible.Baseroof5) < (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) * 0.75 )) and (trend_C == +1 ) and Time_Signal == 1 : # and PublicVarible.hmaSignal == 1 :
+                if (abs(close_C - PublicVarible.Baseroof5) < (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) * 0.75 )) and trend_C == +1  and trend5== 1 and Time_Signal == 1 :
                   Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
-                  PublicVarible.Exit_C = True
                   EntryPrice = SymbolInfo.ask
                   Entryheight = round(abs(EntryPrice - PublicVarible.Basefloor5) / (SymbolInfo.point) / 10, 2)      
                   Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2) 
-                  OrderBuy(Pair= self.Pair, Volume= Volume/2, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
-                
-                  EntryPrice = (PublicVarible.Baseroof5 + PublicVarible.Basefloor5)/2
-                  #OrderBuyLimit(Pair= self.Pair, Volume= Volume/2 , EntryPrice = EntryPrice , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V2 - M5")
-                  PromptToTelegram(f"🚨🚨 \n سفارش #خرید معوق در قیمت {EntryPrice} گذاشته شد\n LL = {PublicVarible.List_of_low}\n HH = {PublicVarible.List_of_high}")
+                  ### سفارش خرید در قیمت مارکت   ############
+                  OrderBuy(Pair= self.Pair, Volume= round(Volume/2 ,2) , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Mar V9")
+                  ### سفارش خرید در قیمت کف رنج   ############
+                  OrderBuyLimit(Pair= self.Pair, Volume=  round(Volume/2 ,2)  , EntryPrice =  PublicVarible.Basefloor5 , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Lim V9")
+                  #PromptToTelegram(f"🚨🚨 \n سفارش #خرید معوق {self.Pair} در قیمت \n SL : {SL} \n Price : {EntryPrice} \n TP : {TP1}")
                   PublicVarible.Limittime = current_time
                 else : 
                    TextN = f"\n self.Pair | pos = Buy | EntryPrice = {EntryPrice} | SL = {SL} | TP1 = {TP1} \n"
@@ -417,7 +437,7 @@ class SupplyDemandStrategyV9():
 
 #Sell ####################  بررسی شرط خروج قیمت از کف و انجام معامله فروش ######################
 
-             if close_C < PublicVarible.Basefloor5 and close_C > (PublicVarible.Basefloor5 - (SymbolInfo.point * 20)) and PublicVarible.Basefloor5 != 0 :
+             if close_C < PublicVarible.Basefloor5 and close_C > (PublicVarible.Basefloor5 - (SymbolInfo.point * 1)) and PublicVarible.Basefloor5 != 0 :
                 PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0
                 Text = f" مقدار و قدرت خروج قیمت از کف #نامناسب است \n ⚠️پاک شدن  مقادیر سقف و کف ⚠️"
                 #results = send_telegram_messages(Text, PublicVarible.chat_ids)
@@ -425,62 +445,65 @@ class SupplyDemandStrategyV9():
              elif close_C < (PublicVarible.Basefloor5 - (SymbolInfo.point * 20)) and PublicVarible.Basefloor5 != 0 and close_C < LowerL : 
                 print(f"price is {close_C} and Under floor {PublicVarible.Basefloor5} ")
                 if current_time - PublicVarible.last_execution_timeS >= 300:   
-                   Text = f"#Sell Position  {self.Pair} \n\n"
-                   Text += f"price:{close_C}$ 🔻Under floor {PublicVarible.Basefloor5}$ \n\n "
+                   Text = f"\n⬇️ Sell Position in {self.Pair} \n({PairNameX}) \n"
+                   Text += f"🔘price:{close_C}$ \n🔻Under floor {PublicVarible.Basefloor5}$ \n\n"
                    if trend_C == -1 : 
-                       Text += f"خروج قیمت از #کف با قدرت #زیاد توسط فروشندگان 🐻 \n"
+                       Text += f"🔘 خروج از کف: باکندل قدرتمند 🐻 \n"
                        if PublicVarible.HS_Down == 1 : 
-                          Text += f"الکوی سرشانه نزولی رخ داده است \n "
+                          Text += f"🔘الگوی سر وشانه نزولی \n"
                        elif PublicVarible.HS_Up == 1 : 
-                          Text += f"الکوی سرشانه صعودی رخ داده است \n "
+                          Text += f"🔘 الگوی سر وشانه صعودی \n"
                    elif trend_C == -2 :
-                       Text +=  f"خروج قیمت از #کف با قدرت #معمولی توسط فروشندگان 🐻 \n ⚠️پاک شدن  مقادیر سقف و کف ⚠️"
+                       Text +=  f"🔘خروج از کف: باکندل معولی 🐻 \n🔘حذف مقادیر سقف و کف ⚠️\n"
                        if PublicVarible.HS_Down == 1 : 
-                          Text += f"الکوی سرشانه نزولی رخ داده است \n "
+                          Text += f"🔘 الگوی سر وشانه نزولی \n"
                        elif PublicVarible.HS_Up == 1 : 
-                          Text += f"الکوی سرشانه صعودی رخ داده است \n "
+                          Text += f"🔘 الگوی سر وشانه صعودی \n"
                        PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0
                    elif trend_C == 0 :
                       PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0
-                      Text += f" قدرت فروشنده و خریدار #برابر است 🏓 \n ⚠️پاک شدن  مقادیر سقف و کف ⚠️"
+                      Text += f"🔘 قدرت کندل ها برابر  🏓 \n🔘حذف مقادیر سقف و کف ⚠️\n"
                    elif trend_C == 1 or trend_C ==2:
                       PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0
-                      Text += f" وضعیت خروج قیمت #نامناسب است \n ⚠️پاک شدن  مقادیر سقف و کف ⚠️"
+                      Text += f"🔘 وضعیت خروج:  نامناسب  \n🔘حذف مقادیر سقف و کف ⚠️\n"
+                  
+                   trend5 = analyze_market_power(FrameRatesM5) 
+                   if trend5 == 1 : 
+                      Text += f"🔘 آنالیز چندگانه : قدرت با خریداران "
+                   elif trend5 == -1 :
+                      Text += f"🔘 آنالیز چندگانه : قدرت با فروشندگان "
+                   elif trend5 == 0 :
+                      Text += f"🔘 آنالیز چندگانه : قدرت ها برابر "
+                   if trend_C == -1 and trend5 == -1 : 
+                      Text += f"\n✅ موقعیت Sell: مناسب "
+                   else : 
+                      Text += f"\n❌ موقعیت Sell: نامناسب "
+                      
                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    #PromptToTelegram(Text)
                    #results = send_telegram_messages(Text, PublicVarible.chat_ids)  
                    PublicVarible.last_execution_timeS = current_time  
 #Sell
-                sell_positions_with_open_prices = get_sell_positions_with_open_prices()           ######### بررسی معامله فروش باز  ##########
-                if sell_positions_with_open_prices:
-                  for ticket, open_price in sell_positions_with_open_prices.items():
-                    positions = MT5.positions_get()
-                    for position_info in positions:
-                     if position_info.symbol == self.Pair :
-                        Botdashboard(54 , self.Pair)
-                        return
-                
                 EntryPrice = SymbolInfo.bid 
-                SL = PublicVarible.Baseroof5 + ((PublicVarible.Baseroof5 - PublicVarible.Basefloor5)/2) #########  تعیین حدضرر معامله #########  ( SymbolInfo.point * 50 * ATR_Value)  #
-                TP1 =  SymbolInfo.bid - (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) * 1.2)  #SymbolInfo.ask - ( SymbolInfo.point * 100) 
+                SL = PublicVarible.Baseroof5 + ((PublicVarible.Baseroof5 - PublicVarible.Basefloor5)*0.75) #########  تعیین حدضرر معامله #########  ( SymbolInfo.point * 50 * ATR_Value)  #
+                TP1 = PublicVarible.Basefloor5 - (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5) * 2) 
                 Entryheight = round(abs(EntryPrice - PublicVarible.Baseroof5) / (SymbolInfo.point) / 10, 2)      
                 Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)
                 TextN = f"\nVolume = {Volume} \n"
                 TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5)) - (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)*0.75)} (If NEG T is True)\n" 
                 write_trade_info_to_file(self.Pair ,"Sell", SymbolInfo.bid  , SL, TP1, TextN )
                 
-                if (abs(close_C - PublicVarible.Basefloor5) < (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)* 0.75) ) and (trend_C == -1 ) and Time_Signal == 1 : 
-                  Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                if (abs(close_C - PublicVarible.Basefloor5) < (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)* 0.75) ) and trend_C == -1  and trend5 == -1  and Time_Signal == 1 : 
                   EntryPrice = SymbolInfo.bid  
                   Entryheight = round(abs(EntryPrice - PublicVarible.Baseroof5) / (SymbolInfo.point) / 10, 2)      
-                  Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)
-                  OrderSell(Pair= self.Pair, Volume= Volume/2, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V9 - M5")
-
-                  EntryPrice = (PublicVarible.Baseroof5 + PublicVarible.Basefloor5)/2
-                  #OrderSellLimit(Pair= self.Pair, Volume= Volume/2 , EntryPrice = EntryPrice , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V9 - M5")
-                  PromptToTelegram(f"🚨🚨 \n سفارش #فروش معوق در قیمت {EntryPrice} گذاشته شد \n LL = {PublicVarible.List_of_low}\n HH = {PublicVarible.List_of_high}")
+                  Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)/2
+                  ### سفارش خرید در قیمت مارکت   ############
+                  OrderSell(Pair= self.Pair, Volume= round(Volume/2 ,2)  , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "Mar V9")
+                  Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
+                  ### سفارش خرید در قیمت کف رنج   ############
+                  OrderSellLimit(Pair= self.Pair, Volume=  round(Volume/2 ,2) , EntryPrice =  PublicVarible.Baseroof5 , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Lim V9")
+                  #PromptToTelegram(f"🚨🚨 \n سفارش #فروش معوق {self.Pair} در قیمت \n SL : {SL} \n Price : {PublicVarible.Baseroof5} \n TP : {TP1}")
                   PublicVarible.Limittime = current_time
-
                 else : 
                     TextN = f"\n self.Pair | pos = Sell | EntryPrice = {EntryPrice} | SL = {SL} | TP1 = {TP1} \n"
                     TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloor5)) - (abs(PublicVarible.Baseroof5 - PublicVarible.Basefloor5)*0.75)} (If NEG T is True)" 

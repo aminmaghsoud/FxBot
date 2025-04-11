@@ -169,3 +169,4 @@ datetime,pair,leg_type,leg_height,leg_candles_count,range_height,range_to_leg_ra
 2025-04-03 22:49:56,BTCUSD,bullish,272.0,1,11.9,4.38,62.0,177.0,0,0,3.527939804096952e+17,False,success
 2025-04-03 22:49:56,USDJPYb,bullish,403.0,7,14.0,3.47,31.0,352.0,0,0,1.106804644422615e+17,True,pending
 2025-04-03 22:49:56,XAUUSDb,bullish,403.0,1,14.0,3.47,121.0,449.0,0,0,4.611686018427388e+17,False,success
+2025-04-03 23:15:32,AUDJPYb,bearish,346.0,8,12.6,3.64,47.0,329.0,1,0,-8.301034833169613e+16,True,pending

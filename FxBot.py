@@ -9,6 +9,8 @@ from SupplyDemandStrategyV9 import *
 from SupplyDemandStrategyV8 import *
 from SupplyDemandStrategyV7 import *
 from SupplyDemandStrategyV6 import *
+from SupplyDemandStrategyV5 import *
+from SupplyDemandStrategyV4 import *
 from LegAnalyzer import  *
 from Utility import *
 import sys
@@ -106,7 +108,7 @@ class FxBot():
                           #if (datetime.now() - PublicVarible.LastDatetimeRobotIsReady).total_seconds() / 60 > 120 :
                           #  PublicVarible.LastDatetimeRobotIsReady = datetime.now() 
                           #  Statistics()
-                          A = SupplyDemandStrategyV7(Pair = Item['Name']) #M5 AUDJPY
+                          A = SupplyDemandStrategyV7(Pair = Item['Name']) #M5 EURUSDb
                           PublicVarible.Executor.submit(A.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
                           B = SupplyDemandStrategyV8(Pair = Item['Name']) #M5 USDJPYb
                           PublicVarible.Executor.submit(B.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
@@ -114,9 +116,10 @@ class FxBot():
                           PublicVarible.Executor.submit(C.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
                           D = SupplyDemandStrategyV6(Pair = Item['Name']) #M5 BTCUSDT
                           PublicVarible.Executor.submit(D.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
-                          E = LegAnalyzer(Pair = Item['Name']) #M5 BTCUSDT
+                          E = SupplyDemandStrategyV5(Pair = Item['Name']) #M5 USDCHFb
                           PublicVarible.Executor.submit(E.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
-
+                          F = SupplyDemandStrategyV4(Pair = Item['Name']) #M5 NZADUSD
+                          PublicVarible.Executor.submit(F.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
                           CloseAllPosition(Pair= Item['Name'])
                           
                        else:

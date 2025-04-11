@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 import mplfinance as mpf
 from io import BytesIO
 import pandas as pd
+import pandas_ta as pta
 
 warnings.filterwarnings('ignore')
 ########################################################################################################
@@ -1291,66 +1292,6 @@ def has_pending_limit_orders():
     return False  # اگر هیچ سفارش لیمیتی وجود نداشت، مقدار False باز می‌گرداند
 
 
-"""
-def plot_candles_and_send_telegram(FrameRatesM5, pair, Text):
-    try:
-        # اطمینان از وجود ستون‌های مورد نیاز
-        required_columns = ['open', 'high', 'low', 'close']
-        if not all(col in FrameRatesM5.columns for col in required_columns):
-            error_msg = "Warning: Missing required columns in DataFrame"
-            print(error_msg)
-            send_telegram_messages(error_msg, PublicVarible.chat_ids)
-            return False
-
-        # تنظیم تاریخ‌ها به عنوان ایندکس
-        if 'datetime' in FrameRatesM5.columns:
-            FrameRatesM5.set_index('datetime', inplace=True)
-
-        # تنظیم استایل نمودار
-        mc = mpf.make_marketcolors(up='g', down='r', edge='inherit', wick='inherit', volume='inherit')
-        s = mpf.make_mpf_style(marketcolors=mc, gridstyle='')
-
-        # ذخیره نمودار در بافر
-        buf = BytesIO()
-        mpf.plot(FrameRatesM5, 
-                type='candle',
-                style=s,
-                title=f'Candlestick Chart - {pair}',
-                savefig=dict(fname=buf, dpi=300, bbox_inches='tight'))
-        buf.seek(0)
-        
-        # ارسال تصویر به تلگرام
-        send_telegram_photo(buf, PublicVarible.chat_ids, Text)
-        return True
-        
-    except Exception as e:
-        error_msg = f"Error in plot_candles_and_send_telegram: {str(e)}"
-        print(error_msg)
-        send_telegram_messages(error_msg, PublicVarible.chat_ids)
-        return False
-
-
-############################################
-
-def send_telegram_photo(photo_buffer, chat_ids, caption=""):
-    token = "8041867463:AAEUH_w2CYFne521LxNVsuR6hiuqk-75pfQ"
-    url = f"https://api.telegram.org/bot{token}/sendPhoto"
-    
-    responses = {}
-    for chat_id in chat_ids:
-        files = {'photo': ('chart.png', photo_buffer, 'image/png')}
-        data = {
-            'chat_id': chat_id,
-            'caption': caption,
-            'parse_mode': 'HTML'
-        }
-        response = requests.post(url, files=files, data=data)
-        responses[chat_id] = response.json()
-    return responses
-
-
-
-"""
 ########################################################################################
 
 def plot_candles_and_send_telegram(FrameRatesM5, pair, Text):
@@ -1428,3 +1369,115 @@ def send_telegram_photo(photo_buffer, chat_ids, caption=""):
         responses[chat_id] = response.json()
     
     return responses
+
+########################################################################################
+
+def analyze_market_power(FrameRatesM5):
+    """
+    تحلیل قدرت خریداران و فروشندگان با استفاده از ترکیبی از روش‌های مختلف
+    خروجی: 
+        +1: قدرت خریداران
+        -1: قدرت فروشندگان
+        0: عدم قطعیت
+    """
+    try:
+        # 1. تحلیل حجم معاملات
+        volume_bullish = 0
+        volume_bearish = 0
+        for i in range(-7, -1):  # بررسی از کندل -7 تا -2
+            if FrameRatesM5.iloc[i]['close'] > FrameRatesM5.iloc[i]['open']:  # کندل صعودی
+                volume_bullish += FrameRatesM5.iloc[i]['tick_volume']
+            else:  # کندل نزولی
+                volume_bearish += FrameRatesM5.iloc[i]['tick_volume']
+        
+        volume_ratio = volume_bullish / (volume_bearish + 1)  # جلوگیری از تقسیم بر صفر
+        volume_signal = 1 if volume_ratio > 1.2 else (-1 if volume_ratio < 0.8 else 0)
+
+        # 2. تحلیل مومنتوم قیمت
+        price_changes = []
+        for i in range(-7, -1):  # بررسی از کندل -7 تا -2
+            if i < -1:
+                change = (FrameRatesM5.iloc[i]['close'] - FrameRatesM5.iloc[i-1]['close'])
+                price_changes.append(change)
+        
+        avg_price_change = sum(price_changes) / len(price_changes)
+        momentum_signal = 1 if avg_price_change > 0 else (-1 if avg_price_change < 0 else 0)
+
+        # 3. تحلیل الگوی کندل‌ها با روش لنس بگز
+        bullish_candles = 0
+        bearish_candles = 0
+        neutral_candles = 0
+        
+        for i in range(-7, -1):  # بررسی از کندل -7 تا -2
+            candle = FrameRatesM5.iloc[i]
+            high = candle['high']
+            low = candle['low']
+            close = candle['close']
+            
+            # محاسبه محدوده قیمتی کندل
+            price_range = high - low
+            # محاسبه موقعیت کلوز نسبت به محدوده قیمتی
+            close_position = (close - low) / price_range
+            # تحلیل بر اساس روش لنس بگز
+            if close_position > 0.67:  # ثلث بالایی
+                bullish_candles += 1
+            elif close_position < 0.33:  # ثلث پایینی
+                bearish_candles += 1
+            else:  # ثلث میانی
+                neutral_candles += 1
+        
+        # تعیین سیگنال کندل‌ها
+        if bullish_candles >= 3:  # حداقل 3 کندل صعودی
+            candlestick_signal = 1
+        elif bearish_candles >= 3:  # حداقل 3 کندل نزولی
+            candlestick_signal = -1
+        else:
+            candlestick_signal = 0
+
+        # 4. محاسبه RSI با استفاده از ماژول pta
+        rsi = PTA.rsi(FrameRatesM5['close'], length=14)
+        current_rsi = rsi.iloc[-2]  # استفاده از RSI کندل -2
+        
+        rsi_signal = 1 if current_rsi > 60 else (-1 if current_rsi < 40 else 0)
+        
+        # 5. تحلیل EMA 20
+        # محاسبه EMA 20
+        ema20 = FrameRatesM5['close'].ewm(span=20, adjust=False).mean()
+        # بررسی موقعیت کلوز کندل -2 نسبت به EMA 20
+        close_minus_2 = FrameRatesM5.iloc[-2]['close']
+        ema20_minus_2 = ema20.iloc[-2]
+        ema_signal = 1 if close_minus_2 > ema20_minus_2 else -1
+
+        # 6. تحلیل OBV (On-Balance Volume)
+        # محاسبه OBV با استفاده از ماژول pta
+        obv = PTA.obv(FrameRatesM5['close'], FrameRatesM5['tick_volume'])
+        # محاسبه تغییرات OBV در 5 کندل آخر
+        obv_changes = []
+        for i in range(-11, -1):  # بررسی تغییرات OBV از کندل -11 تا -2
+            obv_change = obv.iloc[i] - obv.iloc[i-1]
+            obv_changes.append(obv_change)
+        
+        # محاسبه میانگین تغییرات OBV
+        avg_obv_change = sum(obv_changes) / len(obv_changes)
+        # تعیین سیگنال OBV
+        obv_signal = 1 if avg_obv_change > 0 else -1
+
+        # ترکیب سیگنال‌ها
+        signals = [volume_signal, momentum_signal, candlestick_signal, rsi_signal, ema_signal, obv_signal]
+        #PromptToTelegram(Text=f"volume_signal: {volume_signal} , momentum_signal: {momentum_signal} , candlestick_signal: {candlestick_signal} , rsi_signal: {rsi_signal} , ema_signal: {ema_signal} , obv_signal: {obv_signal}")
+        bullish_count = sum(1 for s in signals if s == 1)
+        bearish_count = sum(1 for s in signals if s == -1)
+        
+        if bullish_count >= 4:  # حداقل 4 سیگنال صعودی (به دلیل اضافه شدن OBV)
+            return 1  # قدرت خریداران
+        elif bearish_count >= 4:  # حداقل 4 سیگنال نزولی (به دلیل اضافه شدن OBV)
+            return -1  # قدرت فروشندگان
+        else:
+            return 0  # عدم قطعیت
+
+    except Exception as e:
+        error_msg = f"خطا در تحلیل قدرت بازار: {str(e)}"
+        print(error_msg)
+        PromptToTelegram(Text=error_msg)
+        return 0  # در صورت خطا، عدم قطعیت برمی‌گرداند
+

@@ -78,7 +78,7 @@ Botstatus = 0
 #last_message_time = 0
 #last_message_time1 = 0
 
-############# xauusd ##################
+############# xauusd ################## VER 9
 last_execution_time = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timeS = 0
 last_execution_timeM15 = 0  
@@ -95,7 +95,7 @@ Limittime = 0
 high_low_diff = 0
 
 
-############# USDJPY ##################
+############# USDJPY ################## VER 8
 last_execution_timej = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timejS = 0 
 Basefloorj = 0.0
@@ -109,20 +109,47 @@ HS_UpJ = 0
 Leg_startj = 0
 high_low_diffj = 0
 
-############# AUDJPY ##################
-last_execution_timeA = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
-last_execution_timeAS = 0 
-BasefloorA = 0.0
-BaseroofA = 0.0
-BasetimeA = 0
-range_heightA = 0
-LowerLA = 0
-HigherHA = 0
-HS_DownA = 0 
-HS_UpA = 0
-high_low_diffA = 0
+############# NZDUSD ################## VER 4
+last_execution_timeN = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
+last_execution_timeNS = 0 
+BasefloorN = 0.0
+BaseroofN = 0.0
+BasetimeN = 0
+range_heightN = 0
+LowerLN = 0
+HigherHN = 0
+HS_DownN = 0 
+HS_UpN = 0
+Leg_startN = 0
+high_low_diffN = 0
 
-############# BTCUSD ##################
+############# EURUSD ################## VER 7
+last_execution_timeE = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
+last_execution_timeES = 0 
+BasefloorE = 0.0
+BaseroofE = 0.0
+BasetimeE = 0
+range_heightE = 0
+LowerLE = 0
+HigherHE = 0
+HS_DownE = 0 
+HS_UpE = 0
+high_low_diffE = 0
+
+############# CHFUSD ################## VER 5
+last_execution_timeU = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
+last_execution_timeUS = 0 
+BasefloorU = 0.0
+BaseroofU = 0.0
+BasetimeU = 0
+range_heightU = 0
+LowerLU = 0
+HigherHU = 0
+HS_DownU = 0 
+HS_UpU = 0
+high_low_diffU = 0 
+
+############# BTCUSD ################## VER 6
 last_execution_timeB = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timeBS = 0 
 BasefloorB = 0.0
@@ -135,7 +162,7 @@ HS_DownB = 0
 HS_UpB = 0
 high_low_diffB = 0
 
-############# LegAnalyzer ##################
+"""############# LegAnalyzer ##################
 BasefloorLA = 0.0
 BaseroofLA = 0.0
 range_heightLA = 0
@@ -143,7 +170,7 @@ LowerLLA = 0
 HigherHLA = 0
 HS_DownLA = 0 
 HS_UpLA = 0
-high_low_diffLA = 0
+high_low_diffLA = 0"""
 
 
 Quick_trade = True
@@ -172,7 +199,7 @@ def update_variables(new_risk, new_lot_size, new_quick_trade, new_can_open_order
 def create_gui():
     root = tk.Tk()
     root.title("تنظیمات ربات")
-    root.geometry("500x300")
+    root.geometry("500x400")
 
     # رنگ پس‌زمینه
     right_bg_color = "yellow"
