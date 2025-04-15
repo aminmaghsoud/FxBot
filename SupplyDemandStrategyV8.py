@@ -64,7 +64,7 @@ class SupplyDemandStrategyV8():
                                      # اعمال تغییرات
                                      ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
                                      print(" Buy Position Tp and Sl Modified to Bearish Status")
-                                 elif SymbolInfo.ask >= abs(abs(entry_price - take_profit) * 0.50 + entry_price):
+                                 elif SymbolInfo.ask >= abs(abs(entry_price - take_profit) * 0.65 + entry_price):
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = entry_price
                                      # اعمال تغییرات
@@ -98,7 +98,7 @@ class SupplyDemandStrategyV8():
                                      # اعمال تغییرات
                                      ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
                                      print(" Sell Position Tp and Sl Modified to Bearish Status")
-                                 elif SymbolInfo.bid <= abs(abs(entry_price - take_profit) * 0.50 - entry_price):
+                                 elif SymbolInfo.bid <= abs(abs(entry_price - take_profit) * 0.65 - entry_price):
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = entry_price
                                      # اعمال تغییرات
@@ -399,7 +399,7 @@ class SupplyDemandStrategyV8():
                 EntryPrice = SymbolInfo.ask
                 SL = PublicVarible.Basefloorj - ( SymbolInfo.point * 100)  #########  تعیین حدضرر معامله #########
                 #TP1 = EntryPrice + ((EntryPrice - SL) * 1  )
-                TP1 =  PublicVarible.Baseroofj + (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj) * 2) 
+                TP1 =  PublicVarible.Baseroofj + (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj) * 1) 
                 Entryheight = round(abs(EntryPrice - PublicVarible.Basefloorj) / (SymbolInfo.point) / 10, 2)      
                 Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)   
                 TextN = f"\nVolume = {Volume} \n"
@@ -429,7 +429,7 @@ class SupplyDemandStrategyV8():
 
 #Sell ####################  بررسی شرط خروج قیمت از کف و انجام معامله فروش ######################
 
-             if close_C < PublicVarible.Basefloorj and close_C > (PublicVarible.Basefloorj + (SymbolInfo.point * 1)) and PublicVarible.Basefloorj != 0 :
+             if close_C < PublicVarible.Basefloorj and close_C > (PublicVarible.Basefloorj + (SymbolInfo.point * 2)) and PublicVarible.Basefloorj != 0 :
                 PublicVarible.Baseroofj = PublicVarible.Basefloorj = 0
                 Text = f" مقدار و قدرت خروج قیمت از کف #نامناسب است \n 🔘 حذف مقادیر سقف و کف ⚠️"
                 #results = send_telegram_messages(Text, PublicVarible.chat_ids)

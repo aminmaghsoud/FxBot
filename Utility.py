@@ -469,10 +469,10 @@ def Statistics():
     elif PublicVarible.risk == 1 : 
              Prompt(f"Risk: Low")
              Text += "\n" + f" ⚠️ Tradeing Risk >> Low 🟢"
-    #if PublicVarible.Quick_trade == False : 
-             #Text += "\n" + f" ⚠️ Quck tread if OFF 🟢 "
-    #elif PublicVarible.Quick_trade == True : 
-            # Text += "\n" + f" ⚠️ Quck tread if ON 🔴 "
+    if PublicVarible.Quick_trade == False : 
+             Text += "\n" + f" ⚠️ xauusd trade is OFF 🟢 "
+    elif PublicVarible.Quick_trade == True : 
+             Text += "\n" + f" ⚠️ xauusd trade is ON 🔴 "
     PromptToTelegram(Text= Text)
 
 ########################################################################################################
@@ -574,10 +574,10 @@ def ProcessTelegramCommand():
              PromptToTelegram('😘')
         elif Command == "/quick_trade_off" :
              PublicVarible.Quick_trade = False
-             PromptToTelegram("Quick trade if OFF") 
+             PromptToTelegram("xauusd trade is OFF") 
         elif Command == "/quick_trade_on" :
              PublicVarible.Quick_trade = True 
-             PromptToTelegram("Quick trade if ON")
+             PromptToTelegram("xauusd trade is ON")
     except Exception as e:
             print(e)
 
@@ -1349,7 +1349,7 @@ def plot_candles_and_send_telegram(FrameRatesM5, pair, Text):
 def send_telegram_photo(photo_buffer, chat_ids, caption=""):
     print(f"Received chat_ids: {chat_ids}, Type: {type(chat_ids)}")  # بررسی مقدار
 
-    TOKEN = "8041867463:AAEUH_w2CYFne521LxNVsuR6hiuqk-75pfQ"
+    TOKEN = "8041867463:AAGad64rvG7qQ2AVdF6xrCnGvtyU-1iFE4U"
     url = f"https://api.telegram.org/bot{TOKEN}/sendPhoto"
 
     responses = {}
@@ -1481,3 +1481,25 @@ def analyze_market_power(FrameRatesM5):
         PromptToTelegram(Text=error_msg)
         return 0  # در صورت خطا، عدم قطعیت برمی‌گرداند
 
+########################################################################################
+
+def time_to_trade(Pair:str):
+    SymbolInfo = MT5.symbol_info(Pair)
+    current_time = time.time()
+    current_datetime = datetime.now()
+    #print(f"{Pair} Price is ({SymbolInfo.ask} $)")
+    restricted_hours = {6 , 11 , 13 , 19 , 16}
+    if current_datetime.minute == 0 and current_datetime.hour in restricted_hours:
+            PublicVarible.CanOpenOrder = False
+            PublicVarible.risk = 1
+            if current_time - PublicVarible.last_execution_timeT >= 60 :
+                   Text = f"⏰ Time : {current_datetime} \n"
+                   Text += f"Risk changed to Safe Mode 🟢 (Low) \n"
+                   Text += f"Can Open Order Stoped ... \n"
+                   Text += f"{Pair} Price is ({SymbolInfo.ask} $)"
+                   PromptToTelegram(Text)
+                         
+    if current_datetime.minute == 0 and current_datetime.hour in {13 , 19}:
+           Text = f"⚠️هشدار⚠️ \n اطلاعات ارائه شده در این بات ، صرفا جنبه #آموزشی داشته و سازنده مسئولیتی در قبال ضرر احتمالی  ندارد . لطفا اصول حرفه ای معامله و مدیریت سرمایه را رعایت فرمائید . "
+           results = send_telegram_messages(Text, PublicVarible.chat_ids)
+           PublicVarible.last_execution_timeT = current_time

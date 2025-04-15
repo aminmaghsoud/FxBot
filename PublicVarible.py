@@ -94,7 +94,6 @@ Basetime = 0
 Limittime = 0 
 high_low_diff = 0
 
-
 ############# USDJPY ################## VER 8
 last_execution_timej = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timejS = 0 
@@ -109,46 +108,6 @@ HS_UpJ = 0
 Leg_startj = 0
 high_low_diffj = 0
 
-############# NZDUSD ################## VER 4
-last_execution_timeN = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
-last_execution_timeNS = 0 
-BasefloorN = 0.0
-BaseroofN = 0.0
-BasetimeN = 0
-range_heightN = 0
-LowerLN = 0
-HigherHN = 0
-HS_DownN = 0 
-HS_UpN = 0
-Leg_startN = 0
-high_low_diffN = 0
-
-############# EURUSD ################## VER 7
-last_execution_timeE = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
-last_execution_timeES = 0 
-BasefloorE = 0.0
-BaseroofE = 0.0
-BasetimeE = 0
-range_heightE = 0
-LowerLE = 0
-HigherHE = 0
-HS_DownE = 0 
-HS_UpE = 0
-high_low_diffE = 0
-
-############# CHFUSD ################## VER 5
-last_execution_timeU = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
-last_execution_timeUS = 0 
-BasefloorU = 0.0
-BaseroofU = 0.0
-BasetimeU = 0
-range_heightU = 0
-LowerLU = 0
-HigherHU = 0
-HS_DownU = 0 
-HS_UpU = 0
-high_low_diffU = 0 
-
 ############# BTCUSD ################## VER 6
 last_execution_timeB = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timeBS = 0 
@@ -162,18 +121,60 @@ HS_DownB = 0
 HS_UpB = 0
 high_low_diffB = 0
 
-"""############# LegAnalyzer ##################
-BasefloorLA = 0.0
+
+############# CADJPY ################## VER 4
+last_execution_timeN = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
+last_execution_timeNS = 0 
+BasefloorN = 0.0
+BaseroofN = 0.0
+BasetimeN = 0
+range_heightN = 0
+LowerLN = 0
+HigherHN = 0
+HS_DownN = 0 
+HS_UpN = 0
+Leg_startN = 0
+high_low_diffN = 0
+
+############# EURjpy  ################## VER 7
+last_execution_timeE = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
+last_execution_timeES = 0 
+BasefloorE = 0.0
+BaseroofE = 0.0
+BasetimeE = 0
+range_heightE = 0
+LowerLE = 0
+HigherHE = 0
+HS_DownE = 0 
+HS_UpE = 0
+high_low_diffE = 0
+
+############# CHFJPY ################## VER 5
+last_execution_timeU = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
+last_execution_timeUS = 0 
+BasefloorU = 0.0
+BaseroofU = 0.0
+BasetimeU = 0
+range_heightU = 0
+LowerLU = 0
+HigherHU = 0
+HS_DownU = 0 
+HS_UpU = 0
+high_low_diffU = 0 
+
+############# LegAnalyzer ##################
+"""BasefloorLA = 0.0
 BaseroofLA = 0.0
 range_heightLA = 0
 LowerLLA = 0
 HigherHLA = 0
 HS_DownLA = 0 
 HS_UpLA = 0
-high_low_diffLA = 0"""
+high_low_diffLA = 0
+"""
 
 
-Quick_trade = True
+Quick_trade = False
 lot_size = 0.02
 risk = 1
 current_datetime = datetime.now()
@@ -222,7 +223,7 @@ def create_gui():
     # فیلدهای سمت راست (عناوین و توضیحات)
     tk.Label(right_frame, text="(1 = Low  -- 2 = Med  --  3 = High)ریسک", font=("B Nazanin", 12), bg=right_bg_color, fg="black").pack(anchor="e", padx=20, pady=10)
     tk.Label(right_frame, text=" (حجم معاملات را تعیین کنید.)لات سایز", font=("B Nazanin", 12), bg=right_bg_color, fg="black").pack(anchor="e", padx=20, pady=10)
-    tk.Label(right_frame, text=" (فعال یا غیرفعال کردن)معامله سریع", font=("B Nazanin", 12), bg=right_bg_color, fg="black").pack(anchor="e", padx=20, pady=10)
+    tk.Label(right_frame, text=" (فعال یا غیرفعال کردن)معامله xauusd", font=("B Nazanin", 12), bg=right_bg_color, fg="black").pack(anchor="e", padx=20, pady=10)
     tk.Label(right_frame, text="اجازه به باز کردن سفارش", font=("B Nazanin", 12), bg=right_bg_color, fg="black").pack(anchor="e", padx=20, pady=10)
 
     # فیلدهای سمت چپ (ورودی‌ها)

@@ -57,11 +57,11 @@ class SupplyDemandStrategyV9():
                                      # اعمال تغییرات
                                      ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
                                      print(" Buy Position Tp and Sl Modified to Bearish Status")
-                                 elif SymbolInfo.ask >= abs(abs(entry_price - take_profit) * 0.50 + entry_price):
+                                 elif SymbolInfo.ask >= abs(abs(entry_price - take_profit) * 0.65 + entry_price):
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = entry_price
                                      # اعمال تغییرات
-                                     #ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
+                                     ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
                                      print(" Buy Position Tp and Sl Modified to Bearish Status")
                                  else:
                                      print(f" Condition not met for ticket                             {ticket}" , "\n")
@@ -91,11 +91,11 @@ class SupplyDemandStrategyV9():
                                      # اعمال تغییرات
                                      ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
                                      print(" Sell Position Tp and Sl Modified to Bearish Status")
-                                 elif SymbolInfo.bid <= abs(abs(entry_price - take_profit) * 0.50 - entry_price):
+                                 elif SymbolInfo.bid <= abs(abs(entry_price - take_profit) * 0.65 - entry_price):
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = entry_price
                                      # اعمال تغییرات
-                                     #ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
+                                     ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
                                      print(" Sell Position Tp and Sl Modified to Bearish Status")
                                  else:
                                      print(f" Condition not met for ticket                             {ticket}" , "\n")
@@ -107,9 +107,9 @@ class SupplyDemandStrategyV9():
              # تعریف بازه‌های زمانی ممنوعه
              restricted_time_ranges = [
                 (0, 0, 2, 0),    # 00:00 تا 02:00
-                (3, 24, 3, 36),    # 03:24 تا 03:36
-                #(10, 25, 13, 0),  # 9:45 تا 13:00
-                #(15, 45, 18, 45),  # 16:00 تا 19:00
+                #(3, 24, 3, 36),    # 03:24 تا 03:36
+                (10, 25, 13, 0),  # 9:45 تا 13:00
+                (15, 45, 18, 45),  # 16:00 تا 19:00
                 (23, 0, 23, 59)  # 22:00 تا 23:59
              ]
              # بررسی اینکه آیا ساعت جاری در یکی از بازه‌های ممنوعه است یا خیر
@@ -118,7 +118,7 @@ class SupplyDemandStrategyV9():
                 for start_h, start_m, end_h, end_m in restricted_time_ranges
              )
 
-             restricted_hours = {6 , 13 , 19}
+             """restricted_hours = {6 , 11 , 13 , 19 , 16}
              if current_datetime.minute == 0 and current_datetime.hour in restricted_hours:
                 PublicVarible.CanOpenOrder = False
                 PublicVarible.risk = 1
@@ -128,12 +128,12 @@ class SupplyDemandStrategyV9():
                   Text += f"Can Open Order Stoped ... \n"
                   Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
                   PromptToTelegram(Text)
+                  
                   Text = f"⚠️هشدار⚠️ \n اطلاعات ارائه شده در این بات ، صرفا جنبه #آموزشی داشته و سازنده مسئولیتی در قبال ضرر احتمالی  ندارد . لطفا اصول حرفه ای معامله و مدیریت سرمایه را رعایت فرمائید . "
                   results = send_telegram_messages(Text, PublicVarible.chat_ids)
-                  PublicVarible.last_execution_timeT = current_time
+                  PublicVarible.last_execution_timeT = current_time """ 
                   
-
-             if in_restricted_time or not PublicVarible.CanOpenOrder :
+             if in_restricted_time or not PublicVarible.CanOpenOrder or not PublicVarible.Quick_trade :
                  Botdashboard(4, self.Pair)
                  Time_Signal = 0
 

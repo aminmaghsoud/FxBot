@@ -15,6 +15,8 @@ from LegAnalyzer import  *
 from Utility import *
 import sys
 from colorama import init, Fore, Back, Style
+from datetime import datetime
+
 ########################################################################################################
 class FxBot():
       def __init__(self):
@@ -86,7 +88,10 @@ class FxBot():
                    #   if NewsTime:
                    #      continue
                    #system( 'cls' )
+
+                  
                    
+                  
                    for Item in PublicVarible.Pair:
                        LastTick = MT5.symbol_info_tick(Item['Name'])
                        if Item['Tick'] != LastTick.time:
@@ -108,22 +113,24 @@ class FxBot():
                           #if (datetime.now() - PublicVarible.LastDatetimeRobotIsReady).total_seconds() / 60 > 120 :
                           #  PublicVarible.LastDatetimeRobotIsReady = datetime.now() 
                           #  Statistics()
-                          A = SupplyDemandStrategyV7(Pair = Item['Name']) #M5 EURUSDb
+                          time_to_trade(Item['Name'])
+                          A = SupplyDemandStrategyV7(Pair = Item['Name']) #M5 EURJPY
                           PublicVarible.Executor.submit(A.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
-                          B = SupplyDemandStrategyV8(Pair = Item['Name']) #M5 USDJPYb
+                          B = SupplyDemandStrategyV8(Pair = Item['Name']) #M5 USDJPY
                           PublicVarible.Executor.submit(B.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
                           C = SupplyDemandStrategyV9(Pair = Item['Name']) #M5 XAUUSDb
                           PublicVarible.Executor.submit(C.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
                           D = SupplyDemandStrategyV6(Pair = Item['Name']) #M5 BTCUSDT
                           PublicVarible.Executor.submit(D.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
-                          E = SupplyDemandStrategyV5(Pair = Item['Name']) #M5 USDCHFb
+                          E = SupplyDemandStrategyV5(Pair = Item['Name']) #M5 CHFJPY
                           PublicVarible.Executor.submit(E.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
-                          F = SupplyDemandStrategyV4(Pair = Item['Name']) #M5 NZADUSD
+                          F = SupplyDemandStrategyV4(Pair = Item['Name']) #M5 NCADJPY
                           PublicVarible.Executor.submit(F.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
                           CloseAllPosition(Pair= Item['Name'])
                           
                        else:
                           SymbolInfo = MT5.symbol_info(Item['Name'])
+                          time_to_trade(Item['Name'])
                           print (Fore.BLUE,Back.LIGHTWHITE_EX,"Item Name                                               Result",Back.RED,Fore.LIGHTWHITE_EX," The market does not move ...    ", datetime.now().time(),Back.RESET,Fore.RESET,"\n" )
                           for index, pair_info in enumerate(PublicVarible.Pair):
                            if pair_info['Name'] == Item['Name']:

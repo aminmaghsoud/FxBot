@@ -20,7 +20,7 @@ class SupplyDemandStrategyV7():
            
 ##############################################################################################################################################################
       def Main(self):
-          if self.Pair !='EURUSDb' : return 
+          if self.Pair !='EURJPYb' : return 
 
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ Strategy V7 M5  ")
           Time_Signal = 1
@@ -35,7 +35,7 @@ class SupplyDemandStrategyV7():
                    FrameRatesM5 = FrameRatesM5.set_index(PD.DatetimeIndex(FrameRatesM5['datetime']), drop=True)
           
              trendE = analyze_market_power(FrameRatesM5) 
-             PairNameE = "یورو / دلار امریکا"
+             PairNameE = "یورو / ین ژاپن"
 
              buy_positions_with_open_prices = get_buy_positions_with_open_prices()
              if buy_positions_with_open_prices:
@@ -398,7 +398,7 @@ class SupplyDemandStrategyV7():
                 EntryPrice = SymbolInfo.ask
                 SL = PublicVarible.BasefloorE - ( SymbolInfo.point * 100)  #########  تعیین حدضرر معامله #########   
                 #TP1 = EntryPrice + ((EntryPrice - SL) * 1  )
-                TP1 =  PublicVarible.BaseroofE + (abs(PublicVarible.BaseroofE - PublicVarible.BasefloorE) * 2) 
+                TP1 =  PublicVarible.BaseroofE + (abs(PublicVarible.BaseroofE - PublicVarible.BasefloorE) * 1) 
                 Entryheight = round(abs(EntryPrice - PublicVarible.BasefloorE) / (SymbolInfo.point) / 10, 2)      
                 Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)   
                 TextN = f"\nVolume = {Volume} \n"
@@ -412,10 +412,10 @@ class SupplyDemandStrategyV7():
                      Entryheight = round(abs(EntryPrice - PublicVarible.BasefloorE) / (SymbolInfo.point) / 10, 2)      
                      Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2) 
                      ### سفارش خرید در قیمت مارکت  ############
-                     OrderBuy(Pair= self.Pair, Volume= round(Volume/2 ,2)  , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Mar V7")
+                     #OrderBuy(Pair= self.Pair, Volume= round(Volume/2 ,2)  , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Mar V7")
                      ### سفارش خرید در قیمت سقف رنج   ############
-                     OrderBuyLimit(Pair= self.Pair, Volume= round(Volume/2 ,2) , EntryPrice =  PublicVarible.BasefloorE , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Lim V7")
-                     #PromptToTelegram(f"🚨🚨 \n سفارش #خرید معوق {self.Pair} در قیمت \n TP : {TP1} \n Price : {EntryPrice} \n SL : {SL}")
+                     #OrderBuyLimit(Pair= self.Pair, Volume= round(Volume/2 ,2) , EntryPrice =  PublicVarible.BasefloorE , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Lim V7")
+                     PromptToTelegram(f"🚨🚨 \n سفارش #خرید معوق {self.Pair} در قیمت \n TP : {TP1} \n Price : {EntryPrice} \n SL : {SL}")
                      PublicVarible.Limittime = current_time
                      
                 else : 
@@ -478,7 +478,7 @@ class SupplyDemandStrategyV7():
                 EntryPrice = SymbolInfo.bid 
                 SL = PublicVarible.BaseroofE + ( SymbolInfo.point * 100)  #((PublicVarible.BaseroofE - PublicVarible.BasefloorE)/2)                     #########  تعیین حدضرر معامله #########
                    #TP1 = EntryPrice + ((EntryPrice - SL) * 1  )
-                TP1 = PublicVarible.BasefloorE- (abs(PublicVarible.BaseroofE - PublicVarible.BasefloorE) * 2) 
+                TP1 = PublicVarible.BasefloorE- (abs(PublicVarible.BaseroofE - PublicVarible.BasefloorE) * 1) 
                 Entryheight = round(abs(EntryPrice - PublicVarible.BaseroofE) / (SymbolInfo.point) / 10, 2)      
                 Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)
                 TextN = f"\nVolume = {Volume} \n"
@@ -492,10 +492,10 @@ class SupplyDemandStrategyV7():
                      Entryheight = round(abs(EntryPrice - PublicVarible.BaseroofE) / (SymbolInfo.point) / 10, 2)      
                      Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)
                      ### سفارش خرید در قیمت مارکت   ############
-                     OrderSell(Pair= self.Pair, Volume= round(Volume/2 ,2), StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "Mar V7")
+                     #OrderSell(Pair= self.Pair, Volume= round(Volume/2 ,2), StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "Mar V7")
                      ### سفارش خرید در قیمت کف رنج   ############
-                     OrderSellLimit(Pair= self.Pair, Volume=  round(Volume/2 ,2) , EntryPrice =  PublicVarible.BaseroofE , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Lim V7")
-                     #PromptToTelegram(f"🚨🚨 \n سفارش #فروش معوق {self.Pair} در قیمت \n SL : {SL} \n Price : {EntryPrice} \n TP : {TP1}")
+                     #OrderSellLimit(Pair= self.Pair, Volume=  round(Volume/2 ,2) , EntryPrice =  PublicVarible.BaseroofE , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Lim V7")
+                     PromptToTelegram(f"🚨🚨 \n سفارش #فروش معوق {self.Pair} در قیمت \n SL : {SL} \n Price : {EntryPrice} \n TP : {TP1}")
                      PublicVarible.Limittime = current_time
 
                 else : 

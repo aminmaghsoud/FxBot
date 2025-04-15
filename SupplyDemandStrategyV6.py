@@ -65,12 +65,7 @@ class SupplyDemandStrategyV6():
                 for start_h, start_m, end_h, end_m in restricted_time_ranges
              )
 
-             restricted_hours = {13, 19}
-             if current_datetime.minute == 0 and current_datetime.hour in restricted_hours:
-                #PublicVarible.CanOpenOrder = False
-                PublicVarible.risk = 1
-
-             if in_restricted_time or not PublicVarible.CanOpenOrder :
+             if in_restricted_time or not PublicVarible.CanOpenOrder  or not PublicVarible.Quick_trade :
                  Botdashboard(4, self.Pair)
                  Time_Signal = 0
 

@@ -20,7 +20,7 @@ class SupplyDemandStrategyV5():
            
 ##############################################################################################################################################################
       def Main(self):
-          if self.Pair !='USDCHFb' : return 
+          if self.Pair !='CHFJPYb' : return 
 
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ Strategy V5 M5  ")
           # ارسال پیام
@@ -37,7 +37,7 @@ class SupplyDemandStrategyV5():
                    FrameRatesM5 = FrameRatesM5.set_index(PD.DatetimeIndex(FrameRatesM5['datetime']), drop=True)
           
              trendj = analyze_market_power(FrameRatesM5) 
-             PairNameU = "فرانک سوییس/دلار امریکا"
+             PairNameU = "فرانک سوییس/ین ژاپن"
              buy_positions_with_open_prices = get_buy_positions_with_open_prices()
              if buy_positions_with_open_prices:
                       for ticket, open_price in buy_positions_with_open_prices.items():
@@ -127,10 +127,6 @@ class SupplyDemandStrategyV5():
                 for start_h, start_m, end_h, end_m in restricted_time_ranges
              )
 
-             restricted_hours = {13, 19}
-             if current_datetime.minute == 0 and current_datetime.hour in restricted_hours:
-                #PublicVarible.CanOpenOrder = False
-                PublicVarible.risk = 1
 
              if in_restricted_time or not PublicVarible.CanOpenOrder :
                  Botdashboard(4, self.Pair)
@@ -399,7 +395,7 @@ class SupplyDemandStrategyV5():
                 EntryPrice = SymbolInfo.ask
                 SL = PublicVarible.BasefloorU - ( SymbolInfo.point * 100)  #########  تعیین حدضرر معامله #########
                 #TP1 = EntryPrice + ((EntryPrice - SL) * 1  )
-                TP1 =  PublicVarible.BaseroofU + (abs(PublicVarible.BaseroofU - PublicVarible.BasefloorU) * 2) 
+                TP1 =  PublicVarible.BaseroofU + (abs(PublicVarible.BaseroofU - PublicVarible.BasefloorU) * 1) 
                 Entryheight = round(abs(EntryPrice - PublicVarible.BasefloorU) / (SymbolInfo.point) / 10, 2)      
                 Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)   
                 TextN = f"\nVolume = {Volume} \n"
@@ -413,10 +409,10 @@ class SupplyDemandStrategyV5():
                      Entryheight = round(abs(EntryPrice - PublicVarible.BasefloorU) / (SymbolInfo.point) / 10, 2)      
                      Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2) 
                      ### سفارش خرید در قیمت مارکت  ############
-                     OrderBuy(Pair= self.Pair, Volume= round(Volume/2 ,2)  , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Mar V5")
+                     #OrderBuy(Pair= self.Pair, Volume= round(Volume/2 ,2)  , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Mar V5")
                      ### سفارش خرید در قیمت سقف رنج   ############
-                     OrderBuyLimit(Pair= self.Pair, Volume= round(Volume/2 ,2) , EntryPrice =  PublicVarible.BasefloorU , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Lim V5")
-                     #PromptToTelegram(f"🚨🚨 \n سفارش #خرید معوق {self.Pair} در قیمت \n TP : {TP1} \n Price : {EntryPrice} \n SL : {SL}")
+                     #OrderBuyLimit(Pair= self.Pair, Volume= round(Volume/2 ,2) , EntryPrice =  PublicVarible.BasefloorU , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Lim V5")
+                     PromptToTelegram(f"🚨🚨 \n سفارش #خرید معوق {self.Pair} در قیمت \n TP : {TP1} \n Price : {EntryPrice} \n SL : {SL}")
                      PublicVarible.Limittime = current_time
                      
                 else : 
@@ -479,7 +475,7 @@ class SupplyDemandStrategyV5():
                 EntryPrice = SymbolInfo.bid 
                 SL = PublicVarible.BaseroofU + ( SymbolInfo.point * 100)  #((PublicVarible.BaseroofU - PublicVarible.BasefloorU)/2)                     #########  تعیین حدضرر معامله #########
                    #TP1 = EntryPrice + ((EntryPrice - SL) * 1  )
-                TP1 = PublicVarible.BasefloorU- (abs(PublicVarible.BaseroofU - PublicVarible.BasefloorU) * 2) 
+                TP1 = PublicVarible.BasefloorU- (abs(PublicVarible.BaseroofU - PublicVarible.BasefloorU) * 1) 
                 Entryheight = round(abs(EntryPrice - PublicVarible.BaseroofU) / (SymbolInfo.point) / 10, 2)      
                 Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)
                 TextN = f"\nVolume = {Volume} \n"
@@ -493,10 +489,10 @@ class SupplyDemandStrategyV5():
                      Entryheight = round(abs(EntryPrice - PublicVarible.BaseroofU) / (SymbolInfo.point) / 10, 2)      
                      Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)
                      ### سفارش خرید در قیمت مارکت   ############
-                     OrderSell(Pair= self.Pair, Volume= round(Volume/2 ,2), StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "Mar V5")
+                     #OrderSell(Pair= self.Pair, Volume= round(Volume/2 ,2), StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "Mar V5")
                      ### سفارش خرید در قیمت کف رنج   ############
-                     OrderSellLimit(Pair= self.Pair, Volume=  round(Volume/2 ,2) , EntryPrice =  PublicVarible.BaseroofU , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Lim V5")
-                     #PromptToTelegram(f"🚨🚨 \n سفارش #فروش معوق {self.Pair} در قیمت \n SL : {SL} \n Price : {EntryPrice} \n TP : {TP1}")
+                     #OrderSellLimit(Pair= self.Pair, Volume=  round(Volume/2 ,2) , EntryPrice =  PublicVarible.BaseroofU , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Lim V5")
+                     PromptToTelegram(f"🚨🚨 \n سفارش #فروش معوق {self.Pair} در قیمت \n SL : {SL} \n Price : {EntryPrice} \n TP : {TP1}")
                      PublicVarible.Limittime = current_time
 
                 else : 
