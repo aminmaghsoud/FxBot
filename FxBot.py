@@ -11,6 +11,8 @@ from SupplyDemandStrategyV7 import *
 from SupplyDemandStrategyV6 import *
 from SupplyDemandStrategyV5 import *
 from SupplyDemandStrategyV4 import *
+from SupplyDemandStrategyV1 import *
+from SupplyDemandStrategyV2 import *
 from LegAnalyzer import  *
 from Utility import *
 import sys
@@ -126,6 +128,10 @@ class FxBot():
                           PublicVarible.Executor.submit(E.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
                           F = SupplyDemandStrategyV4(Pair = Item['Name']) #M5 NCADJPY
                           PublicVarible.Executor.submit(F.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
+                          #G = SupplyDemandStrategyV1(Pair = Item['Name']) #M5  train_trend_model
+                          #PublicVarible.Executor.submit(G.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
+                          #H = SupplyDemandStrategyV2(Pair = Item['Name']) #M5  train_trend_model
+                          #PublicVarible.Executor.submit(H.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
                           CloseAllPosition(Pair= Item['Name'])
                           
                        else:

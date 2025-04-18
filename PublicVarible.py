@@ -77,7 +77,7 @@ Botstatus = 0
 #firstSell = 100
 #last_message_time = 0
 #last_message_time1 = 0
-
+last_execution_timeAll = 0
 ############# xauusd ################## VER 9
 last_execution_time = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timeS = 0
@@ -93,7 +93,10 @@ List_of_low = 0
 Basetime = 0
 Limittime = 0 
 high_low_diff = 0
-
+prediction = 0
+model = 0
+Accuracy = 100
+Leg_trend = 0
 ############# USDJPY ################## VER 8
 last_execution_timej = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timejS = 0 
@@ -107,7 +110,10 @@ HS_DownJ = 0
 HS_UpJ = 0
 Leg_startj = 0
 high_low_diffj = 0
-
+predictionj = 0
+modelj = 0
+Accuracyj = 0
+Leg_trendj = 0
 ############# BTCUSD ################## VER 6
 last_execution_timeB = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timeBS = 0 
@@ -120,8 +126,10 @@ HigherHB = 0
 HS_DownB = 0 
 HS_UpB = 0
 high_low_diffB = 0
-
-
+predictionB = 0
+modelB = 0
+AccuracyB = 0
+Leg_trendB = 0
 ############# CADJPY ################## VER 4
 last_execution_timeN = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timeNS = 0 
@@ -135,7 +143,9 @@ HS_DownN = 0
 HS_UpN = 0
 Leg_startN = 0
 high_low_diffN = 0
-
+predictionN = 0
+modelN = 0
+AccuracyN = 0
 ############# EURjpy  ################## VER 7
 last_execution_timeE = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timeES = 0 
@@ -148,7 +158,10 @@ HigherHE = 0
 HS_DownE = 0 
 HS_UpE = 0
 high_low_diffE = 0
-
+predictionE = 0
+modelE = 0
+AccuracyE = 0
+Leg_trendE = 0
 ############# CHFJPY ################## VER 5
 last_execution_timeU = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timeUS = 0 
@@ -161,7 +174,10 @@ HigherHU = 0
 HS_DownU = 0 
 HS_UpU = 0
 high_low_diffU = 0 
-
+predictionU = 0
+modelU = 0
+AccuracyU = 0
+Leg_trendU = 0
 ############# LegAnalyzer ##################
 """BasefloorLA = 0.0
 BaseroofLA = 0.0

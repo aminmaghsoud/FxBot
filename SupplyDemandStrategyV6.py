@@ -23,6 +23,22 @@ class SupplyDemandStrategyV6():
           high_low_diff = 0 
           SymbolInfo = MT5.symbol_info(self.Pair)
           if SymbolInfo is not None :
+             RatesM15 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M15, 0, 100)
+             if RatesM15 is not None:
+                FrameRatesM15 = PD.DataFrame(RatesM15)
+                if not FrameRatesM15.empty: 
+                   FrameRatesM15['datetime'] = PD.to_datetime(FrameRatesM15['time'], unit='s')
+                   FrameRatesM15 = FrameRatesM15.drop('time', axis=1)
+                   FrameRatesM15 = FrameRatesM15.set_index(PD.DatetimeIndex(FrameRatesM15['datetime']), drop=True)
+
+             RatesM30 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M30, 0, 100)
+             if RatesM30 is not None:
+                FrameRatesM30 = PD.DataFrame(RatesM30)
+                if not FrameRatesM30.empty: 
+                   FrameRatesM30['datetime'] = PD.to_datetime(FrameRatesM30['time'], unit='s')
+                   FrameRatesM30 = FrameRatesM30.drop('time', axis=1)
+                   FrameRatesM30 = FrameRatesM30.set_index(PD.DatetimeIndex(FrameRatesM30['datetime']), drop=True)
+                   
              RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 100)
              if RatesM5 is not None:
                 FrameRatesM5 = PD.DataFrame(RatesM5)
@@ -30,7 +46,10 @@ class SupplyDemandStrategyV6():
                    FrameRatesM5['datetime'] = PD.to_datetime(FrameRatesM5['time'], unit='s')
                    FrameRatesM5 = FrameRatesM5.drop('time', axis=1)
                    FrameRatesM5 = FrameRatesM5.set_index(PD.DatetimeIndex(FrameRatesM5['datetime']), drop=True)
-             
+
+             trendB ,  final_confidence = analyze_market_power(FrameRatesM5, FrameRatesM15, FrameRatesM30) 
+             print("trendB: ",trendB , "final_confidence: " ,final_confidence )
+
              PairNameB = "بیتکوین/دلار امریکا"
              buy_positions_with_open_prices = get_buy_positions_with_open_prices()                 ######### بررسی معامله خرید باز  ##########
              if buy_positions_with_open_prices:
@@ -175,16 +194,16 @@ class SupplyDemandStrategyV6():
                    Text += f"کف رنج : {PublicVarible.BasefloorB} $ \n"
                    Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_heightB , 2)} Lot \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}\n"
-                   trendB = analyze_market_power(FrameRatesM5) 
                    if trendB == 1 : 
-                      Text += f"🔘 آنالیز چندگانه : قدرت با خریداران "
+                      Text += f"🔘 پایش قدرت : قدرت خریدار "
                    elif trendB == -1 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت با فروشندگان "
+                      Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendB == 0 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت ها برابر "
-                   #PromptToTelegram(Text)
-                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)
-                   # ارسال نمودار کندل‌ها
+                      Text += f"🔘 پایش قدرت : قدرت ها برابر "
+                   if final_confidence < 0.65 : 
+                     Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
+                   else :
+                     Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_timeB = current_time
 
@@ -237,17 +256,17 @@ class SupplyDemandStrategyV6():
                    Text += f"کف رنج : {PublicVarible.BasefloorB} $ \n"
                    Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_heightB , 2)} Lot \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute} \n"
-                   trendB = analyze_market_power(FrameRatesM5) 
                    if trendB == 1 : 
-                      Text += f"🔘 آنالیز چندگانه : قدرت با خریداران "
+                      Text += f"🔘 پایش قدرت : قدرت خریدار "
                    elif trendB == -1 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت با فروشندگان "
+                      Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendB == 0 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت ها برابر "
-                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)
-                   # ارسال نمودار کندل‌ها
+                      Text += f"🔘 پایش قدرت : قدرت ها برابر "
+                   if final_confidence < 0.65 : 
+                     Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
+                   else :
+                     Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
-                   #PromptToTelegram(Text)
                    PublicVarible.last_execution_timeB = current_time
 
 ########################  پیداکردن بالاترین سقف و پایین ترین کف رنج   ################################
@@ -285,7 +304,7 @@ class SupplyDemandStrategyV6():
 
 #Buy####################  بررسی شرط خروج قیمت از سقف و انجام معامله خرید ######################
              
-             if close_C > PublicVarible.BaseroofB and close_C < (PublicVarible.BaseroofB + (SymbolInfo.point * 5)) and PublicVarible.BaseroofB != 0 :
+             if close_C > PublicVarible.BaseroofB and close_C < (PublicVarible.BaseroofB + (SymbolInfo.point * 1)) and PublicVarible.BaseroofB != 0 :
                 PublicVarible.BaseroofB = PublicVarible.BasefloorB = 0
                 Text = f" مقدار و قدرت خروج قیمت از سقف #نامناسب است \n ⚠️پاک کردن  مقادیر سقف و کف ⚠️"
                 #results = send_telegram_messages(Text, PublicVarible.chat_ids)
@@ -293,7 +312,7 @@ class SupplyDemandStrategyV6():
              elif close_C >= (PublicVarible.BaseroofB + (SymbolInfo.point * 1)) and PublicVarible.BaseroofB != 0 and close_C > HigherHB : 
                 print(f"price is {close_C} and Upper Roof {PublicVarible.BaseroofB} ")
                 if current_time - PublicVarible.last_execution_timeBS  >= 300:   
-                   Text = f"\n⬆️ Buy Position in {self.Pair} \n({PairNameB}) \n"
+                   Text = f"\n({PairNameB}) \n⬆️ Buy Position in {self.Pair} \n"
                    Text += f"price:{close_C}$ \n🔺Upper Roof {PublicVarible.BaseroofB}$ \n\n"
                    if trend_C == +1 : 
                        Text += f"🔘خروج  از سقف:  کندل قدرتمند 🐮 \n"
@@ -310,24 +329,24 @@ class SupplyDemandStrategyV6():
                        PublicVarible.BaseroofB = PublicVarible.BasefloorB = 0
                    elif trend_C == 0 :
                       PublicVarible.BaseroofB = PublicVarible.BasefloorB = 0
-                      Text += f"🔘 قدرت کندل ها : برابر  🏓 \n🔘 حذف مقادیر سقف و کف ⚠️\n"
+                      Text += f"🔘 قدرت کندل ها : شناسایی نشد  🏓 \n🔘 حذف مقادیر سقف و کف ⚠️\n"
                    if trend_C == -1 or trend_C == -2 :
                       PublicVarible.BaseroofB = PublicVarible.BasefloorB = 0
                       Text += f"🔘 وضعیت خروج : نامناسب  \n🔘 حذف مقادیر سقف و کف ⚠️\n"
-                   trendB = analyze_market_power(FrameRatesM5) 
                    if trendB == 1 : 
-                      Text += f"🔘 آنالیز چندگانه : قدرت با خریداران "
+                      Text += f"🔘 پایش قدرت : قدرت خریدار "
                    elif trendB == -1 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت با فروشندگان "
+                      Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendB == 0 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت ها برابر "
-
+                      Text += f"🔘 پایش قدرت : قدرت ها برابر "
+                   if final_confidence < 0.65 : 
+                     Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
+                   else :
+                     Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
                    if trendB == 1 and trend_C == 1 : 
                       Text += f"\n✅ موقعیت Buy: مناسب "
                    else : 
                       Text += f"\n❌ موقعیت Buy: نامناسب "
-                   #PromptToTelegram(Text)  
-                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)
                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_timeBS = current_time 
 #Buy
@@ -370,7 +389,7 @@ class SupplyDemandStrategyV6():
              elif close_C <= (PublicVarible.BasefloorB - (SymbolInfo.point * 1)) and PublicVarible.BasefloorB != 0 and close_C < LowerLB : 
                 print(f"price is {close_C} and Under floor {PublicVarible.BasefloorB} ")
                 if current_time - PublicVarible.last_execution_timeBS >= 300:   
-                   Text = f"\n⬇️ Sell Position in {self.Pair} \n({PairNameB}) \n"
+                   Text = f"\n({PairNameB}) \n⬇️ Sell Position in {self.Pair} \n"
                    Text += f"🔘price:{close_C}$ \n🔻Under floor {PublicVarible.BasefloorB}$ \n\n"
                    if trend_C == -1 : 
                        Text += f"🔘 خروج از کف: باکندل قدرتمند 🐻 \n"
@@ -391,22 +410,21 @@ class SupplyDemandStrategyV6():
                    elif trend_C == 1 or trend_C ==2:
                       PublicVarible.BaseroofB = PublicVarible.BasefloorB = 0
                       Text += f"🔘 وضعیت خروج:  نامناسب  \n🔘حذف مقادیر سقف و کف ⚠️\n"
-                  
-                   trendB = analyze_market_power(FrameRatesM5) 
                    if trendB == 1 : 
-                      Text += f"🔘 آنالیز چندگانه : قدرت با خریداران "
+                      Text += f"🔘 پایش قدرت : قدرت خریدار "
                    elif trendB == -1 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت با فروشندگان "
+                      Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendB == 0 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت ها برابر "
-
+                      Text += f"🔘 پایش قدرت : قدرت ها برابر "
+                   if final_confidence < 0.65 : 
+                     Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
+                   else :
+                     Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "  
                    if trendB == -1 and trend_C == -1 : 
                       Text += f"\n✅ موقعیت Sell: مناسب "
                    else : 
                       Text += f"\n❌ موقعیت Sell: نامناسب "
 
-                   #PromptToTelegram(Text)
-                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)  
                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_timeBS = current_time  
 #Sell

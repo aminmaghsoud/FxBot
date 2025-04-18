@@ -26,6 +26,22 @@ class SupplyDemandStrategyV7():
           Time_Signal = 1
           SymbolInfo = MT5.symbol_info(self.Pair)
           if SymbolInfo is not None :
+             RatesM15 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M15, 0, 100)
+             if RatesM15 is not None:
+                FrameRatesM15 = PD.DataFrame(RatesM15)
+                if not FrameRatesM15.empty: 
+                   FrameRatesM15['datetime'] = PD.to_datetime(FrameRatesM15['time'], unit='s')
+                   FrameRatesM15 = FrameRatesM15.drop('time', axis=1)
+                   FrameRatesM15 = FrameRatesM15.set_index(PD.DatetimeIndex(FrameRatesM15['datetime']), drop=True)
+
+             RatesM30 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M30, 0, 100)
+             if RatesM30 is not None:
+                FrameRatesM30 = PD.DataFrame(RatesM30)
+                if not FrameRatesM30.empty: 
+                   FrameRatesM30['datetime'] = PD.to_datetime(FrameRatesM30['time'], unit='s')
+                   FrameRatesM30 = FrameRatesM30.drop('time', axis=1)
+                   FrameRatesM30 = FrameRatesM30.set_index(PD.DatetimeIndex(FrameRatesM30['datetime']), drop=True)
+
              RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 100)
              if RatesM5 is not None:
                 FrameRatesM5 = PD.DataFrame(RatesM5)
@@ -34,7 +50,9 @@ class SupplyDemandStrategyV7():
                    FrameRatesM5 = FrameRatesM5.drop('time', axis=1)
                    FrameRatesM5 = FrameRatesM5.set_index(PD.DatetimeIndex(FrameRatesM5['datetime']), drop=True)
           
-             trendE = analyze_market_power(FrameRatesM5) 
+             trendE ,  final_confidence = analyze_market_power(FrameRatesM5, FrameRatesM15, FrameRatesM30) 
+             print("trendE: ",trendE , "final_confidence: " ,final_confidence )
+
              PairNameE = "یورو / ین ژاپن"
 
              buy_positions_with_open_prices = get_buy_positions_with_open_prices()
@@ -243,16 +261,16 @@ class SupplyDemandStrategyV7():
                    Text += f"کف رنج : {PublicVarible.BasefloorE} $ \n"
                    Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_heightE , 2)} Lot \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}\n"
-                   trendE = analyze_market_power(FrameRatesM5) 
                    if trendE == 1 : 
-                      Text += f"🔘 آنالیز چندگانه : قدرت با خریداران "
+                      Text += f"🔘 پایش قدرت : قدرت با خریداران "
                    elif trendE == -1 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت با فروشندگان "
+                      Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendE == 0 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت ها برابر "
-                   #PromptToTelegram(Text)
-                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)
-                   # ارسال نمودار کندل‌ها
+                      Text += f"🔘 پایش قدرت : قدرت ها برابر "
+                   if final_confidence < 0.65 : 
+                     Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
+                   else :
+                     Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_timeE = current_time
 
@@ -288,7 +306,6 @@ class SupplyDemandStrategyV7():
                   PublicVarible.range_heightE = round(abs(PublicVarible.BaseroofE - PublicVarible.BasefloorE) / (SymbolInfo.point) / 10, 2)
                   print(f"Up PublicVarible.high_low_diffE : {PublicVarible.high_low_diffE } and BaseroofE: {PublicVarible.BaseroofE} and BasefloorE: {PublicVarible.BasefloorE} and Range arraye: {abs(PublicVarible.BasefloorE - PublicVarible.BaseroofE) / (SymbolInfo.point)} \n")
                   current_time = time.time()
-                  
                   if current_time - PublicVarible.last_execution_timeE>= 300:  
                    Text = f"{PairNameE}\n"
                    Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)\n"
@@ -301,16 +318,16 @@ class SupplyDemandStrategyV7():
                    Text += f"کف رنج : {PublicVarible.BasefloorE} $ \n"
                    Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_heightE , 2)} Lot \n"
                    Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute} \n"
-                   trendE = analyze_market_power(FrameRatesM5) 
                    if trendE == 1 : 
-                      Text += f"🔘 آنالیز چندگانه : قدرت با خریداران "
+                      Text += f"🔘 پایش قدرت : قدرت با خریداران "
                    elif trendE == -1 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت با فروشندگان "
+                      Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendE == 0 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت ها برابر "
-                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)
-                   #PromptToTelegram(Text)
-                   # ارسال نمودار کندل‌ها
+                      Text += f"🔘 پایش قدرت : قدرت ها برابر "
+                   if final_confidence < 0.65 : 
+                     Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
+                   else :
+                     Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_timeE = current_time
 
@@ -357,7 +374,7 @@ class SupplyDemandStrategyV7():
              elif close_C >= (PublicVarible.BaseroofE + (SymbolInfo.point * 1)) and PublicVarible.BaseroofE != 0 and close_C > PublicVarible.HigherHE : 
                 print(f"price is {close_C} and Upper Roof {PublicVarible.BaseroofE} ")
                 if current_time - PublicVarible.last_execution_timeE  >= 300:   
-                   Text = f"\n⬆️ Buy Position in {self.Pair} \n({PairNameE}) \n"
+                   Text = f"\n({PairNameE}) \n⬆️ Buy Position in {self.Pair} \n"
                    Text += f"price:{close_C}$ \n🔺Upper Roof {PublicVarible.BaseroofE}$ \n\n"
                    if trendE == +1 : 
                        Text += f"🔘خروج  از سقف:  کندل قدرتمند 🐮 \n"
@@ -374,31 +391,31 @@ class SupplyDemandStrategyV7():
                        PublicVarible.BaseroofE = PublicVarible.BasefloorE = 0
                    elif trend_C == 0 :
                       PublicVarible.BaseroofE = PublicVarible.BasefloorE = 0
-                      Text += f"🔘 قدرت کندل ها : برابر  🏓 \n🔘 حذف مقادیر سقف و کف ⚠️\n"
+                      Text += f"🔘 قدرت کندل ها : شناسایی نشد  🏓 \n🔘 حذف مقادیر سقف و کف ⚠️\n"
                    if trend_C == -1 or trend_C == -2 :
                       PublicVarible.BaseroofE = PublicVarible.BasefloorE = 0
                       Text += f"🔘 وضعیت خروج : نامناسب  \n🔘 حذف مقادیر سقف و کف ⚠️\n"
-
-                   trendE = analyze_market_power(FrameRatesM5) 
                    if trendE == 1 : 
-                      Text += f"🔘 آنالیز چندگانه : قدرت با خریداران "
+                      Text += f"🔘 پایش قدرت : قدرت با خریداران "
                    elif trendE == -1 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت با فروشندگان "
+                      Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendE == 0 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت ها برابر "
-                   if trendE == 1 and trendE == 1 : 
+                      Text += f"🔘 پایش قدرت : قدرت ها برابر "
+                   if final_confidence < 0.65 : 
+                     Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
+                   else :
+                     Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
+                   if trend_C == 1 and trendE == 1 and final_confidence > 0.65 : 
                       Text += f"\n✅ موقعیت Buy: مناسب "
                    else : 
                       Text += f"\n❌ موقعیت Buy: نامناسب "
-                   #PromptToTelegram(Text)  
-                  # results = send_telegram_messages(Text, PublicVarible.chat_ids)
                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_timeE = current_time 
 #Buy            
                 EntryPrice = SymbolInfo.ask
                 SL = PublicVarible.BasefloorE - ( SymbolInfo.point * 100)  #########  تعیین حدضرر معامله #########   
                 #TP1 = EntryPrice + ((EntryPrice - SL) * 1  )
-                TP1 =  PublicVarible.BaseroofE + (abs(PublicVarible.BaseroofE - PublicVarible.BasefloorE) * 1) 
+                TP1 =  PublicVarible.BaseroofE + (abs(PublicVarible.BaseroofE - PublicVarible.BasefloorE) * 2) 
                 Entryheight = round(abs(EntryPrice - PublicVarible.BasefloorE) / (SymbolInfo.point) / 10, 2)      
                 Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)   
                 TextN = f"\nVolume = {Volume} \n"
@@ -436,7 +453,7 @@ class SupplyDemandStrategyV7():
              elif close_C <= (PublicVarible.BasefloorE - (SymbolInfo.point * 5)) and PublicVarible.BasefloorE != 0 and close_C < LowerLE : 
                 print(f"price is {close_C} and Under floor {PublicVarible.BasefloorE} ")
                 if current_time - PublicVarible.last_execution_timeES >= 300:   
-                   Text = f"\n⬇️ Sell Position in {self.Pair} \n({PairNameE}) \n"
+                   Text = f"\n({PairNameE}) \n⬇️ Sell Position in {self.Pair} \n"
                    Text += f"🔘price:{close_C}$ \n🔻Under floor {PublicVarible.BasefloorE}$ \n\n"
                    if trend_C == -1 : 
                        Text += f"🔘 خروج از کف: باکندل قدرتمند 🐻 \n"
@@ -457,28 +474,27 @@ class SupplyDemandStrategyV7():
                    elif trend_C == 1 or trend_C ==2:
                       PublicVarible.BaseroofE = PublicVarible.BasefloorE = 0
                       Text += f"🔘 وضعیت خروج:  نامناسب  \n🔘حذف مقادیر سقف و کف ⚠️\n"
-                  
-                   trendE = analyze_market_power(FrameRatesM5) 
                    if trendE == 1 : 
-                      Text += f"🔘 آنالیز چندگانه : قدرت با خریداران "
+                      Text += f"🔘 پایش قدرت : قدرت با خریداران "
                    elif trendE == -1 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت با فروشندگان "
+                      Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendE == 0 :
-                      Text += f"🔘 آنالیز چندگانه : قدرت ها برابر "
-                   if trend_C == -1 and trendE == -1 : 
+                      Text += f"🔘 پایش قدرت : قدرت ها برابر "
+                   if final_confidence < 0.65 : 
+                     Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
+                   else :
+                     Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
+                   if trend_C == -1 and trendE == -1 and final_confidence > 0.65 : 
                       Text += f"\n✅ موقعیت Sell: مناسب "
                    else : 
                       Text += f"\n❌ موقعیت Sell: نامناسب "
-
                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
-                   #PromptToTelegram(Text)
-                   #results = send_telegram_messages(Text, PublicVarible.chat_ids)  
                    PublicVarible.last_execution_timeES = current_time  
 #Sell
                 EntryPrice = SymbolInfo.bid 
                 SL = PublicVarible.BaseroofE + ( SymbolInfo.point * 100)  #((PublicVarible.BaseroofE - PublicVarible.BasefloorE)/2)                     #########  تعیین حدضرر معامله #########
                    #TP1 = EntryPrice + ((EntryPrice - SL) * 1  )
-                TP1 = PublicVarible.BasefloorE- (abs(PublicVarible.BaseroofE - PublicVarible.BasefloorE) * 1) 
+                TP1 = PublicVarible.BasefloorE- (abs(PublicVarible.BaseroofE - PublicVarible.BasefloorE) * 2) 
                 Entryheight = round(abs(EntryPrice - PublicVarible.BaseroofE) / (SymbolInfo.point) / 10, 2)      
                 Volume = round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)
                 TextN = f"\nVolume = {Volume} \n"

@@ -37,14 +37,14 @@ def OrderBuy(Pair, Volume:float, StopLoss:float = None, TakeProfit:float = None,
           Result = MT5.order_send(Request)
           Prompt("Send buy order {} {} lots with deviation={} points".format(Pair, Volume, Deviation))
           if Result.retcode != MT5.TRADE_RETCODE_DONE:
-             PromptToTelegram("Order Send failed, retcode={}".format(Result.retcode))
+             Prompt("Order Send failed, retcode={}".format(Result.retcode))
              ResultDict = Result._asdict()
              for field in ResultDict.keys():
                  Prompt("   {}={}".format(field,ResultDict[field]))
                  if field == "request":
                     TraderequestDict=ResultDict[field]._asdict()
                     for tradereq_filed in TraderequestDict:
-                         PromptToTelegram("traderequest: {}={}".format(tradereq_filed,TraderequestDict[tradereq_filed]))
+                         Prompt("traderequest: {}={}".format(tradereq_filed,TraderequestDict[tradereq_filed]))
           else:
              
              Prompt("Send buy order for {} done!, ".format(Pair))
@@ -90,14 +90,14 @@ def OrderSell(Pair, Volume:float, StopLoss:float = None, TakeProfit:float = None
           Result = MT5.order_send(Request)
           Prompt("Send sell order {} {} lots with deviation={} points".format(Pair, Volume, Deviation))
           if Result.retcode != MT5.TRADE_RETCODE_DONE:
-             PromptToTelegram("Order Send failed, retcode={}".format(Result.retcode))
+             Prompt("Order Send failed, retcode={}".format(Result.retcode))
              ResultDict = Result._asdict()
              for field in ResultDict.keys():
                  Prompt("   {}={}".format(field,ResultDict[field]))
                  if field == "request":
                     TraderequestDict=ResultDict[field]._asdict()
                     for tradereq_filed in TraderequestDict:
-                         PromptToTelegram("traderequest: {}={}".format(tradereq_filed,TraderequestDict[tradereq_filed]))
+                         Prompt("traderequest: {}={}".format(tradereq_filed,TraderequestDict[tradereq_filed]))
           else:
              Prompt("Send sell order for {} done!, ".format(Pair))
              Lot = CalcTotalVolumes(Pair= Pair)
@@ -238,121 +238,141 @@ def OrderSellStop(Pair, Volume:float, Price:float, StopLoss:float = None, TakePr
     #    Prompt("A maximum of {} orders can be open".format(MaxOpenTrades))
 #######################################################################################################
 def OrderBuyLimit(Pair, Volume: float, EntryPrice: float, StopLoss: float = None, TakeProfit: float = None, Deviation: int = 0, Comment: str = ""):
-    SymbolInfo = MT5.symbol_info(Pair)
-    if SymbolInfo is None:
-        print(f"Symbol {Pair} is None")
-        return
-    if Volume < 0.01 : return
+    try:
+        SymbolInfo = MT5.symbol_info(Pair)
+        if SymbolInfo is None:
+            print(f"Symbol {Pair} is None")
+            return
+        if Volume < 0.01:
+            return
 
-    if PublicVarible.CanOpenOrder == True:
-        if MT5.positions_total() < PublicVarible.MaxOpenTrades:
-            # اگر ورودی StopLoss و TakeProfit قیمت هستند، از همان استفاده می‌کنیم
-            SL = StopLoss
-            TP = TakeProfit
-            Request = {
-                "action": MT5.TRADE_ACTION_PENDING,
-                "symbol": Pair,
-                "volume": Volume,
-                "type": MT5.ORDER_TYPE_BUY_LIMIT,
-                "price": EntryPrice,
-                "sl": SL,
-                "tp": TP,
-                "deviation": Deviation,
-                "comment": Comment,
-                "type_time": MT5.ORDER_TIME_GTC,
-                "type_filling": MT5.ORDER_FILLING_FOK
-            }
+        if PublicVarible.CanOpenOrder:
+            if MT5.positions_total() < PublicVarible.MaxOpenTrades:
+                SL = StopLoss
+                TP = TakeProfit
+                Request = {
+                    "action": MT5.TRADE_ACTION_PENDING,
+                    "symbol": Pair,
+                    "volume": Volume,
+                    "type": MT5.ORDER_TYPE_BUY_LIMIT,
+                    "price": EntryPrice,
+                    "sl": SL,
+                    "tp": TP,
+                    "deviation": Deviation,
+                    "comment": Comment,
+                    "type_time": MT5.ORDER_TIME_GTC,
+                    "type_filling": MT5.ORDER_FILLING_FOK
+                }
 
-            # حذف مقادیر None
-            if StopLoss is None:
-                del Request['sl']
+                if StopLoss is None:
+                    del Request['sl']
+                if TakeProfit is None:
+                    del Request['tp']
 
-            if TakeProfit is None:
-                del Request['tp']
+                print(Request)
+                Result = MT5.order_send(Request)
 
-            print(Request)
-            Result = MT5.order_send(Request)
-            Prompt(f"Send buy limit order for {Pair} {Volume} lots at {EntryPrice} with deviation={Deviation} points")
+                if Result is None:
+                    Prompt(f"❌ MT5.order_send() returned None for {Pair}")
+                    return
 
-            if Result.retcode != MT5.TRADE_RETCODE_DONE:
-                PromptToTelegram(f"Order Send failed, retcode={Result.retcode}")
-                ResultDict = Result._asdict()
-                for field in ResultDict.keys():
-                    Prompt(f"   {field}={ResultDict[field]}")
-                    if field == "request":
-                        TraderequestDict = ResultDict[field]._asdict()
-                        for tradereq_field in TraderequestDict:
-                            PromptToTelegram(f"traderequest: {tradereq_field}={TraderequestDict[tradereq_field]}")
+                Prompt(f"Send buy limit order for {Pair} {Volume} lots at {EntryPrice} with deviation={Deviation} points")
+
+                if Result.retcode != MT5.TRADE_RETCODE_DONE:
+                    Prompt(f"Order Send failed, retcode={Result.retcode}")
+                    ResultDict = Result._asdict()
+                    for field in ResultDict:
+                        Prompt(f"   {field}={ResultDict[field]}")
+                        if field == "request":
+                            TraderequestDict = ResultDict[field]._asdict()
+                            for tradereq_field in TraderequestDict:
+                                Prompt(f"traderequest: {tradereq_field}={TraderequestDict[tradereq_field]}")
+                else:
+                    Prompt(f"Send buy limit order for {Pair} done!")
+
+                    Lot = CalcTotalVolumes(Pair=Pair)
+                    Text = f"⏳🔵 Buy Limit {Pair} (#{Result.order})\nVolume: {Result.volume}\nPrice: {Result.price}\nS/L: {StopLoss}\nT/P: {TakeProfit}\n⬆️ Total buy volume: {Lot[0]} lot\n⬇️ Total sell volume: {Lot[1]} lot"
+                    print(Text)
+                    PromptToTelegram(Text=Text)
             else:
-                Prompt(f"Send buy limit order for {Pair} done!")
-
-                Lot = CalcTotalVolumes(Pair=Pair)
-                Text = f"⏳🔵 Buy Limit {Pair} (#{Result.order})" + "\n" + f"Volume: {Result.volume}" + "\n" + f"Price: {Result.price}" +  "\n" + f"S/L: {StopLoss}" + "\n" + f"T/P: {TakeProfit}" + "\n" + f"⬆️ Total buy volume: {Lot[0]} lot" + "\n" + f"⬇️ Total sell volume: {Lot[1]} lot"
-                print(Text)
-                PromptToTelegram(Text=Text)
+                Prompt(f"A maximum of {PublicVarible.MaxOpenTrades} orders can be open")
         else:
-            PromptToTelegram(f"A maximum of {PublicVarible.MaxOpenTrades} orders can be open")
-    else:
-        PromptToTelegram("Stopped opening a new order")
+            Prompt("Stopped opening a new order")
+
+    except Exception as e:
+        Prompt(f"⚠️ Error in OrderBuyLimit: {e}")
+        import traceback
+        traceback.print_exc()
+
 ########################################################################################################
 def OrderSellLimit(Pair, Volume: float, EntryPrice: float, StopLoss: float = None, TakeProfit: float = None, Deviation: int = 0, Comment: str = ""):
-    SymbolInfo = MT5.symbol_info(Pair)
-    if SymbolInfo is None:
-        print(f"Symbol {Pair} is None")
-        return
-    if Volume < 0.01 : return
+    try:
+        SymbolInfo = MT5.symbol_info(Pair)
+        if SymbolInfo is None:
+            print(f"Symbol {Pair} is None")
+            return
+        if Volume < 0.01:
+            return
 
-    if PublicVarible.CanOpenOrder == True:
-        if MT5.positions_total() < PublicVarible.MaxOpenTrades:
-            # اگر ورودی StopLoss و TakeProfit قیمت هستند، از همان استفاده می‌کنیم
-            SL = StopLoss
-            TP = TakeProfit
+        if PublicVarible.CanOpenOrder:
+            if MT5.positions_total() < PublicVarible.MaxOpenTrades:
+                SL = StopLoss
+                TP = TakeProfit
 
-            Request = {
-                "action": MT5.TRADE_ACTION_PENDING,
-                "symbol": Pair,
-                "volume": Volume,
-                "type": MT5.ORDER_TYPE_SELL_LIMIT,
-                "price": EntryPrice,
-                "sl": SL,
-                "tp": TP,
-                "deviation": Deviation,
-                "comment": Comment,
-                "type_time": MT5.ORDER_TIME_GTC,
-                "type_filling": MT5.ORDER_FILLING_FOK
-            }
+                Request = {
+                    "action": MT5.TRADE_ACTION_PENDING,
+                    "symbol": Pair,
+                    "volume": Volume,
+                    "type": MT5.ORDER_TYPE_SELL_LIMIT,
+                    "price": EntryPrice,
+                    "sl": SL,
+                    "tp": TP,
+                    "deviation": Deviation,
+                    "comment": Comment,
+                    "type_time": MT5.ORDER_TIME_GTC,
+                    "type_filling": MT5.ORDER_FILLING_FOK
+                }
 
-            # حذف مقادیر None
-            if StopLoss is None:
-                del Request['sl']
+                if StopLoss is None:
+                    del Request['sl']
+                if TakeProfit is None:
+                    del Request['tp']
 
-            if TakeProfit is None:
-                del Request['tp']
+                print(Request)
+                Result = MT5.order_send(Request)
 
-            print(Request)
-            Result = MT5.order_send(Request)
-            Prompt(f"Send sell limit order for {Pair} {Volume} lots at {EntryPrice} with deviation={Deviation} points")
+                if Result is None:
+                    Prompt(f"❌ MT5.order_send() returned None for {Pair}")
+                    return
 
-            if Result.retcode != MT5.TRADE_RETCODE_DONE:
-                PromptToTelegram(f"Order Send failed, retcode={Result.retcode}")
-                ResultDict = Result._asdict()
-                for field in ResultDict.keys():
-                    PromptToTelegram(f"   {field}={ResultDict[field]}")
-                    if field == "request":
-                        TraderequestDict = ResultDict[field]._asdict()
-                        for tradereq_field in TraderequestDict:
-                            PromptToTelegram(f"traderequest: {tradereq_field}={TraderequestDict[tradereq_field]}")
+                Prompt(f"Send sell limit order for {Pair} {Volume} lots at {EntryPrice} with deviation={Deviation} points")
+
+                if Result.retcode != MT5.TRADE_RETCODE_DONE:
+                    Prompt(f"Order Send failed, retcode={Result.retcode}")
+                    ResultDict = Result._asdict()
+                    for field in ResultDict:
+                        Prompt(f"   {field}={ResultDict[field]}")
+                        if field == "request":
+                            TraderequestDict = ResultDict[field]._asdict()
+                            for tradereq_field in TraderequestDict:
+                                Prompt(f"traderequest: {tradereq_field}={TraderequestDict[tradereq_field]}")
+                else:
+                    Prompt(f"Send sell limit order for {Pair} done!")
+
+                    Lot = CalcTotalVolumes(Pair=Pair)
+                    Text = f"⏳🔴 Sell Limit {Pair} (#{Result.order})\nVolume: {Result.volume}\nPrice: {Result.price}\nS/L: {StopLoss}\nT/P: {TakeProfit}\n⬆️ Total buy volume: {Lot[0]} lot\n⬇️ Total sell volume: {Lot[1]} lot"
+                    print(Text)
+                    PromptToTelegram(Text=Text)
             else:
-                Prompt(f"Send sell limit order for {Pair} done!")
-
-                Lot = CalcTotalVolumes(Pair=Pair)
-                Text = f"⏳🔴 Sell Limit {Pair} (#{Result.order})" + "\n" + f"Volume: {Result.volume}" + "\n" + f"Price: {Result.price}" + "\n" + f"S/L: {StopLoss}" + "\n" + f"T/P: {TakeProfit}" + "\n" + f"⬆️ Total buy volume: {Lot[0]} lot" + "\n" + f"⬇️ Total sell volume: {Lot[1]} lot"
-                print(Text)
-                PromptToTelegram(Text=Text)
+                Prompt(f"A maximum of {PublicVarible.MaxOpenTrades} orders can be open")
         else:
-            PromptToTelegram(f"A maximum of {PublicVarible.MaxOpenTrades} orders can be open")
-    else:
-        PromptToTelegram("Stopped opening a new order")
+            Prompt("Stopped opening a new order")
+
+    except Exception as e:
+        Prompt(f"⚠️ Error in OrderSellLimit: {e}")
+        import traceback
+        traceback.print_exc()
+
 
 ########################################################################################################
 def ModifyTPSLPosition(Position, NewTakeProfit: float = None, NewStopLoss: float = None, Deviation: int = 0):

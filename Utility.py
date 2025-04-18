@@ -1372,116 +1372,265 @@ def send_telegram_photo(photo_buffer, chat_ids, caption=""):
 
 ########################################################################################
 
-def analyze_market_power(FrameRatesM5):
-    """
-    تحلیل قدرت خریداران و فروشندگان با استفاده از ترکیبی از روش‌های مختلف
-    خروجی: 
-        +1: قدرت خریداران
-        -1: قدرت فروشندگان
-        0: عدم قطعیت
-    """
-    try:
-        # 1. تحلیل حجم معاملات
-        volume_bullish = 0
-        volume_bearish = 0
-        for i in range(-7, -1):  # بررسی از کندل -7 تا -2
-            if FrameRatesM5.iloc[i]['close'] > FrameRatesM5.iloc[i]['open']:  # کندل صعودی
-                volume_bullish += FrameRatesM5.iloc[i]['tick_volume']
-            else:  # کندل نزولی
-                volume_bearish += FrameRatesM5.iloc[i]['tick_volume']
+# def analyze_market_power(FrameRatesM5):
+#     """
+#     تحلیل قدرت خریداران و فروشندگان با استفاده از ترکیبی از روش‌های مختلف
+#     خروجی: 
+#         +1: قدرت خریداران
+#         -1: قدرت فروشندگان
+#         0: عدم قطعیت
+#     """
+#     try:
+#         # 1. تحلیل حجم معاملات
+#         volume_bullish = 0
+#         volume_bearish = 0
+#         for i in range(-7, -1):  # بررسی از کندل -7 تا -2
+#             if FrameRatesM5.iloc[i]['close'] > FrameRatesM5.iloc[i]['open']:  # کندل صعودی
+#                 volume_bullish += FrameRatesM5.iloc[i]['tick_volume']
+#             else:  # کندل نزولی
+#                 volume_bearish += FrameRatesM5.iloc[i]['tick_volume']
         
-        volume_ratio = volume_bullish / (volume_bearish + 1)  # جلوگیری از تقسیم بر صفر
-        volume_signal = 1 if volume_ratio > 1.2 else (-1 if volume_ratio < 0.8 else 0)
+#         volume_ratio = volume_bullish / (volume_bearish + 1)  # جلوگیری از تقسیم بر صفر
+#         volume_signal = 1 if volume_ratio > 1.2 else (-1 if volume_ratio < 0.8 else 0)
 
-        # 2. تحلیل مومنتوم قیمت
-        price_changes = []
-        for i in range(-7, -1):  # بررسی از کندل -7 تا -2
-            if i < -1:
-                change = (FrameRatesM5.iloc[i]['close'] - FrameRatesM5.iloc[i-1]['close'])
-                price_changes.append(change)
+#         # 2. تحلیل مومنتوم قیمت
+#         price_changes = []
+#         for i in range(-7, -1):  # بررسی از کندل -7 تا -2
+#             if i < -1:
+#                 change = (FrameRatesM5.iloc[i]['close'] - FrameRatesM5.iloc[i-1]['close'])
+#                 price_changes.append(change)
         
-        avg_price_change = sum(price_changes) / len(price_changes)
-        momentum_signal = 1 if avg_price_change > 0 else (-1 if avg_price_change < 0 else 0)
+#         avg_price_change = sum(price_changes) / len(price_changes)
+#         momentum_signal = 1 if avg_price_change > 0 else (-1 if avg_price_change < 0 else 0)
 
-        # 3. تحلیل الگوی کندل‌ها با روش لنس بگز
-        bullish_candles = 0
-        bearish_candles = 0
-        neutral_candles = 0
+#         # 3. تحلیل الگوی کندل‌ها با روش لنس بگز
+#         bullish_candles = 0
+#         bearish_candles = 0
+#         neutral_candles = 0
         
-        for i in range(-7, -1):  # بررسی از کندل -7 تا -2
-            candle = FrameRatesM5.iloc[i]
-            high = candle['high']
-            low = candle['low']
-            close = candle['close']
+#         for i in range(-7, -1):  # بررسی از کندل -7 تا -2
+#             candle = FrameRatesM5.iloc[i]
+#             high = candle['high']
+#             low = candle['low']
+#             close = candle['close']
             
-            # محاسبه محدوده قیمتی کندل
-            price_range = high - low
-            # محاسبه موقعیت کلوز نسبت به محدوده قیمتی
-            close_position = (close - low) / price_range
-            # تحلیل بر اساس روش لنس بگز
-            if close_position > 0.67:  # ثلث بالایی
-                bullish_candles += 1
-            elif close_position < 0.33:  # ثلث پایینی
-                bearish_candles += 1
-            else:  # ثلث میانی
-                neutral_candles += 1
+#             # محاسبه محدوده قیمتی کندل
+#             price_range = high - low
+#             # محاسبه موقعیت کلوز نسبت به محدوده قیمتی
+#             close_position = (close - low) / price_range
+#             # تحلیل بر اساس روش لنس بگز
+#             if close_position > 0.67:  # ثلث بالایی
+#                 bullish_candles += 1
+#             elif close_position < 0.33:  # ثلث پایینی
+#                 bearish_candles += 1
+#             else:  # ثلث میانی
+#                 neutral_candles += 1
         
-        # تعیین سیگنال کندل‌ها
-        if bullish_candles >= 3:  # حداقل 3 کندل صعودی
-            candlestick_signal = 1
-        elif bearish_candles >= 3:  # حداقل 3 کندل نزولی
-            candlestick_signal = -1
-        else:
-            candlestick_signal = 0
+#         # تعیین سیگنال کندل‌ها
+#         if bullish_candles >= 3:  # حداقل 3 کندل صعودی
+#             candlestick_signal = 1
+#         elif bearish_candles >= 3:  # حداقل 3 کندل نزولی
+#             candlestick_signal = -1
+#         else:
+#             candlestick_signal = 0
 
-        # 4. محاسبه RSI با استفاده از ماژول pta
-        rsi = PTA.rsi(FrameRatesM5['close'], length=14)
-        current_rsi = rsi.iloc[-2]  # استفاده از RSI کندل -2
+#         # 4. محاسبه RSI با استفاده از ماژول pta
+#         rsi = PTA.rsi(FrameRatesM5['close'], length=14)
+#         current_rsi = rsi.iloc[-2]  # استفاده از RSI کندل -2
         
-        rsi_signal = 1 if current_rsi > 60 else (-1 if current_rsi < 40 else 0)
+#         rsi_signal = 1 if current_rsi > 60 else (-1 if current_rsi < 40 else 0)
         
-        # 5. تحلیل EMA 20
-        # محاسبه EMA 20
-        ema20 = FrameRatesM5['close'].ewm(span=20, adjust=False).mean()
-        # بررسی موقعیت کلوز کندل -2 نسبت به EMA 20
-        close_minus_2 = FrameRatesM5.iloc[-2]['close']
-        ema20_minus_2 = ema20.iloc[-2]
-        ema_signal = 1 if close_minus_2 > ema20_minus_2 else -1
+#         # 5. تحلیل EMA 20
+#         # محاسبه EMA 20
+#         ema20 = FrameRatesM5['close'].ewm(span=20, adjust=False).mean()
+#         # بررسی موقعیت کلوز کندل -2 نسبت به EMA 20
+#         close_minus_2 = FrameRatesM5.iloc[-2]['close']
+#         ema20_minus_2 = ema20.iloc[-2]
+#         ema_signal = 1 if close_minus_2 > ema20_minus_2 else -1
 
-        # 6. تحلیل OBV (On-Balance Volume)
-        # محاسبه OBV با استفاده از ماژول pta
-        obv = PTA.obv(FrameRatesM5['close'], FrameRatesM5['tick_volume'])
-        # محاسبه تغییرات OBV در 5 کندل آخر
-        obv_changes = []
-        for i in range(-11, -1):  # بررسی تغییرات OBV از کندل -11 تا -2
-            obv_change = obv.iloc[i] - obv.iloc[i-1]
-            obv_changes.append(obv_change)
+#         # 6. تحلیل OBV (On-Balance Volume)
+#         # محاسبه OBV با استفاده از ماژول pta
+#         obv = PTA.obv(FrameRatesM5['close'], FrameRatesM5['tick_volume'])
+#         # محاسبه تغییرات OBV در 5 کندل آخر
+#         obv_changes = []
+#         for i in range(-11, -1):  # بررسی تغییرات OBV از کندل -11 تا -2
+#             obv_change = obv.iloc[i] - obv.iloc[i-1]
+#             obv_changes.append(obv_change)
         
-        # محاسبه میانگین تغییرات OBV
-        avg_obv_change = sum(obv_changes) / len(obv_changes)
-        # تعیین سیگنال OBV
-        obv_signal = 1 if avg_obv_change > 0 else -1
+#         # محاسبه میانگین تغییرات OBV
+#         avg_obv_change = sum(obv_changes) / len(obv_changes)
+#         # تعیین سیگنال OBV
+#         obv_signal = 1 if avg_obv_change > 0 else -1
 
-        # ترکیب سیگنال‌ها
-        signals = [volume_signal, momentum_signal, candlestick_signal, rsi_signal, ema_signal, obv_signal]
-        #PromptToTelegram(Text=f"volume_signal: {volume_signal} , momentum_signal: {momentum_signal} , candlestick_signal: {candlestick_signal} , rsi_signal: {rsi_signal} , ema_signal: {ema_signal} , obv_signal: {obv_signal}")
-        bullish_count = sum(1 for s in signals if s == 1)
-        bearish_count = sum(1 for s in signals if s == -1)
+#         # ترکیب سیگنال‌ها
+#         signals = [volume_signal, momentum_signal, candlestick_signal, rsi_signal, ema_signal, obv_signal]
+#         #PromptToTelegram(Text=f"volume_signal: {volume_signal} , momentum_signal: {momentum_signal} , candlestick_signal: {candlestick_signal} , rsi_signal: {rsi_signal} , ema_signal: {ema_signal} , obv_signal: {obv_signal}")
+#         bullish_count = sum(1 for s in signals if s == 1)
+#         bearish_count = sum(1 for s in signals if s == -1)
         
-        if bullish_count >= 4:  # حداقل 4 سیگنال صعودی (به دلیل اضافه شدن OBV)
-            return 1  # قدرت خریداران
-        elif bearish_count >= 4:  # حداقل 4 سیگنال نزولی (به دلیل اضافه شدن OBV)
-            return -1  # قدرت فروشندگان
-        else:
-            return 0  # عدم قطعیت
+#         if bullish_count >= 4:  # حداقل 4 سیگنال صعودی (به دلیل اضافه شدن OBV)
+#             return 1  # قدرت خریداران
+#         elif bearish_count >= 4:  # حداقل 4 سیگنال نزولی (به دلیل اضافه شدن OBV)
+#             return -1  # قدرت فروشندگان
+#         else:
+#             return 0  # عدم قطعیت
 
-    except Exception as e:
-        error_msg = f"خطا در تحلیل قدرت بازار: {str(e)}"
-        print(error_msg)
-        PromptToTelegram(Text=error_msg)
-        return 0  # در صورت خطا، عدم قطعیت برمی‌گرداند
+#     except Exception as e:
+#         error_msg = f"خطا در تحلیل قدرت بازار: {str(e)}"
+#         print(error_msg)
+#         PromptToTelegram(Text=error_msg)
+#         return 0  # در صورت خطا، عدم قطعیت برمی‌گرداند
 
-########################################################################################
+########################################################################################""""
+import numpy as np
+import pandas_ta as PTA
+
+def analyze_market_power(FrameRatesM5, FrameRatesM15, FrameRatesM30):
+    """
+    تحلیل قدرت بازار با استفاده از سه تایم‌فریم (M5, M15, M30)
+    خروجی:
+        signal: +1 (قدرت خریداران)، -1 (قدرت فروشندگان)، 0 (عدم قطعیت)
+        confidence_score: ضریب اطمینان به صورت درصد که نشان‌دهنده دقت سیگنال است.
+    """
+
+    def find_divergence(prices, indicator_values):
+        """
+        بررسی واگرایی بین قیمت و اندیکاتور
+        """
+        price_peaks, price_troughs = find_peaks_and_troughs(prices)
+        indicator_peaks, indicator_troughs = find_peaks_and_troughs(indicator_values)
+
+        bullish_divergence = False
+        bearish_divergence = False
+
+        if price_troughs and indicator_troughs and len(price_troughs) >= 2 and len(indicator_troughs) >= 2:
+            if prices[price_troughs[-1]] < prices[price_troughs[-2]] and indicator_values[indicator_troughs[-1]] > indicator_values[indicator_troughs[-2]]:
+                bullish_divergence = True
+
+        if price_peaks and indicator_peaks and len(price_peaks) >= 2 and len(indicator_peaks) >= 2:
+            if prices[price_peaks[-1]] > prices[price_peaks[-2]] and indicator_values[indicator_peaks[-1]] < indicator_values[indicator_peaks[-2]]:
+                bearish_divergence = True
+
+        return bullish_divergence, bearish_divergence
+
+    def find_peaks_and_troughs(values):
+        """
+        یافتن قله‌ها و کف‌ها در یک سری زمانی
+        """
+        peaks = []
+        troughs = []
+        for i in range(1, len(values) - 1):
+            if values[i] > values[i - 1] and values[i] > values[i + 1]:
+                peaks.append(i)
+            if values[i] < values[i - 1] and values[i] < values[i + 1]:
+                troughs.append(i)
+        return peaks, troughs
+
+    def single_tf_analysis(FrameRates):
+        try:
+            # 1. حجم
+            volume_bullish = 0
+            volume_bearish = 0
+            for i in range(-7, -1):
+                if FrameRates.iloc[i]['close'] > FrameRates.iloc[i]['open']:
+                    volume_bullish += FrameRates.iloc[i]['tick_volume']
+                else:
+                    volume_bearish += FrameRates.iloc[i]['tick_volume']
+            volume_ratio = volume_bullish / (volume_bearish + 1)
+            volume_signal = 1 if volume_ratio > 1.2 else (-1 if volume_ratio < 0.8 else 0)
+
+            # 2. مومنتوم
+            changes = [FrameRates.iloc[i]['close'] - FrameRates.iloc[i-1]['close'] for i in range(-6, 0)]
+            avg_change = sum(changes) / len(changes)
+            momentum_signal = 1 if avg_change > 0 else (-1 if avg_change < 0 else 0)
+
+            # 3. RSI + واگرایی
+            rsi = PTA.rsi(FrameRates['close'], length=14)
+            rsi_value = rsi.iloc[-2]
+            rsi_signal = 1 if rsi_value > 60 else (-1 if rsi_value < 40 else 0)
+            bullish_div_rsi, bearish_div_rsi = find_divergence(FrameRates['close'], rsi)
+            if bullish_div_rsi:
+                rsi_signal = 1
+            elif bearish_div_rsi:
+                rsi_signal = -1
+
+            # 4. EMA
+            ema = FrameRates['close'].ewm(span=20, adjust=False).mean()
+            ema_signal = 1 if FrameRates.iloc[-2]['close'] > ema.iloc[-2] else -1
+
+            # 5. OBV + واگرایی
+            obv = PTA.obv(FrameRates['close'], FrameRates['tick_volume'])
+            obv_diff = obv.iloc[-2] - obv.iloc[-7]
+            obv_signal = 1 if obv_diff > 0 else -1
+            bullish_div_obv, bearish_div_obv = find_divergence(FrameRates['close'], obv)
+            if bullish_div_obv:
+                obv_signal = 1
+            elif bearish_div_obv:
+                obv_signal = -1
+
+            # 6. بررسی قدرت کندل‌ها (لنس بگز)
+            strong_bullish = 0
+            strong_bearish = 0
+            for i in range(-6, -1):
+                row = FrameRates.iloc[i]
+                height = row['high'] - row['low']
+                if height == 0:
+                    continue
+                close_pos = (row['close'] - row['low']) / height
+                if close_pos > 2/3:
+                    strong_bullish += 1
+                elif close_pos < 1/3:
+                    strong_bearish += 1
+            if strong_bullish >= 3:
+                price_action_signal = 1
+            elif strong_bearish >= 3:
+                price_action_signal = -1
+            else:
+                price_action_signal = 0
+
+            # ترکیب سیگنال‌ها
+            signals = [volume_signal, momentum_signal, rsi_signal, ema_signal, obv_signal, price_action_signal]
+            bullish = signals.count(1)
+            bearish = signals.count(-1)
+
+            # ضریب اطمینان
+            weighted_signals = sum(signals)
+            total_weight = len(signals)
+            confidence_score = weighted_signals / total_weight
+
+            if bullish >= 3:
+                return 1, confidence_score
+            elif bearish >= 3:
+                return -1, confidence_score
+            else:
+                return 0, confidence_score
+
+        except Exception as e:
+            print(f"[Error in single_tf_analysis]: {str(e)}")
+            return 0, 0
+
+    # تحلیل سه تایم‌فریم
+    signal_M5, conf_M5 = single_tf_analysis(FrameRatesM5)
+    signal_M15, conf_M15 = single_tf_analysis(FrameRatesM15)
+    signal_M30, conf_M30 = single_tf_analysis(FrameRatesM30)
+
+    # محاسبه نمره نهایی با وزن‌دهی: M30 (2), M15 (1.5), M5 (1)
+    final_score = (2 * signal_M30 + 1.5 * signal_M15 + 1 * signal_M5) / 4.5
+    final_confidence = (2 * conf_M30 + 1.5 * conf_M15 + 1 * conf_M5) / 4.5
+
+    # تبدیل به درصد (0 تا 100)
+    final_confidence_percent = abs(final_confidence * 100)
+
+    # صدور تصمیم نهایی
+    if final_score > 0.5:
+        return 1, final_confidence_percent  # خریداران با اطمینان
+    elif final_score < -0.5:
+        return -1, final_confidence_percent  # فروشندگان با اطمینان
+    else:
+        return 0, final_confidence_percent  # بدون سیگنال واضح
+
+
+########################################################################################""""
 
 def time_to_trade(Pair:str):
     SymbolInfo = MT5.symbol_info(Pair)
@@ -1492,14 +1641,19 @@ def time_to_trade(Pair:str):
     if current_datetime.minute == 0 and current_datetime.hour in restricted_hours:
             PublicVarible.CanOpenOrder = False
             PublicVarible.risk = 1
-            if current_time - PublicVarible.last_execution_timeT >= 60 :
+            if current_time - PublicVarible.last_execution_timeAll >= 600 :
                    Text = f"⏰ Time : {current_datetime} \n"
                    Text += f"Risk changed to Safe Mode 🟢 (Low) \n"
                    Text += f"Can Open Order Stoped ... \n"
                    Text += f"{Pair} Price is ({SymbolInfo.ask} $)"
                    PromptToTelegram(Text)
+                   PublicVarible.last_execution_timeAll = current_time
                          
-    if current_datetime.minute == 0 and current_datetime.hour in {13 , 19}:
-           Text = f"⚠️هشدار⚠️ \n اطلاعات ارائه شده در این بات ، صرفا جنبه #آموزشی داشته و سازنده مسئولیتی در قبال ضرر احتمالی  ندارد . لطفا اصول حرفه ای معامله و مدیریت سرمایه را رعایت فرمائید . "
-           results = send_telegram_messages(Text, PublicVarible.chat_ids)
-           PublicVarible.last_execution_timeT = current_time
+            # if current_datetime.minute == 0 and current_datetime.hour in {13 , 19}:
+            #    Text = f"⚠️هشدار⚠️ \n اطلاعات ارائه شده در این بات ، صرفا جنبه #آموزشی داشته و سازنده مسئولیتی در قبال ضرر احتمالی  ندارد . لطفا اصول حرفه ای معامله و مدیریت سرمایه را رعایت فرمائید . "
+            #    results = send_telegram_messages(Text, PublicVarible.chat_ids)
+               
+
+
+##################################################################################################
+
