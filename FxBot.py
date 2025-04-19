@@ -11,7 +11,6 @@ from SupplyDemandStrategyV7 import *
 from SupplyDemandStrategyV6 import *
 from SupplyDemandStrategyV5 import *
 from SupplyDemandStrategyV4 import *
-from SupplyDemandStrategyV1 import *
 from SupplyDemandStrategyV2 import *
 from LegAnalyzer import  *
 from Utility import *
@@ -96,7 +95,7 @@ class FxBot():
                   
                    for Item in PublicVarible.Pair:
                        LastTick = MT5.symbol_info_tick(Item['Name'])
-                       if Item['Tick'] != LastTick.time:
+                       if True : # Item['Tick'] != LastTick.time:
                           Item['Tick'] = LastTick.time
                           
                           # بروزرسانی داده های مالی

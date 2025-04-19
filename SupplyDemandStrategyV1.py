@@ -164,18 +164,18 @@ def train_trend_model(df: pd.DataFrame, pair: str = None) -> Tuple[Optional[int]
         # برچسب‌گذاری با فاصله‌های بیشتر برای روندهای بلندمدت‌تر
         df["label"] = np.where(df["close"].shift(-10) > df["close"] * 1.001, 1,  # افزایش 0.1%
                         np.where(df["close"].shift(-10) < df["close"] * 0.999, 2, 0))  # کاهش 0.1%
-        df.dropna(inplace=True)
+    df.dropna(inplace=True)
 
         # تعریف ویژگی‌های اصلی
-        features = [
-            "sma_20", "ema_50", "rsi", "macd", "macd_signal",
+    features = [
+        "sma_20", "ema_50", "rsi", "macd", "macd_signal",
             "bb_bbm", "bb_bbh", "bb_bbl", "adx", "stochastic",
             "tick_volume_ma", "price_range", "trend_strength",
             "price_momentum", "volume_ratio"
-        ]
+    ]
 
-        X = df[features]
-        y = df["label"]
+    X = df[features]
+    y = df["label"]
 
         # تقسیم داده‌ها
         train_size = int(len(X) * 0.8)
@@ -183,9 +183,9 @@ def train_trend_model(df: pd.DataFrame, pair: str = None) -> Tuple[Optional[int]
         y_train, y_test = y[:train_size], y[train_size:]
 
         # نرمال‌سازی داده‌ها
-        scaler = StandardScaler()
-        X_train_scaled = scaler.fit_transform(X_train)
-        X_test_scaled = scaler.transform(X_test)
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
 
         # محاسبه وزن‌های کلاس با تنظیم مجدد
         class_weights = {
