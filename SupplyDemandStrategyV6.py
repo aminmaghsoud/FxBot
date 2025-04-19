@@ -200,7 +200,7 @@ class SupplyDemandStrategyV6():
                       Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendB == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 0.65 : 
+                   if final_confidence < 65 : 
                      Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                      Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
@@ -262,7 +262,7 @@ class SupplyDemandStrategyV6():
                       Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendB == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 0.65 : 
+                   if final_confidence < 65 : 
                      Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                      Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
@@ -339,7 +339,7 @@ class SupplyDemandStrategyV6():
                       Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendB == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 0.65 : 
+                   if final_confidence < 65 : 
                      Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                      Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
@@ -416,7 +416,7 @@ class SupplyDemandStrategyV6():
                       Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendB == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 0.65 : 
+                   if final_confidence < 65 : 
                      Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                      Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "  

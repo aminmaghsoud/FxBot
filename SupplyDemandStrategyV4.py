@@ -264,11 +264,11 @@ class SupplyDemandStrategyV4():
                       Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendN == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 0.65 :
+                   if final_confidence < 65 :
                      Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                      Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
-                   if trend_C == 1 and trendN == 1 and final_confidence > 0.65 : 
+                   if trend_C == 1 and trendN == 1 and final_confidence > 65 : 
                       Text += f"\n✅ موقعیت Buy: مناسب "
                    else : 
                       Text += f"\n❌ موقعیت Buy: نامناسب "
@@ -327,11 +327,11 @@ class SupplyDemandStrategyV4():
                       Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendN == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 0.65 :
+                   if final_confidence < 65 :
                       Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                       Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
-                   if trend_C == -1 and trendN == -1 and final_confidence > 0.65 : 
+                   if trend_C == -1 and trendN == -1 and final_confidence > 65 : 
                       Text += f"\n✅ موقعیت Sell: مناسب "
                    else : 
                       Text += f"\n❌ موقعیت Sell: نامناسب "
@@ -408,7 +408,7 @@ class SupplyDemandStrategyV4():
                       Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendN == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 0.65 :
+                   if final_confidence < 65 :
                       Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                       Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
@@ -487,7 +487,7 @@ class SupplyDemandStrategyV4():
                       Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendN == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 0.65 :
+                   if final_confidence < 65 :
                       Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                       Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "

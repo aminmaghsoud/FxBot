@@ -82,7 +82,7 @@ class SupplyDemandStrategyV8():
                                      # اعمال تغییرات
                                      ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
                                      print(" Buy Position Tp and Sl Modified to Bearish Status")
-                                 elif SymbolInfo.ask >= abs(abs(entry_price - take_profit) * 0.65 + entry_price):
+                                 elif SymbolInfo.ask >= abs(abs(entry_price - take_profit) * 65 + entry_price):
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = entry_price
                                      # اعمال تغییرات
@@ -116,7 +116,7 @@ class SupplyDemandStrategyV8():
                                      # اعمال تغییرات
                                      ModifyTPSLPosition(position_data, NewTakeProfit = take_profit, NewStopLoss= new_stop_loss, Deviation=0)
                                      print(" Sell Position Tp and Sl Modified to Bearish Status")
-                                 elif SymbolInfo.bid <= abs(abs(entry_price - take_profit) * 0.65 - entry_price):
+                                 elif SymbolInfo.bid <= abs(abs(entry_price - take_profit) * 65 - entry_price):
                                      # محاسبه مقدار جدید برای حد ضرر (stop_loss)
                                      new_stop_loss = entry_price
                                      # اعمال تغییرات
@@ -272,7 +272,7 @@ class SupplyDemandStrategyV8():
                       Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendj == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 0.65 :
+                   if final_confidence < 65 :
                      Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                      Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
@@ -332,7 +332,7 @@ class SupplyDemandStrategyV8():
                       Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendj == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 0.65 :
+                   if final_confidence < 65 :
                      Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                      Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
@@ -375,7 +375,7 @@ class SupplyDemandStrategyV8():
 ####################  بررسی لگ و جهت روند   ######################
              if PublicVarible.Baseroofj != 0 :
                 return
-             elif PublicVarible.Leg_trendj == 1  and final_confidence > 0.65 and trendj == 1  : 
+             elif PublicVarible.Leg_trendj == 1  and final_confidence > 65 and trendj == 1  : 
                 EntryPrice = SymbolInfo.ask
                 SL = FrameRatesM5.iloc[current_index : -1]['low'].min()
                 TP1 = EntryPrice + (EntryPrice - SL)
@@ -384,14 +384,14 @@ class SupplyDemandStrategyV8():
                 OrderBuyLimit(Pair= self.Pair, Volume=  round(Volume/2 ,2)  , EntryPrice =  PublicVarible.Basefloorj , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Dir11 V9")
                 PublicVarible.Leg_trendj = 0
 
-             elif PublicVarible.Leg_trendj == 1  and final_confidence > 0.65 and trendj == -1 : 
+             elif PublicVarible.Leg_trendj == 1  and final_confidence > 65 and trendj == -1 : 
                 SL = PublicVarible.Baseroofj  + (PublicVarible.Baseroofj - PublicVarible.Basefloorj)
                 TP1 = PublicVarible.Basefloorj
                 Volume = 0.01
                 OrderSellLimit(Pair= self.Pair, Volume=  Volume  , EntryPrice =  PublicVarible.Baseroofj , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Dir11 V9")
                 PublicVarible.Leg_trendj = 0
 
-             elif PublicVarible.Leg_trendj == -1  and final_confidence > 0.65 and trendj == -1 : 
+             elif PublicVarible.Leg_trendj == -1  and final_confidence > 65 and trendj == -1 : 
                 EntryPrice = SymbolInfo.bid
                 SL = FrameRatesM5.iloc[current_index : -1]['high'].max()
                 TP1 = EntryPrice - (SL - EntryPrice )
@@ -400,7 +400,7 @@ class SupplyDemandStrategyV8():
                 OrderSellLimit(Pair= self.Pair, Volume=  round(Volume/2 ,2)  , EntryPrice =  PublicVarible.Baseroofj , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Dir11 V9")
                 PublicVarible.Leg_trendj = 0
 
-             elif PublicVarible.Leg_trendj == -1  and final_confidence > 0.65 and trendj == 1 : 
+             elif PublicVarible.Leg_trendj == -1  and final_confidence > 65 and trendj == 1 : 
                 SL = PublicVarible.Basefloorj - ((PublicVarible.Baseroofj - PublicVarible.Basefloorj))  
                 TP1 = PublicVarible.Baseroofj 
                 Volume = 0.01
@@ -445,11 +445,11 @@ class SupplyDemandStrategyV8():
                       Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendj == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 0.65 :
+                   if final_confidence < 65 :
                      Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                      Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
-                   if trend_C == 1 and trendj == 1 and final_confidence > 0.65 : 
+                   if trend_C == 1 and trendj == 1 and final_confidence > 65 : 
                       Text += f"\n✅ موقعیت Buy: مناسب "
                    else : 
                       Text += f"\n❌ موقعیت Buy: نامناسب "
@@ -466,7 +466,7 @@ class SupplyDemandStrategyV8():
                 TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroofj)) - (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj)*0.75)} (If NEG T is True)" 
                 write_trade_info_to_file(self.Pair ,"Buy", SymbolInfo.ask, SL, TP1, TextN )
 
-                if  trend_C == +1 and trendj == +1 and final_confidence > 0.65 and Time_Signal == 1  : 
+                if  trend_C == +1 and trendj == +1 and final_confidence > 65 and Time_Signal == 1  : 
                    if  (abs(close_C - PublicVarible.Baseroofj) < (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj) * 0.75 )):       
                      Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                      EntryPrice = SymbolInfo.ask
@@ -524,11 +524,11 @@ class SupplyDemandStrategyV8():
                       Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendj == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 0.65 :
+                   if final_confidence < 65 :
                      Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                      Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
-                   if trend_C == -1 and trendj == -1 and final_confidence > 0.65 : 
+                   if trend_C == -1 and trendj == -1 and final_confidence > 65 : 
                       Text += f"\n✅ موقعیت Sell: مناسب "
                    else : 
                       Text += f"\n❌ موقعیت Sell: نامناسب "
@@ -545,7 +545,7 @@ class SupplyDemandStrategyV8():
                 TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloorj)) - (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj)*0.75)} (If NEG T is True)\n" 
                 write_trade_info_to_file(self.Pair ,"Sell", SymbolInfo.bid  , SL, TP1, TextN )
                 
-                if  trend_C == -1  and trendj == -1 and final_confidence > 0.65 and Time_Signal == 1 :
+                if  trend_C == -1  and trendj == -1 and final_confidence > 65 and Time_Signal == 1 :
                    if  (abs(close_C - PublicVarible.Basefloorj) < (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj)* 0.75) ) :
                      Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                      EntryPrice = SymbolInfo.bid  

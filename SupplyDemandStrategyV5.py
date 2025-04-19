@@ -264,7 +264,7 @@ class SupplyDemandStrategyV5():
                       Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendU == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 0.65 :
+                   if final_confidence < 65 :
                      Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                      Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
@@ -322,7 +322,7 @@ class SupplyDemandStrategyV5():
                       Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendU == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 0.65 :
+                   if final_confidence < 65 :
                      Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                      Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
@@ -401,12 +401,12 @@ class SupplyDemandStrategyV5():
                    elif trendU == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
                    
-                   if final_confidence < 0.65 :
+                   if final_confidence < 65 :
                      Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                      Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
 
-                   if trend_C == 1 and trendU == 1 and final_confidence > 0.65 : 
+                   if trend_C == 1 and trendU == 1 and final_confidence > 65 : 
                       Text += f"\n✅ موقعیت Buy: مناسب "
                    else : 
                       Text += f"\n❌ موقعیت Buy: نامناسب "
@@ -483,11 +483,11 @@ class SupplyDemandStrategyV5():
                       Text += f"🔘 پایش قدرت :قدرت فروشنده "
                    elif trendU == 0 :
                       Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 0.65 :
+                   if final_confidence < 65 :
                      Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
                    else :
                      Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
-                   if trend_C == -1 and trendU == -1 and final_confidence > 0.65 : 
+                   if trend_C == -1 and trendU == -1 and final_confidence > 65 : 
                       Text += f"\n✅ موقعیت Sell: مناسب "
                    else : 
                       Text += f"\n❌ موقعیت Sell: نامناسب "

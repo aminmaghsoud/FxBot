@@ -9,10 +9,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime, timedelta
 from typing import Tuple, Optional, Dict, Any
+import MetaTrader5 as MT5
+
 
 class GoldPricePredictor:
-    def __init__(self, days: int = 30, test_size: float = 0.2, random_state: int = 42):
+    def __init__(self, pair, days: int = 30, test_size: float = 0.2, random_state: int = 42): #: str = 'XAUUSDb'
         """Initialize the Gold Price Predictor"""
+        self.Pair = pair
         self.days = days
         self.test_size = test_size
         self.random_state = random_state
@@ -27,41 +30,46 @@ class GoldPricePredictor:
         self.metrics = {}
 
     def get_gold_data(self) -> Optional[pd.DataFrame]:
-        """Get Gold price data using GLD ETF with hourly intervals"""
+        """Get gold price data from MetaTrader 5 (5-minute timeframe)"""
         try:
-            symbol = "GLD"  # SPDR Gold Shares ETF
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=self.days)
-            
-            print(f"Downloading gold price data (GLD) from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}...")
-            df = yf.download(symbol, start=start_date, end=end_date, interval='1h')
-            
-            if df.empty:
-                raise ValueError("No data was downloaded")
-            
-            # Handle MultiIndex columns if they exist
-            if isinstance(df.columns, pd.MultiIndex):
-                # Select the GLD ticker columns and flatten the MultiIndex
-                df = df.xs('GLD', axis=1, level=1)
-            
-            # Convert GLD price to approximate gold price (1 GLD ≈ 1/10 oz of gold)
-            for column in ['Open', 'High', 'Low', 'Close']:
-                if column in df.columns:
-                    df[column] = df[column] * 10
-            
-            print(f"Successfully downloaded {len(df)} data points")
-            if 'Close' in df.columns:
-                print(f"Latest gold price: ${float(df['Close'].iloc[-1]):.2f}")
-            
-            # Store data range information
-            self.data_start = df.index[0].strftime('%Y-%m-%d %H:%M:%S')
-            self.data_end = df.index[-1].strftime('%Y-%m-%d %H:%M:%S')
-            self.df = df
-            
-            return df
+            if not MT5.initialize():
+                raise RuntimeError("MT5 initialization failed")
+
+            print(f"Fetching 5-minute data for: {self.Pair}")
+            RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 350)
+            if RatesM5 is None:
+                raise ValueError("Failed to fetch data from MT5")
+
+            FrameRatesH1 = pd.DataFrame(RatesM5)
+            if FrameRatesH1.empty:
+                raise ValueError("DataFrame is empty")
+
+        # پردازش داده‌ها
+            FrameRatesH1['datetime'] = pd.to_datetime(FrameRatesH1['time'], unit='s')
+            FrameRatesH1.set_index(pd.DatetimeIndex(FrameRatesH1['datetime']), inplace=True, drop=True)
+            FrameRatesH1.drop(columns=['time'], inplace=True)
+
+        # تغییر نام ستون‌ها برای تطبیق با کد اصلی
+            FrameRatesH1.rename(columns={
+                'open': 'Open',
+                'high': 'High',
+                'low': 'Low',
+                'close': 'Close',
+                'tick_volume': 'Volume'  # اگر tick_volume استفاده شده باشه
+            }, inplace=True)
+
+        # به‌روزرسانی ویژگی‌های کلاس
+            self.df = FrameRatesH1
+            self.data_start = FrameRatesH1.index[0].strftime('%Y-%m-%d %H:%M:%S')
+            self.data_end = FrameRatesH1.index[-1].strftime('%Y-%m-%d %H:%M:%S')
+            self.current_price = FrameRatesH1['Close'].iloc[-1]
+
+            print(f"Successfully fetched {len(FrameRatesH1)} rows from MT5.")
+            print(f"Latest gold price (from MT5): ${self.current_price:.2f}")
+            return FrameRatesH1
+
         except Exception as e:
-            print(f"Error downloading data: {str(e)}")
-            print("Available columns:", df.columns if 'df' in locals() else "No data downloaded")
+            print(f"Error in get_gold_data: {e}")
             return None
 
     def prepare_data(self, df: pd.DataFrame) -> Tuple[Optional[pd.DataFrame], Optional[pd.Series], Optional[pd.DataFrame]]:
@@ -231,19 +239,19 @@ def main():
     
     # Print results if all values are available
     if all(v is not None for v in [metrics, current_price, next_price, predicted_change]):
-        print("\nTime Information:")
-        print(f"Data Start: {predictor.data_start}")
-        print(f"Data End: {predictor.data_end}")
-        print(f"Current Time: {current_time}")
-        print(f"Prediction Time: {predicted_time}")
+        # print("\nTime Information:")
+        # print(f"Data Start: {predictor.data_start}")
+        # print(f"Data End: {predictor.data_end}")
+        # print(f"Current Time: {current_time}")
+        # print(f"Prediction Time: {predicted_time}")
         
-        print("\nSpot Gold Price Prediction Results:")
-        print(f"Model Accuracy (R2): {metrics['r2']:.4f}")
-        print(f"Mean Squared Error: {metrics['mse']:.4f}")
-        print(f"Root Mean Squared Error: {metrics['rmse']:.4f}")
-        print(f"Current Gold Price: ${current_price:.2f}")
-        print(f"Predicted Price: ${next_price:.2f}")
-        print(f"Predicted Change: ${predicted_change:.2f}")
+        # print("\nSpot Gold Price Prediction Results:")
+        # print(f"Model Accuracy (R2): {metrics['r2']:.4f}")
+        # print(f"Mean Squared Error: {metrics['mse']:.4f}")
+        # print(f"Root Mean Squared Error: {metrics['rmse']:.4f}")
+        # print(f"Current Gold Price: ${current_price:.2f}")
+        # print(f"Predicted Price: ${next_price:.2f}")
+        # print(f"Predicted Change: ${predicted_change:.2f}")
         
         print("\nTrading Signal:")
         if predicted_change > 0:
