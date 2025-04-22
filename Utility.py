@@ -23,6 +23,9 @@ import mplfinance as mpf
 from io import BytesIO
 import pandas as pd
 import pandas_ta as pta
+from GoldPricePredictor import *
+from GoldPricePredictorM5 import *
+from GoldPricePredictorM5_XGB import GoldPricePredictorM5_XGB
 
 warnings.filterwarnings('ignore')
 ########################################################################################################
@@ -1137,13 +1140,18 @@ def get_buy_positions_with_open_prices():
     # دریافت تمام موقعیت‌های باز
     open_positions = MT5.positions_get()
 
-    # فیلتر کردن تیکت‌های موقعیت‌های فروش
+    if open_positions is None:
+        print("⚠️  MT5.positions_get() returned None — احتمالاً متاتریدر وصل نیست یا حساب فعال نداری.")
+        return {}
+
+    # فیلتر کردن موقعیت‌های خرید
     buy_positions = [position for position in open_positions if position.type == MT5.POSITION_TYPE_BUY]
 
-    # ساخت یک دیکشنری برای نگهداری تیکت و قیمت باز شدن هر موقعیت فروش
+    # ساخت دیکشنری شامل تیکت و قیمت باز شدن
     buy_positions_with_open_prices = {position.ticket: position.price_open for position in buy_positions}
 
     return buy_positions_with_open_prices
+
 
 def write_trade_info_to_file(Pair ,Pos, EntryPrice, SL, TP1, Direction ):
     file_path = 'C:/logTrade.txt'  # مسیر فایل
@@ -1657,3 +1665,190 @@ def time_to_trade(Pair:str):
 
 ##################################################################################################
 
+def get_signal_from_model(pair):
+    # predictor = GoldPricePredictor(pair, days=30)
+    # predictorM5 = GoldPricePredictorM5(pair, days=7)
+    # predictorM5XGB = GoldPricePredictorM5_XGB(pair)
+
+    # # اجرای پیش‌بینی
+    # resultH1 = predictor.predict(show_plot=False)
+    # resultM5 = predictorM5.predict(show_plot=False)
+    # resultXGB = predictorM5XGB.predict(show_plot=False)
+    predictor = GoldPricePredictor(pair, days=30)
+    predictorM5 = GoldPricePredictorM5(pair, days=7)
+    predictorM5XGB = GoldPricePredictorM5_XGB(pair)
+
+    resultH1 = predictor.predict(show_plot=False)
+    resultM5 = predictorM5.predict(show_plot=False)
+    resultXGB = predictorM5XGB.predict(show_plot=False)
+    # مقداردهی اولیه ایمن
+    metrics, current_price, next_price, predicted_change, current_time, predicted_time = resultH1 or ({}, 0, 0, 0, '', '')
+    metricsM5, current_priceM5, next_priceM5, predicted_changeM5, current_timeM5, predicted_timeM5 = resultM5 or ({}, 0, 0, 0, '', '')
+    metricsXGB, current_priceXGB, next_priceXGB, predicted_changeXGB, current_timeXGB, predicted_timeXGB = resultXGB or ({}, 0, 0, 0, '', '')
+    #print(f"metricsXGB:{metricsXGB} \n current_priceXGB: {current_priceXGB} \n next_priceXGB: {next_priceXGB} \n predicted_changeXGB: {predicted_changeXGB} \n current_timeXGB:{current_timeXGB} \n predicted_timeXGB:{predicted_timeXGB}")
+    # اطمینان از عددی بودن مقادیر (در صورت خرابی جزئی)
+    predicted_change = predicted_change or 0
+    predicted_changeM5 = predicted_changeM5 or 0
+    predicted_changeXGB = predicted_changeXGB or 0
+
+    # نمایش سیگنال ترکیبی
+    print(Fore.LIGHTWHITE_EX,"=== Combined Trading Signal ===",Fore.WHITE)
+    if predicted_change > 0 and predicted_changeM5 > 0:
+        print(Fore.LIGHTGREEN_EX,"STRONG BUY - Both models predict increase",Fore.WHITE)
+    elif predicted_change < 0 and predicted_changeM5 < 0:
+        print(Fore.LIGHTRED_EX,"STRONG SELL - Both models predict decrease",Fore.WHITE)
+    elif predicted_change > 0 or predicted_changeM5 > 0:
+        print(Fore.LIGHTGREEN_EX,"MODERATE BUY - One model predicts increase",Fore.WHITE)
+    elif predicted_change < 0 or predicted_changeM5 < 0:
+        print(Fore.LIGHTRED_EX,"MODERATE SELL - One model predicts decrease",Fore.WHITE)
+    else:
+        print("HOLD - No significant change expected")
+
+    # چاپ خروجی هر سه مدل
+    print(f"\n 1-Hour   Model: {predicted_change:+.2f} ")# and  metrics is {metrics}")
+    print(f" 5-Minute Model: {predicted_changeM5:+.2f} ")#and  metricsM5 is {metricsM5}" )
+    print(f" 5-Minute Model (XGB): {predicted_changeXGB:+.2f} ")#and  metricsM5XGB is {metricsXGB}")
+
+    return predicted_change, predicted_changeM5, predicted_changeXGB
+
+##################################################################################################
+## پیدا کردن لگ 
+def build_and_send_analysis_text(pos,PairName, pair, ask_price, trend, final_confidence,
+                                 predicted_changeM5, predicted_change, predicted_changeXGB,
+                                 Baseroof, Basefloor, FrameRatesM5):
+    text = ' '
+    text = f"{PairName}\n"
+    text += f"{pair} Price is ({ask_price} $)\n"
+
+    if pos == 'Buy' : 
+       text += f"M5️⃣ لگ صعودی و رنج# ... 🟢🟢 \n\n"
+    elif pos == 'Sell' : 
+       text += f"M5️⃣ لگ نزولی و رنج# ... 🔴🔴\n\n"
+    # Optional/commented out sections:
+    # text += f"تعداد کندل: {count}\n"
+    # text += f"ارتفاع لگ: {round(high_low_diff, 2) / 10} pip\n"
+    # text += f"ارتفاع رنج: {range_height} pip \n"
+    # text += f"نسبت رنج به لگ: {round(range_height / high_low_diff * 1000,1) } % \n"
+
+    text += f"سقف رنج: {Baseroof} $ \n"
+    text += f"کف رنج : {Basefloor} $ \n\n"
+    
+    # text += f"حجم کل مجاز : {allowed_volume} Lot \n"
+    # text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute} \n"
+
+    if trend == 1:
+        text += "🔘 پایش قدرت : قدرت خریدار "
+    elif trend == -1:
+        text += "🔘 پایش قدرت :قدرت فروشنده "
+    elif trend == 0:
+        text += "🔘 پایش قدرت : قدرت ها برابر "
+
+    if final_confidence < 65:
+        text += f"\n🔘 ضریب اطمینان پایش مناسب نیست ⚠️({round(final_confidence , 2)}) "
+    else:
+        text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
+
+    text += " \n\n🔘 آنالیز LR: \n"
+    if predicted_changeM5 >= 0:
+        text += f"رشد کوتاه مدت :🔺+{round(predicted_changeM5,1)} $\n"
+    else:
+        text += f"رشد کوتاه مدت :🔻{round(predicted_changeM5,1)} $\n"
+
+    if predicted_change >= 0:
+        text += f"رشد بلند مدت :🔺+{round(predicted_change,1)} $\n"
+    else:
+        text += f"رشد بلند مدت :🔻{round(predicted_change,1)} $"
+
+    text += f" \n🔘 آنالیز XGB: \nرشدکوتاه مدت {round(predicted_changeXGB,2)} $"
+
+    # ارسال پیام به تلگرام و رسم نمودار
+    plot_candles_and_send_telegram(FrameRatesM5, pair, text)
+
+##################################################################################################
+## خروج قیمت از رنج
+def build_position_text(pos,PairName, pair, close_price, trend_C, trend, final_confidence,
+                            predicted_changeM5, predicted_change, predicted_changeXGB,
+                            Baseroof, Basefloor, HS_Down, HS_Up, FrameRatesM5):
+    text = ' '
+    if pos == 'Buy' : 
+       text = f"\n({PairName}) \n⬆️ Buy Position in {pair} \n"
+       text += f"price: {close_price}$ \n🔺Upper Roof {Baseroof}$ \n\n"   
+    elif pos == 'Sell' : 
+        Text = f"\n({PairName}) \n⬇️ Sell Position in {pair} \n"
+        Text += f"🔘price:{close_price}$ \n🔻Under floor {Basefloor}$ \n\n"
+    if trend_C == +1:
+      if pos == 'Buy' : 
+        text += "🔘خروج  از سقف:  کندل قدرتمند 🐮 \n"
+        if HS_Down == 1:
+            text += "🔘 الگوی سر وشانه نزولی \n"
+        elif HS_Up == 1:
+            text += "🔘 الگوی سر وشانه صعودی \n"
+      elif  pos == 'Sell' : 
+        Text += f"🔘 خروج از کف: باکندل قدرتمند 🐻 \n"
+        if PublicVarible.HS_Down == 1 : 
+           Text += f"🔘الگوی سر وشانه نزولی \n"
+        elif PublicVarible.HS_Up == 1 : 
+           Text += f"🔘 الگوی سر وشانه صعودی \n"
+    elif trend_C == +2:
+      if  pos == 'Buy' : 
+        text += "🔘 خروج از سقف:  کندل قدرتمند 🐮 \n🔘 حذف مقادیر سقف و کف ⚠️\n"
+        if HS_Down == 1:
+            text += "🔘 الگوی سر وشانه نزولی \n"
+        elif HS_Up == 1:
+            text += "🔘 الگوی سر وشانه صعودی \n"
+        PublicVarible.Baseroof = PublicVarible.Basefloor = 0
+      elif   pos == 'Sell' :  
+         Text +=  f"🔘خروج از کف: باکندل معولی 🐻 \n🔘حذف مقادیر سقف و کف ⚠️\n"
+         if PublicVarible.HS_Down == 1 : 
+            Text += f"🔘 الگوی سر وشانه نزولی \n"
+         elif PublicVarible.HS_Up == 1 : 
+            Text += f"🔘 الگوی سر وشانه صعودی \n"
+            PublicVarible.Baseroof = PublicVarible.Basefloor = 0          
+    elif trend_C == 0:
+        text += "🔘 قدرت کندل ها : شناسایی نشد  🏓 \n🔘 حذف مقادیر سقف و کف ⚠️\n"
+        PublicVarible.Baseroof = PublicVarible.Basefloor = 0
+    elif trend_C == -1 or trend_C == -2:
+        text += "🔘 وضعیت خروج : نامناسب  \n🔘 حذف مقادیر سقف و کف ⚠️\n"
+        PublicVarible.Baseroof = PublicVarible.Basefloor = 0
+    # تحلیل قدرت بازار
+    if trend == 1:
+        text += "🔘 پایش قدرت : قدرت خریدار "
+    elif trend == -1:
+        text += "🔘 پایش قدرت :قدرت فروشنده "
+    elif trend == 0:
+        text += "🔘 پایش قدرت : قدرت ها برابر "
+    # ضریب اطمینان
+    if final_confidence < 65:
+        text += f"\n🔘 ضریب اطمینان پایش مناسب نیست ⚠️({round(final_confidence , 2)}) "
+    else:
+        text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
+    # تصمیم نهایی
+    if pos == "Buy" : 
+      if trend == 1 and trend_C == 1 and final_confidence > 65 :
+        text += "\n✅ موقعیت Buy: مناسب "
+      else:
+        text += "\n❌ موقعیت Buy: نامناسب "
+    elif pos == "Sell" : 
+      if trend == -1 and trend_C == -1 and final_confidence > 65 : 
+        Text += f"\n✅ موقعیت Sell: مناسب "
+      else : 
+        Text += f"\n❌ موقعیت Sell: نامناسب "
+
+    # تحلیل‌های پیش‌بینی
+    text += " \n\n🔘 آنالیز LR: \n"
+    if predicted_changeM5 >= 0:
+        text += f"رشد کوتاه مدت :🔺+{round(predicted_changeM5, 1)} $\n"
+    else:
+        text += f"رشد کوتاه مدت :🔻{round(predicted_changeM5, 1)} $\n"
+
+    if predicted_change >= 0:
+        text += f"رشد بلند مدت :🔺+{round(predicted_change, 1)} $\n"
+    else:
+        text += f"رشد بلند مدت :🔻{round(predicted_change, 1)} $"
+
+    text += f" \n🔘 آنالیز XGB: \nرشدکوتاه مدت {round(predicted_changeXGB, 2)} $"
+
+    # ارسال پیام
+    plot_candles_and_send_telegram(FrameRatesM5, pair, text)
+
+    

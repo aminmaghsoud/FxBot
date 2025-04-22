@@ -8,6 +8,7 @@ from colorama import init, Fore, Back, Style
 import PublicVarible
 from GoldPricePredictor import *
 from GoldPricePredictorM5 import *
+from GoldPricePredictorM5_XGB import GoldPricePredictorM5_XGB
 
 class SupplyDemandStrategyV9():
       Pair = ""
@@ -18,7 +19,7 @@ class SupplyDemandStrategyV9():
            
 ##############################################################################################################################################################
       def Main(self):
-          #if self.Pair !='XAUUSDb' : return
+          if self.Pair !='XAUUSDb' : return
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ Strategy V9 M5 XAUUSDb ")
 
           SymbolInfo = MT5.symbol_info(self.Pair)
@@ -40,88 +41,23 @@ class SupplyDemandStrategyV9():
                    FrameRatesM30 = FrameRatesM30.drop('time', axis=1)
                    FrameRatesM30 = FrameRatesM30.set_index(PD.DatetimeIndex(FrameRatesM30['datetime']), drop=True)
 
-             RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 2500)
+             RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 100)
              if RatesM5 is not None:
                 FrameRatesM5 = PD.DataFrame(RatesM5)
                 if not FrameRatesM5.empty: 
                    FrameRatesM5['datetime'] = PD.to_datetime(FrameRatesM5['time'], unit='s')
                    FrameRatesM5 = FrameRatesM5.drop('time', axis=1)
                    FrameRatesM5 = FrameRatesM5.set_index(PD.DatetimeIndex(FrameRatesM5['datetime']), drop=True)
-          # ارسال پیام
-          # ایجاد یک نمونه از کلاس
-          predictor = GoldPricePredictor(self.Pair , days=30)  # دریافت داده‌های 30 روز گذشته
-          predictorM5= GoldPricePredictorM5(self.Pair ,days=7)  # دریافت داده‌های 7 روز گذشته با بازه 5 دقیقه‌ای
-          #predictorM5 = GoldPricePredictorM5(FrameRateM5=FrameRatesM5) 
-
-          # دریافت پیش‌بینی‌ها
-          metrics, current_price, next_price, predicted_change, current_time, predicted_time = predictor.predict(show_plot=False)
-          metricsM5, current_priceM5, next_priceM5, predicted_changeM5, current_timeM5, predicted_timeM5 = predictorM5.predict(show_plot=False)
-          # بررسی نتایج
-          if metrics and current_price and next_price and predicted_change:
-         #    print("\n=== Hourly Model Results ===")
-         #    print(f"Start Date: {predictor.data_start}")
-         #    print(f"End Date: {predictor.data_end}")
-         #    print(f"Current Time: {current_time}")
-         #    print(f"Prediction Time (1 hour ahead): {predicted_time}")
-         #    print(f"Model Accuracy (R²): {metrics['r2']:.4f}")
-         #    print(f"Current Gold Price: ${current_price:.2f}")
-         #    print(f"Predicted Price (1 hour ahead): ${next_price:.2f}")
-         #    print(f"Predicted Change: ${predicted_change:.2f}")
-
-         #  # بررسی نتایج مدل 5 دقیقه‌ای
-         #  if metricsM5 and current_priceM5 and next_priceM5 and predicted_changeM5:
-         #    print("\n=== 5-Minute Model Results ===")
-         #    print(f"Start Date: {predictorM5.data_start}")
-         #    print(f"End Date: {predictorM5.data_end}")
-         #    print(f"Current Time: {current_timeM5}")
-         #    print(f"Prediction Time (30 min ahead): {predicted_timeM5}")
-         #    print(f"Model Accuracy (R²): {metricsM5['r2']:.4f}")
-         #    print(f"Current Gold Price: ${current_priceM5:.2f}")
-         #    print(f"Predicted Price (30 min ahead): ${next_priceM5:.2f}")
-         #    print(f"Predicted Change: ${predicted_changeM5:.2f}")
-            
-         #    # نمایش معیارهای اطمینان مدل 5 دقیقه‌ای
-         #    print("\n5-Minute Model Confidence Metrics:")
-         #    print(f"Success Rate (0.1%): {predictorM5.confidence_metrics['success_rate_0.1']:.2f}%")
-         #    print(f"Directional Accuracy: {predictorM5.confidence_metrics['directional_accuracy']:.2f}%")
-         #    print(f"Trend Accuracy: {predictorM5.confidence_metrics['trend_accuracy']:.2f}%")
-            
-         #    # محاسبه و نمایش سطح اطمینان کلی مدل 5 دقیقه‌ای
-         #    confidence_score = (
-         #        predictorM5.confidence_metrics['success_rate_0.1'] * 0.4 +
-         #        predictorM5.confidence_metrics['directional_accuracy'] * 0.3 +
-         #        predictorM5.confidence_metrics['trend_accuracy'] * 0.3
-         #    )
-         #    print(f"Overall Prediction Confidence: {confidence_score:.2f}%")
-            
-            # نمایش سیگنال معاملاتی ترکیبی
-            print("\n=== Combined Trading Signal ===")
-            if predicted_change > 0 and predicted_changeM5 > 0:
-                print("STRONG BUY - Both models predict increase")
-                print(f"Hourly Model: +${predicted_change:.2f}")
-                print(f"5-Minute Model: +${predicted_changeM5:.2f}")
-            elif predicted_change < 0 and predicted_changeM5 < 0:
-                print("STRONG SELL - Both models predict decrease")
-                print(f"Hourly Model: -${abs(predicted_change):.2f}")
-                print(f"5-Minute Model: -${abs(predicted_changeM5):.2f}")
-            elif predicted_change > 0 or predicted_changeM5 > 0:
-                print("MODERATE BUY - One model predicts increase")
-                print(f"Hourly Model: ${predicted_change:.2f}")
-                print(f"5-Minute Model: ${predicted_changeM5:.2f}")
-            elif predicted_change < 0 or predicted_changeM5 < 0:
-                print("MODERATE SELL - One model predicts decrease")
-                print(f"Hourly Model: ${predicted_change:.2f}")
-                print(f"5-Minute Model: ${predicted_changeM5:.2f}")
-            else:
-                print("HOLD - No significant change expected")
-
+          
+          predicted_change , predicted_changeM5 , predicted_changeXGB = get_signal_from_model(self.Pair)
+          
           PairNameX = "دلار امریکا/ اونس طلا"
           Time_Signal = 1
           high_low_diff = 0 
           
           if True :   
              trend5 ,  final_confidence = analyze_market_power(FrameRatesM5, FrameRatesM15, FrameRatesM30) 
-             print("trend5: ",trend5 , "final_confidence: " ,final_confidence )
+             print(" trend5: ",trend5 , "final_confidence: " ,round(final_confidence,2) )
 
              buy_positions_with_open_prices = get_buy_positions_with_open_prices()
              if buy_positions_with_open_prices:
@@ -211,21 +147,6 @@ class SupplyDemandStrategyV9():
                 for start_h, start_m, end_h, end_m in restricted_time_ranges
              )
 
-             """restricted_hours = {6 , 11 , 13 , 19 , 16}
-             if current_datetime.minute == 0 and current_datetime.hour in restricted_hours:
-                PublicVarible.CanOpenOrder = False
-                PublicVarible.risk = 1
-                if current_time - PublicVarible.last_execution_timeT >= 60 :
-                  Text = f"⏰ Time : {current_datetime} \n"
-                  Text += f"Risk changed to Safe Mode 🟢 (Low) \n"
-                  Text += f"Can Open Order Stoped ... \n"
-                  Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)"
-                  PromptToTelegram(Text)
-                  
-                  Text = f"⚠️هشدار⚠️ \n اطلاعات ارائه شده در این بات ، صرفا جنبه #آموزشی داشته و سازنده مسئولیتی در قبال ضرر احتمالی  ندارد . لطفا اصول حرفه ای معامله و مدیریت سرمایه را رعایت فرمائید . "
-                  results = send_telegram_messages(Text, PublicVarible.chat_ids)
-                  PublicVarible.last_execution_timeT = current_time """ 
-                  
              if in_restricted_time or not PublicVarible.CanOpenOrder or not PublicVarible.Quick_trade :
                  Botdashboard(4, self.Pair)
                  Time_Signal = 0
@@ -329,15 +250,15 @@ class SupplyDemandStrategyV9():
                    PublicVarible.Leg_trend = -1
                    Text = f"{PairNameX}\n"
                    Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)\n"
-                   Text += f"M5️⃣ لگ نزولی و رنج# ... 🔴🔴 \n"
-                   Text += f"تعداد کندل: {count}\n"
-                   Text += f"ارتفاع لگ: {round(high_low_diff, 2) / 10} pip\n"
-                   Text += f"ارتفاع رنج: {PublicVarible.range_height} pip \n"
-                   Text += f"نسبت رنج به لگ: {round(PublicVarible.range_height / high_low_diff * 1000,1) } % \n"
+                   Text += f"M5️⃣ لگ نزولی و رنج# ... 🔴🔴\n\n"
+                   #Text += f"تعداد کندل: {count}\n"
+                   #Text += f"ارتفاع لگ: {round(high_low_diff, 2) / 10} pip\n"
+                   #Text += f"ارتفاع رنج: {PublicVarible.range_height} pip \n"
+                   #Text += f"نسبت رنج به لگ: {round(PublicVarible.range_height / high_low_diff * 1000,1) } % \n"
                    Text += f"سقف رنج: {PublicVarible.Baseroof5} $ \n"
-                   Text += f"کف رنج : {PublicVarible.Basefloor5} $ \n"
-                   Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_height , 2)} Lot \n"
-                   Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}\n"
+                   Text += f"کف رنج : {PublicVarible.Basefloor5} $ \n\n"
+                   #Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_height , 2)} Lot \n"
+                   #Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}\n"
                    if trend5 == 1 : 
                       Text += f"🔘 پایش قدرت  : قدرت خریدار "
                    elif trend5 == -1 :
@@ -345,6 +266,18 @@ class SupplyDemandStrategyV9():
                    elif trend5 == 0 :
                       Text += f"🔘 پایش قدرت  : قدرت ها برابر "
                    Text += f"\n🔘 ضریب اطمینان پایش: {round(final_confidence , 2)}"
+
+                   Text += f" \n\n🔘 آنالیز LR: \n"
+                   if predicted_changeM5 >= 0  : 
+                      Text += f"رشد کوتاه مدت :🔺+{round(predicted_changeM5,1)} $\n"
+                   elif predicted_changeM5 < 0  : 
+                      Text += f"رشد کوتاه مدت :🔻{round(predicted_changeM5,1)} $\n"
+                   if predicted_change >= 0  : 
+                      Text += f"رشد بلند مدت :🔺+{round(predicted_change,1)} $\n"
+                   elif predicted_change < 0  : 
+                      Text += f"رشد بلند مدت :🔻{round(predicted_change,1)} $"
+                   Text +=  f" \n🔘 آنالیز XGB  \nرشدکوتاه مدت {round(predicted_changeXGB,2)} $"
+
                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_time = current_time
 
@@ -384,15 +317,15 @@ class SupplyDemandStrategyV9():
                    PublicVarible.Leg_trend = 1
                    Text = f"{PairNameX}\n"
                    Text += f"M5️⃣ لگ صعودی و رنج# ... 🟢🟢 \n"
-                   Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)\n"
-                   Text += f"تعداد کندل: {count}\n"
-                   Text += f"ارتفاع لگ: {round(high_low_diff, 2) / 10} pip\n"
-                   Text += f"ارتفاع رنج: {PublicVarible.range_height} pip \n"
-                   Text += f"نسبت رنج به لگ: {round(PublicVarible.range_height / high_low_diff * 1000,1) } % \n"
+                   Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)\n\n"
+                   #Text += f"تعداد کندل: {count}\n"
+                   #Text += f"ارتفاع لگ: {round(high_low_diff, 2) / 10} pip\n"
+                   #Text += f"ارتفاع رنج: {PublicVarible.range_height} pip \n"
+                   #Text += f"نسبت رنج به لگ: {round(PublicVarible.range_height / high_low_diff * 1000,1) } % \n"
                    Text += f"سقف رنج: {PublicVarible.Baseroof5} $ \n"
-                   Text += f"کف رنج : {PublicVarible.Basefloor5} $ \n"
-                   Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_height , 2)} Lot \n"
-                   Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute} \n"
+                   Text += f"کف رنج : {PublicVarible.Basefloor5} $ \n\n"
+                   #Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_height , 2)} Lot \n"
+                   #Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute} \n"
                    if trend5 == 1 : 
                       Text += f"🔘 پایش قدرت  : قدرت خریدار "
                    elif trend5 == -1 :
@@ -400,6 +333,18 @@ class SupplyDemandStrategyV9():
                    elif trend5 == 0 :
                       Text += f"🔘 پایش قدرت  : قدرت ها برابر "
                    Text += f"\n🔘 ضریب اطمینان پایش: {round(final_confidence , 2)}"
+
+                   Text += f" \n\n🔘 آنالیز LR: \n"
+                   if predicted_changeM5 >= 0  : 
+                      Text += f"رشد کوتاه مدت :🔺+{round(predicted_changeM5,1)} $\n"
+                   elif predicted_changeM5 < 0  : 
+                      Text += f"رشد کوتاه مدت :🔻{round(predicted_changeM5,1)} $\n"
+                   if predicted_change >= 0  : 
+                      Text += f"رشد بلند مدت :🔺+{round(predicted_change,1)} $\n"
+                   elif predicted_change < 0  : 
+                      Text += f"رشد بلند مدت :🔻{round(predicted_change,1)} $"
+                   Text +=  f" \n🔘 آنالیز XGB Machine Learning: \nرشدکوتاه مدت {round(predicted_changeXGB,2)} $"
+
                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_time = current_time
 
@@ -514,10 +459,7 @@ class SupplyDemandStrategyV9():
                    if trend_C == -1 or trend_C == -2 :
                       PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0
                       Text += f"🔘 وضعیت خروج : نامناسب  \n🔘 حذف مقادیر سقف و کف ⚠️\n"
-                   Text += f"🔘 آنالیز واریانس Machine Learning: \n"
-                   Text += f"پیشبینی 30 Min : {predicted_changeM5} $\n"
-                   Text += f"پیشبینی 1 Hour : {predicted_change} $\n"
-
+                   
                    if trend5 == 1 : 
                       Text += f"🔘 پایش قدرت  : قدرت خریدار "
                    elif trend5 == -1 :
@@ -525,14 +467,24 @@ class SupplyDemandStrategyV9():
                    elif trend5 == 0 :
                       Text += f"🔘 پایش قدرت  : قدرت ها برابر "
                    if final_confidence < 65 :
-                     Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
+                     Text += f"\n🔘 ضریب اطمینان پایش مناسب نیست ⚠️({round(final_confidence , 2)}) "
                    else :
                      Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
-
                    if trend_C == +1 and trend5 == 1 and final_confidence > 65 : 
                       Text += f"\n✅ موقعیت Buy: مناسب "
                    else : 
                       Text += f"\n❌ موقعیت Buy: نامناسب "
+
+                   Text += f" \n\n🔘 آنالیز LR: \n"
+                   if predicted_changeM5 >= 0  : 
+                      Text += f"رشد کوتاه مدت :🔺+{round(predicted_changeM5,1)} $\n"
+                   elif predicted_changeM5 < 0  : 
+                      Text += f"رشد کوتاه مدت :🔻{round(predicted_changeM5,1)} $\n"
+                   if predicted_change >= 0  : 
+                      Text += f"رشد بلند مدت :🔺+{round(predicted_change,1)} $\n"
+                   elif predicted_change < 0  : 
+                      Text += f"رشد بلند مدت :🔻{round(predicted_change,1)} $"
+                   Text +=  f" \n🔘 آنالیز XGB Machine Learning: \nرشدکوتاه مدت {round(predicted_changeXGB,2)} $"
 
                    #PromptToTelegram(Text)  
                    plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
@@ -598,9 +550,6 @@ class SupplyDemandStrategyV9():
                    elif trend_C == 1 or trend_C ==2:
                       PublicVarible.Baseroof5 = PublicVarible.Basefloor5 = 0
                       Text += f"🔘 وضعیت خروج:  نامناسب  \n🔘حذف مقادیر سقف و کف ⚠️\n"
-                   Text += f"🔘 آنالیز واریانس Machine Learning: \n"
-                   Text += f"پیشبینی 30 Min : {predicted_changeM5} $\n"
-                   Text += f"پیشبینی 1 Hour : {predicted_change} $\n"
                    if trend5 == 1 : 
                       Text += f"🔘 پایش قدرت  : قدرت خریدار "
                    elif trend5 == -1 :
@@ -608,7 +557,7 @@ class SupplyDemandStrategyV9():
                    elif trend5 == 0 :
                       Text += f"🔘 پایش قدرت  : قدرت ها برابر "
                    if final_confidence < 65 : 
-                     Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
+                     Text += f"\n🔘 ضریب اطمینان پایش مناسب نیست ⚠️({round(final_confidence , 2)}) "
                    else :
                      Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
                    
@@ -616,8 +565,19 @@ class SupplyDemandStrategyV9():
                       Text += f"\n✅ موقعیت Sell: مناسب "
                    else : 
                       Text += f"\n❌ موقعیت Sell: نامناسب "
-                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
 
+                   Text += f" \n\n🔘 آنالیز LR: \n"
+                   if predicted_changeM5 >= 0  : 
+                      Text += f"رشد کوتاه مدت :🔺+{round(predicted_changeM5,1)} $\n"
+                   elif predicted_changeM5 < 0  : 
+                      Text += f"رشد کوتاه مدت :🔻{round(predicted_changeM5,1)} $\n"
+                   if predicted_change >= 0  : 
+                      Text += f"رشد بلند مدت :🔺+{round(predicted_change,1)} $\n"
+                   elif predicted_change < 0  : 
+                      Text += f"رشد بلند مدت :🔻{round(predicted_change,1)} $"
+                   Text +=  f" \n🔘 آنالیز XGB Machine Learning: \nرشدکوتاه مدت {round(predicted_changeXGB,2)} $"
+
+                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
                    PublicVarible.last_execution_timeS = current_time  
 #Sell
                 EntryPrice = SymbolInfo.bid 

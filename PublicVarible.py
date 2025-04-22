@@ -97,6 +97,8 @@ prediction = 0
 model = 0
 Accuracy = 100
 Leg_trend = 0
+predicted_changeM5 = 0
+predicted_change = 0
 ############# USDJPY ################## VER 8
 last_execution_timej = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timejS = 0 
@@ -114,6 +116,8 @@ predictionj = 0
 modelj = 0
 Accuracyj = 0
 Leg_trendj = 0
+predicted_changeM5j = 0
+predicted_changej = 0
 ############# BTCUSD ################## VER 6
 last_execution_timeB = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timeBS = 0 
@@ -130,6 +134,8 @@ predictionB = 0
 modelB = 0
 AccuracyB = 0
 Leg_trendB = 0
+predicted_changeM5B = 0
+predicted_changeB = 0
 ############# CADJPY ################## VER 4
 last_execution_timeN = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timeNS = 0 
@@ -146,6 +152,8 @@ high_low_diffN = 0
 predictionN = 0
 modelN = 0
 AccuracyN = 0
+predicted_changeM5N = 0
+predicted_changeN = 0
 ############# EURjpy  ################## VER 7
 last_execution_timeE = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timeES = 0 
@@ -162,6 +170,8 @@ predictionE = 0
 modelE = 0
 AccuracyE = 0
 Leg_trendE = 0
+predicted_changeM5E = 0
+predicted_changeE = 0
 ############# CHFJPY ################## VER 5
 last_execution_timeU = 0  # در ابتدا 0 یا هر مقدار مناسب دیگر
 last_execution_timeUS = 0 
@@ -178,6 +188,8 @@ predictionU = 0
 modelU = 0
 AccuracyU = 0
 Leg_trendU = 0
+predicted_changeM5U = 0
+predicted_changeU = 0
 ############# LegAnalyzer ##################
 """BasefloorLA = 0.0
 BaseroofLA = 0.0

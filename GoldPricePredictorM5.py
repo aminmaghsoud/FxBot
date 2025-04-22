@@ -17,7 +17,6 @@ import MetaTrader5 as MT5
 class GoldPricePredictorM5:
     def __init__(self, pair, days: int = 7, test_size: float = 0.2, random_state: int = 42): #: str = 'XAUUSDb'
         self.Pair = pair
-    #def __init__(self, days: int = 7, test_size: float = 0.2, random_state: int = 42):
         """Initialize the Gold Price Predicctor for 5-minute intervals"""
         self.days = days  # Maximum 7 days for 5-minute data
         self.test_size = test_size
@@ -40,7 +39,7 @@ class GoldPricePredictorM5:
             if not MT5.initialize():
                 raise RuntimeError("MT5 initialization failed")
 
-            print(f"Fetching 5-minute data for: {self.Pair}")
+            #print(f"Fetching 5-minute data for: {self.Pair}")
             RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 2500)
             if RatesM5 is None:
                 raise ValueError("Failed to fetch data from MT5")
@@ -69,8 +68,8 @@ class GoldPricePredictorM5:
             self.data_end = FrameRatesM5.index[-1].strftime('%Y-%m-%d %H:%M:%S')
             self.current_price = FrameRatesM5['Close'].iloc[-1]
 
-            print(f"Successfully fetched {len(FrameRatesM5)} rows from MT5.")
-            print(f"Latest gold price (from MT5): ${self.current_price:.2f}")
+            # print(f"Successfully fetched {len(FrameRatesM5)} rows from MT5.")
+            # print(f"Latest gold price (from MT5): ${self.current_price:.2f}")
             return FrameRatesM5
 
         except Exception as e:
@@ -231,12 +230,12 @@ class GoldPricePredictorM5:
             self.confidence_metrics = self.calculate_confidence_metrics(y_test, y_pred)
             
             # Print feature importance
-            print("\nFeature Importance:")
+            #print("\nFeature Importance:")
             feature_importance = pd.DataFrame({
                 'Feature': X.columns,
                 'Importance': pipeline.named_steps['model'].feature_importances_
             }).sort_values('Importance', ascending=False)
-            print(feature_importance.head(10))
+            #print(feature_importance.head(10))
             
             return pipeline, X_test, y_test, y_pred, mse, r2
         except Exception as e:
@@ -358,12 +357,12 @@ class GoldPricePredictorM5:
             # print(f"Minimum Error: ${self.confidence_metrics['min_error']:.2f}")
             
             # print("\nTrading Signal (30-minute horizon):")
-            if predicted_change > 0:
-                print(f"BUY - Expected Increase: ${predicted_change:.2f}")
-            elif predicted_change < 0:
-                print(f"SELL - Expected Decrease: ${predicted_change:.2f}")
-            else:
-                print("HOLD - No significant change expected")
+            # if predicted_change > 0:
+            #     print(f"BUY - Expected Increase: ${predicted_change:.2f}")
+            # elif predicted_change < 0:
+            #     print(f"SELL - Expected Decrease: ${predicted_change:.2f}")
+            # else:
+            #     print("HOLD - No significant change expected")
             
             # Calculate and display prediction confidence
             confidence_score = (
@@ -371,7 +370,7 @@ class GoldPricePredictorM5:
                 self.confidence_metrics['directional_accuracy'] * 0.3 +
                 self.confidence_metrics['trend_accuracy'] * 0.3
             )
-            print(f"\nOverall Prediction Confidence: {confidence_score:.2f}%")
+            print(f"\nOverall Prediction Confidence M5: {confidence_score:.2f}%")
             
             # Show plot if requested
             if show_plot and y_test is not None and y_pred is not None:
@@ -424,13 +423,13 @@ def main():
         # print(f"Maximum Error: ${predictor.confidence_metrics['max_error']:.2f}")
         # print(f"Minimum Error: ${predictor.confidence_metrics['min_error']:.2f}")
         
-        print("\nTrading Signal (30-minute horizon):")
-        if predicted_change > 0:
-            print(f"BUY - Expected Increase: ${predicted_change:.2f}")
-        elif predicted_change < 0:
-            print(f"SELL - Expected Decrease: ${predicted_change:.2f}")
-        else:
-            print("HOLD - No significant change expected")
+        # print("\nTrading Signal (30-minute horizon):")
+        # if predicted_change > 0:
+        #     print(f"BUY - Expected Increase: ${predicted_change:.2f}")
+        # elif predicted_change < 0:
+        #     print(f"SELL - Expected Decrease: ${predicted_change:.2f}")
+        # else:
+        #     print("HOLD - No significant change expected")
         
         # Calculate and display prediction confidence
         confidence_score = (
@@ -438,45 +437,10 @@ def main():
             predictor.confidence_metrics['directional_accuracy'] * 0.3 +
             predictor.confidence_metrics['trend_accuracy'] * 0.3
         )
-        print(f"\nOverall Prediction Confidence: {confidence_score:.2f}%")
+        print(f"\nOverall Prediction Confidence M5: {confidence_score:.2f}%")
 
 if __name__ == '__main__':
     main()
 
 
-    """def get_gold_data(self) -> Optional[pd.DataFrame]:
-        try:
-            symbol = "GLD"  # SPDR Gold Shares ETF
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=self.days)
-            
-            print(f"Downloading gold price data (GLD) with 5-minute intervals...")
-            print(f"Period: {start_date.strftime('%Y-%m-%d %H:%M')} to {end_date.strftime('%Y-%m-%d %H:%M')}")
-            df = yf.download(symbol, start=start_date, end=end_date, interval='5m')
-            
-            if df.empty:
-                raise ValueError("No data was downloaded")
-            
-            # Handle MultiIndex columns if they exist
-            if isinstance(df.columns, pd.MultiIndex):
-                df = df.xs('GLD', axis=1, level=1)
-            
-            # Convert GLD price to approximate gold price (1 GLD ≈ 1/10 oz of gold)
-            for column in ['Open', 'High', 'Low', 'Close']:
-                if column in df.columns:
-                    df[column] = df[column] * 10
-            
-            print(f"Successfully downloaded {len(df)} data points")
-            if 'Close' in df.columns:
-                print(f"Latest gold price: ${float(df['Close'].iloc[-1]):.2f}")
-            
-            # Store data range information
-            self.data_start = df.index[0].strftime('%Y-%m-%d %H:%M:%S')
-            self.data_end = df.index[-1].strftime('%Y-%m-%d %H:%M:%S')
-            self.df = df
-            
-            return df
-        except Exception as e:
-            print(f"Error downloading data: {str(e)}")
-            print("Available columns:", df.columns if 'df' in locals() else "No data downloaded")
-            return None"""
+    

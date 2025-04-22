@@ -11,7 +11,6 @@ from SupplyDemandStrategyV7 import *
 from SupplyDemandStrategyV6 import *
 from SupplyDemandStrategyV5 import *
 from SupplyDemandStrategyV4 import *
-from SupplyDemandStrategyV2 import *
 from LegAnalyzer import  *
 from Utility import *
 import sys

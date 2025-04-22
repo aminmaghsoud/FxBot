@@ -35,7 +35,7 @@ class GoldPricePredictor:
             if not MT5.initialize():
                 raise RuntimeError("MT5 initialization failed")
 
-            print(f"Fetching 5-minute data for: {self.Pair}")
+            #print(f"Fetching 5-minute data for: {self.Pair}")
             RatesM5 = MT5.copy_rates_from_pos(self.Pair, MT5.TIMEFRAME_M5, 0, 350)
             if RatesM5 is None:
                 raise ValueError("Failed to fetch data from MT5")
@@ -64,8 +64,8 @@ class GoldPricePredictor:
             self.data_end = FrameRatesH1.index[-1].strftime('%Y-%m-%d %H:%M:%S')
             self.current_price = FrameRatesH1['Close'].iloc[-1]
 
-            print(f"Successfully fetched {len(FrameRatesH1)} rows from MT5.")
-            print(f"Latest gold price (from MT5): ${self.current_price:.2f}")
+            #print(f"Successfully fetched {len(FrameRatesH1)} rows from MT5.")
+            #print(f"Latest gold price (from MT5): ${self.current_price:.2f}")
             return FrameRatesH1
 
         except Exception as e:
@@ -238,7 +238,7 @@ def main():
     metrics, current_price, next_price, predicted_change, current_time, predicted_time = predictor.predict(show_plot=True)
     
     # Print results if all values are available
-    if all(v is not None for v in [metrics, current_price, next_price, predicted_change]):
+    #if all(v is not None for v in [metrics, current_price, next_price, predicted_change]):
         # print("\nTime Information:")
         # print(f"Data Start: {predictor.data_start}")
         # print(f"Data End: {predictor.data_end}")
@@ -253,13 +253,13 @@ def main():
         # print(f"Predicted Price: ${next_price:.2f}")
         # print(f"Predicted Change: ${predicted_change:.2f}")
         
-        print("\nTrading Signal:")
-        if predicted_change > 0:
-            print(f"BUY - Expected Increase: ${predicted_change:.2f}")
-        elif predicted_change < 0:
-            print(f"SELL - Expected Decrease: ${predicted_change:.2f}")
-        else:
-            print("HOLD - No significant change expected")
+        # print("\nTrading Signal:")
+        # if predicted_change > 0:
+        #     print(f"BUY - Expected Increase: ${predicted_change:.2f}")
+        # elif predicted_change < 0:
+        #     print(f"SELL - Expected Decrease: ${predicted_change:.2f}")
+        # else:
+        #     print("HOLD - No significant change expected")
 
 if __name__ == '__main__':
     main()

@@ -425,7 +425,7 @@ class SupplyDemandStrategyV5():
                 TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.BaseroofU)) - (abs(PublicVarible.BaseroofU - PublicVarible.BasefloorU)*0.75)} (If NEG T is True)" 
                 write_trade_info_to_file(self.Pair ,"Buy", SymbolInfo.ask, SL, TP1, TextN )
 
-                if  trend_C == +1 and trendj == +1 and Time_Signal == 1  : 
+                if  trend_C == +1 and trendU == +1 and Time_Signal == 1  : 
                    if  (abs(close_C - PublicVarible.BaseroofU) < (abs(PublicVarible.BaseroofU - PublicVarible.BasefloorU) * 0.75 )):       
                      Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                      EntryPrice = SymbolInfo.ask
@@ -504,7 +504,7 @@ class SupplyDemandStrategyV5():
                 TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.BasefloorU)) - (abs(PublicVarible.BaseroofU - PublicVarible.BasefloorU)*0.75)} (If NEG T is True)\n" 
                 write_trade_info_to_file(self.Pair ,"Sell", SymbolInfo.bid  , SL, TP1, TextN )
                 
-                if  trend_C == -1  and trendj == -1 and Time_Signal == 1 :
+                if  trend_C == -1  and trendU == -1 and Time_Signal == 1 :
                    if  (abs(close_C - PublicVarible.BasefloorU) < (abs(PublicVarible.BaseroofU - PublicVarible.BasefloorU)* 0.75) ) :
                      Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                      EntryPrice = SymbolInfo.bid  
