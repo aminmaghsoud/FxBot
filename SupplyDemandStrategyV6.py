@@ -51,7 +51,7 @@ class SupplyDemandStrategyV6():
                    FrameRatesM5 = FrameRatesM5.drop('time', axis=1)
                    FrameRatesM5 = FrameRatesM5.set_index(PD.DatetimeIndex(FrameRatesM5['datetime']), drop=True)
              
-             predicted_change , predicted_changeM5 , predicted_changeXGB = get_signal_from_model(self.Pair)
+             predicted_change,current_price, next_price, predicted_time ,predicted_changeM5,current_priceM5, next_priceM5, predicted_timeM5 , predicted_changeXGB  ,current_priceXGB, next_priceXGB, predicted_timeXGB = 0,0,0,0,0,0,0,0,0,0,0,0 #get_signal_from_model(self.Pair)
              trendB ,  final_confidence = analyze_market_power(FrameRatesM5, FrameRatesM15, FrameRatesM30) 
              print(" trendB: ",trendB , "final_confidence: " ,round(final_confidence,2) )
 
@@ -302,8 +302,8 @@ class SupplyDemandStrategyV6():
                   Volume = 0.01 # round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2) 
                   #OrderBuy(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "V8 AUD ")
                   EntryPrice = (PublicVarible.BaseroofB + PublicVarible.BasefloorB)/2
-                  OrderBuyLimit(Pair= self.Pair, Volume= Volume , EntryPrice = EntryPrice , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Lim  V6")
-                  #PromptToTelegram(f"🚨🚨 \n سفارش #خرید معوق در قیمت \n TP : {TP1} \n Price : {EntryPrice} \n SL : {SL}")
+                  #OrderBuyLimit(Pair= self.Pair, Volume= Volume , EntryPrice = EntryPrice , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Lim  V6")
+                  PromptToTelegram(f"🚨🚨 \n سفارش #خرید معوق در قیمت \n TP : {TP1} \n Price : {EntryPrice} \n SL : {SL}")
                   PublicVarible.Limittime = current_time
                 else : 
                    TextN = f"\n self.Pair | pos = Buy | EntryPrice = {EntryPrice} | SL = {SL} | TP1 = {TP1} \n"
@@ -345,8 +345,8 @@ class SupplyDemandStrategyV6():
                   Volume = 0.01 # round((Balace * 0.8) * (PublicVarible.risk/1000) / Entryheight , 2)
                   #OrderSell(Pair= self.Pair, Volume= Volume, StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment=  "V7 AUD")
                   EntryPrice = (PublicVarible.BaseroofB + PublicVarible.BasefloorB)/2
-                  OrderSellLimit(Pair= self.Pair, Volume= Volume , EntryPrice = EntryPrice , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Lim  V6")
-                  #PromptToTelegram(f"🚨🚨 \n سفارش #فروش معوق در قیمت \n SL : {SL} \n Price : {EntryPrice} \n TP : {TP1}")
+                  #OrderSellLimit(Pair= self.Pair, Volume= Volume , EntryPrice = EntryPrice , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Lim  V6")
+                  PromptToTelegram(f"🚨🚨 \n سفارش #فروش معوق در قیمت \n SL : {SL} \n Price : {EntryPrice} \n TP : {TP1}")
                   PublicVarible.Limittime = current_time
 
                 else : 

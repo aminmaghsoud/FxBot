@@ -41,7 +41,7 @@ MarketIsOpen = False
 # آیا ربات فعال است
 StartBot = True
 # آیا ربات میتواند سفارشی باز کند
-CanOpenOrder = False
+CanOpenOrder = True
 # تاریخ ایجاد ربات
 CreateAt = None
 # تاریخ انقضاء ربات
@@ -190,19 +190,12 @@ AccuracyU = 0
 Leg_trendU = 0
 predicted_changeM5U = 0
 predicted_changeU = 0
-############# LegAnalyzer ##################
-"""BasefloorLA = 0.0
-BaseroofLA = 0.0
-range_heightLA = 0
-LowerLLA = 0
-HigherHLA = 0
-HS_DownLA = 0 
-HS_UpLA = 0
-high_low_diffLA = 0
-"""
+############# V10 ##################
+last_execution_timeV10 = 0
 
 
-Quick_trade = False
+
+Quick_trade = True
 lot_size = 0.02
 risk = 1
 current_datetime = datetime.now()

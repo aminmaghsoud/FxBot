@@ -21,6 +21,7 @@ class SupplyDemandStrategyV5():
 ##############################################################################################################################################################
       def Main(self):
           if self.Pair !='CHFJPYb' : return 
+          PairNameU = "فرانک سوییس/ین ژاپن"
 
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ Strategy V5 M5  ")
           # ارسال پیام
@@ -51,11 +52,11 @@ class SupplyDemandStrategyV5():
                    FrameRatesM5['datetime'] = PD.to_datetime(FrameRatesM5['time'], unit='s')
                    FrameRatesM5 = FrameRatesM5.drop('time', axis=1)
                    FrameRatesM5 = FrameRatesM5.set_index(PD.DatetimeIndex(FrameRatesM5['datetime']), drop=True)
-                   
+
+             predicted_change,current_price, next_price, predicted_time ,predicted_changeM5,current_priceM5, next_priceM5, predicted_timeM5 , predicted_changeXGB  ,current_priceXGB, next_priceXGB, predicted_timeXGB = 0,0,0,0,0,0,0,0,0,0,0,0 #get_signal_from_model(self.Pair)
              trendU , final_confidence = analyze_market_power(FrameRatesM5, FrameRatesM15, FrameRatesM30)
              print(f"trendU : {trendU} and final_confidence : {final_confidence}")
 
-             PairNameU = "فرانک سوییس/ین ژاپن"
              buy_positions_with_open_prices = get_buy_positions_with_open_prices()
              if buy_positions_with_open_prices:
                       for ticket, open_price in buy_positions_with_open_prices.items():
@@ -247,28 +248,9 @@ class SupplyDemandStrategyV5():
                   print(f"Down PublicVarible.high_low_diffU : {PublicVarible.high_low_diffU } and BaseroofU: {PublicVarible.BaseroofU} and BasefloorU: {PublicVarible.BasefloorU} and Range arraye: {abs(PublicVarible.BasefloorU - PublicVarible.BaseroofU) / (SymbolInfo.point)} \n")
                   current_time = time.time()
                   if current_time - PublicVarible.last_execution_timeU >= 300:  
-                   Text = f"{PairNameU}\n"
-                   Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)\n"
-                   Text += f"M5️⃣ لگ نزولی و رنج# ... 🔴🔴 \n"
-                   Text += f"تعداد کندل: {count}\n"
-                   Text += f"ارتفاع لگ: {round(PublicVarible.high_low_diffU , 2) / 10} pip\n"
-                   Text += f"ارتفاع رنج: {PublicVarible.range_heightU} pip \n"
-                   Text += f"نسبت رنج به لگ: {round(PublicVarible.range_heightU / PublicVarible.high_low_diffU  * 1000,1) } % \n"
-                   Text += f"سقف رنج: {PublicVarible.BaseroofU} $ \n"
-                   Text += f"کف رنج : {PublicVarible.BasefloorU} $ \n"
-                   Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_heightU , 2)} Lot \n"
-                   Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute}\n"
-                   if trendU == 1 : 
-                      Text += f"🔘 پایش قدرت : قدرت خریدار "
-                   elif trendU == -1 :
-                      Text += f"🔘 پایش قدرت :قدرت فروشنده "
-                   elif trendU == 0 :
-                      Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 65 :
-                     Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
-                   else :
-                     Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
-                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
+                   pos ='Sell'
+                   build_and_send_analysis_text(pos,PairNameU, self.Pair, SymbolInfo.ask, trendU, final_confidence,predicted_changeM5, 
+                       predicted_change, predicted_changeXGB,PublicVarible.BaseroofU, PublicVarible.BasefloorU, FrameRatesM5)
                    PublicVarible.last_execution_timeU = current_time
 
 
@@ -303,31 +285,10 @@ class SupplyDemandStrategyV5():
                   PublicVarible.range_heightU = round(abs(PublicVarible.BaseroofU - PublicVarible.BasefloorU) / (SymbolInfo.point) / 10, 2)
                   print(f"Up PublicVarible.high_low_diffU : {PublicVarible.high_low_diffU } and BaseroofU: {PublicVarible.BaseroofU} and BasefloorU: {PublicVarible.BasefloorU} and Range arraye: {abs(PublicVarible.BasefloorU - PublicVarible.BaseroofU) / (SymbolInfo.point)} \n")
                   current_time = time.time()
-                  
                   if current_time - PublicVarible.last_execution_timeU >= 300:  
-                   Text = f"{PairNameU}\n"
-                   Text += f"{self.Pair} Price is ({SymbolInfo.ask} $)\n"
-                   Text += f"M5️⃣ لگ صعودی و رنج# ... 🟢🟢 \n"
-                   Text += f"تعداد کندل: {count}\n"
-                   Text += f"ارتفاع لگ: {round(PublicVarible.high_low_diffU , 2) / 10} pip\n"
-                   Text += f"ارتفاع رنج: {PublicVarible.range_heightU} pip \n"
-                   Text += f"نسبت رنج به لگ: {round(PublicVarible.range_heightU / PublicVarible.high_low_diffU  * 1000,1) } % \n"
-                   Text += f"سقف رنج: {PublicVarible.BaseroofU} $ \n"
-                   Text += f"کف رنج : {PublicVarible.BasefloorU} $ \n"
-                   Text += f"حجم کل مجاز : {round((Balace * 0.8) * (PublicVarible.risk/1000) / PublicVarible.range_heightU , 2)} Lot \n"
-                   Text += f"زمان کندل: {current_datetime.hour}:{current_datetime.minute} \n"
-                   if trendU == 1 : 
-                      Text += f"🔘 پایش قدرت : قدرت خریدار "
-                   elif trendU == -1 :
-                      Text += f"🔘 پایش قدرت :قدرت فروشنده "
-                   elif trendU == 0 :
-                      Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 65 :
-                     Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
-                   else :
-                     Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
-                  
-                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
+                   pos = 'Buy'
+                   build_and_send_analysis_text(pos,PairNameU, self.Pair, SymbolInfo.ask, trendU, final_confidence,predicted_changeM5, 
+                       predicted_change, predicted_changeXGB,PublicVarible.BaseroofU, PublicVarible.BasefloorU, FrameRatesM5)
                    PublicVarible.last_execution_timeU = current_time
 
 ########################  پیداکردن بالاترین سقف و پایین ترین کف رنج   ################################
@@ -373,46 +334,10 @@ class SupplyDemandStrategyV5():
              elif close_C >= (PublicVarible.BaseroofU + (SymbolInfo.point * 1)) and PublicVarible.BaseroofU != 0 and close_C > HigherHU : 
                 print(f"price is {close_C} and Upper Roof {PublicVarible.BaseroofU} ")
                 if current_time - PublicVarible.last_execution_timeUS  >= 300:   
-                   Text = f" \n({PairNameU}) \n⬆️ Buy Position in {self.Pair}\n"
-                   Text += f"price:{close_C}$ \n🔺Upper Roof {PublicVarible.BaseroofU}$ \n\n"
-                   if trend_C == +1 : 
-                       Text += f"🔘خروج  از سقف:  کندل قدرتمند 🐮 \n"
-                       if PublicVarible.HS_DownU == 1 : 
-                          Text += f"🔘 الگوی سر وشانه نزولی \n"
-                       elif PublicVarible.HS_UpU == 1 : 
-                          Text += f"🔘 الگوی سر وشانه صعودی \n"
-                   elif trend_C == +2 : 
-                       Text += f"🔘 خروج از سقف:  کندل قدرتمند 🐮 \n🔘 حذف مقادیر سقف و کف ⚠️\n"
-                       if PublicVarible.HS_DownU == 1 : 
-                          Text += f"🔘 الگوی سر وشانه نزولی \n"
-                       elif PublicVarible.HS_UpU == 1 : 
-                          Text += f"🔘 الگوی سر وشانه صعودی \n"
-                       PublicVarible.BaseroofU = PublicVarible.BasefloorU = 0
-                   elif trend_C == 0 :
-                      PublicVarible.BaseroofU = PublicVarible.BasefloorU = 0
-                      Text += f"🔘 قدرت کندل ها : شناسایی نشد  🏓 \n🔘 حذف مقادیر سقف و کف ⚠️\n"
-                   if trend_C == -1 or trend_C == -2 :
-                      PublicVarible.BaseroofU = PublicVarible.BasefloorU = 0
-                      Text += f"🔘 وضعیت خروج : نامناسب  \n🔘 حذف مقادیر سقف و کف ⚠️\n"
-                   if trendU == 1 : 
-                      Text += f"🔘 پایش قدرت : قدرت خریدار "
-                   elif trendU == -1 :
-                      Text += f"🔘 پایش قدرت :قدرت فروشنده "
-                   elif trendU == 0 :
-                      Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   
-                   if final_confidence < 65 :
-                     Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
-                   else :
-                     Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
-
-                   if trend_C == 1 and trendU == 1 and final_confidence > 65 : 
-                      Text += f"\n✅ موقعیت Buy: مناسب "
-                   else : 
-                      Text += f"\n❌ موقعیت Buy: نامناسب "
-                   #PromptToTelegram(Text)  
-                  # results = send_telegram_messages(Text, PublicVarible.chat_ids)
-                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
+                   pos="Buy"
+                   build_position_text(pos,PairNameU, self.Pair, SymbolInfo.ask, trend_C, trendU, final_confidence,
+                            predicted_changeM5, predicted_change, predicted_changeXGB,
+                            PublicVarible.BaseroofU, PublicVarible.BasefloorU, PublicVarible.HS_DownU, PublicVarible.HS_UpU, FrameRatesM5)
                    PublicVarible.last_execution_timeUS = current_time 
 #Buy            
                 EntryPrice = SymbolInfo.ask
@@ -456,42 +381,9 @@ class SupplyDemandStrategyV5():
              elif close_C <= (PublicVarible.BasefloorU - (SymbolInfo.point * 5)) and PublicVarible.BasefloorU != 0 and close_C < LowerLU : 
                 print(f"price is {close_C} and Under floor {PublicVarible.BasefloorU} ")
                 if current_time - PublicVarible.last_execution_timeUS >= 300:   
-                   Text = f"\n⬇️ Sell Position in {self.Pair} \n({PairNameU}) \n"
-                   Text += f"🔘price:{close_C}$ \n🔻Under floor {PublicVarible.BasefloorU}$ \n\n"
-                   if trend_C == -1 : 
-                       Text += f"🔘 خروج از کف: باکندل قدرتمند 🐻 \n"
-                       if PublicVarible.HS_DownU == 1 : 
-                          Text += f"🔘الگوی سر وشانه نزولی \n"
-                       elif PublicVarible.HS_UpU == 1 : 
-                          Text += f"🔘 الگوی سر وشانه صعودی \n"
-                   elif trend_C == -2 :
-                       Text +=  f"🔘خروج از کف: باکندل معولی 🐻 \n🔘حذف مقادیر سقف و کف ⚠️\n"
-                       if PublicVarible.HS_DownU == 1 : 
-                          Text += f"🔘 الگوی سر وشانه نزولی \n"
-                       elif PublicVarible.HS_UpU == 1 : 
-                          Text += f"🔘 الگوی سر وشانه صعودی \n"
-                       PublicVarible.BaseroofU = PublicVarible.BasefloorU = 0
-                   elif trend_C == 0 :
-                      PublicVarible.BaseroofU = PublicVarible.BasefloorU = 0
-                      Text += f"🔘 قدرت کندل ها برابر  🏓 \n🔘حذف مقادیر سقف و کف ⚠️\n"
-                   elif trend_C == 1 or trend_C ==2:
-                      PublicVarible.BaseroofU = PublicVarible.BasefloorU = 0
-                      Text += f"🔘 وضعیت خروج:  نامناسب  \n🔘حذف مقادیر سقف و کف ⚠️\n"
-                   if trendU == 1 : 
-                      Text += f"🔘 پایش قدرت : قدرت خریدار "
-                   elif trendU == -1 :
-                      Text += f"🔘 پایش قدرت :قدرت فروشنده "
-                   elif trendU == 0 :
-                      Text += f"🔘 پایش قدرت : قدرت ها برابر "
-                   if final_confidence < 65 :
-                     Text += f"\n⚠️ ضریب اطمینان پایش مناسب نیست ({round(final_confidence , 2)}) "
-                   else :
-                     Text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
-                   if trend_C == -1 and trendU == -1 and final_confidence > 65 : 
-                      Text += f"\n✅ موقعیت Sell: مناسب "
-                   else : 
-                      Text += f"\n❌ موقعیت Sell: نامناسب "
-                   plot_candles_and_send_telegram(FrameRatesM5, self.Pair, Text)
+                   pos = 'Sell'
+                   build_and_send_analysis_text(pos,PairNameU, self.Pair, SymbolInfo.ask, trendU, final_confidence,predicted_changeM5, 
+                       predicted_change, predicted_changeXGB,PublicVarible.BaseroofU, PublicVarible.BasefloorU, FrameRatesM5)
                    PublicVarible.last_execution_timeUS = current_time  
 #Sell
                 EntryPrice = SymbolInfo.bid 

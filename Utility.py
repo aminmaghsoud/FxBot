@@ -24,21 +24,73 @@ from io import BytesIO
 import pandas as pd
 import pandas_ta as pta
 from GoldPricePredictor import *
+from GoldPricePredictorLSTM import * 
 from GoldPricePredictorM5 import *
 from GoldPricePredictorM5_XGB import GoldPricePredictorM5_XGB
+import tkinter as tk
+from tkinter import scrolledtext
+import threading
+import queue
+import random
 
 warnings.filterwarnings('ignore')
+
+# صف برای ذخیره پیام‌های جدید
+message_queue = queue.Queue()
+
+# تابع برای نمایش پنجره
+def show_text_window():
+    def update_text():
+        try:
+            while True:
+                # دریافت پیام جدید از صف
+                message = message_queue.get_nowait()
+                # اضافه کردن پیام به پنجره
+                text_widget.insert(tk.END, message + "\n")
+                text_widget.see(tk.END)  # اسکرول به آخرین پیام
+                message_queue.task_done()
+        except queue.Empty:
+            pass
+        # برنامه‌ریزی برای اجرای مجدد بعد از 100 میلی‌ثانیه
+        root.after(100, update_text)
+
+    # ایجاد پنجره اصلی
+    root = tk.Tk()
+    root.title("Bot Messages")
+    root.geometry("800x600")
+
+    # ایجاد ویجت برای نمایش متن
+    text_widget = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=80, height=30)
+    text_widget.pack(expand=True, fill='both', padx=10, pady=10)
+
+    # شروع به‌روزرسانی خودکار متن
+    update_text()
+
+    # اجرای پنجره
+    root.mainloop()
+
+# تابع برای شروع پنجره در یک ترد جداگانه
+def start_text_window():
+    window_thread = threading.Thread(target=show_text_window, daemon=True)
+    window_thread.start()
+
+# تابع برای ارسال پیام به پنجره
+def send_to_window(message: str):
+    message_queue.put(message)
+
 ########################################################################################################
-def Prompt(Text:str):
-    String = f"Bot{PublicVarible.Id} " + datetime.now(PublicVarible.BrokerTimeZone).strftime("%Y-%m-%d %H:%M:%S") + "=> " + Text
+def Prompt(Text: str):
+    String = f"Bot{PublicVarible.Id} " + datetime.now(PublicVarible.BrokerTimeZone).strftime("%Y-%m-%d %H:%M:%S") + " => " + Text
     print(String)
     PublicVarible.LstLog.append(String)
+    send_to_window(String)  # ارسال پیام به پنجره ویندوزی
+    
     if len(PublicVarible.LstLog) % 100 == 0:
-       with open('Log.Txt', 'a') as LogTxt:
+        with open('Log.Txt', 'a', encoding='utf-8') as LogTxt:
             for Item in PublicVarible.LstLog:
-                LogTxt.write("%s\n" % Item)
-       LogTxt.close()
-       PublicVarible.LstLog.clear()
+                LogTxt.write(f"{Item}\n")
+        PublicVarible.LstLog.clear()
+
 ########################################################################################################
 def PromptToTelegram(Text:str):
     ApiURL = f'https://api.telegram.org/bot{PublicVarible.TelegramToken}/sendMessage'
@@ -1073,56 +1125,8 @@ def supertrendH(Pair , high, low, close, length=None, multiplier=None, offset=No
     return df
 
 supertrend.__doc__ = \
-"""Supertrend (supertrend)
-
-Supertrend is an overlap indicator. It is used to help identify trend
-direction, setting stop loss, identify support and resistance, and/or
-generate buy & sell signals.
-
-Sources:
-    http://www.freebsensetips.com/blog/detail/7/What-is-supertrend-indicator-its-calculation
-
-Calculation:
-    Default Inputs:
-        length=7, multiplier=3.0
-    Default Direction:
-	Set to +1 or bullish trend at start
-
-    MID = multiplier * ATR
-    LOWERBAND = HL2 - MID
-    UPPERBAND = HL2 + MID
-
-    if UPPERBAND[i] < FINAL_UPPERBAND[i-1] and close[i-1] > FINAL_UPPERBAND[i-1]:
-        FINAL_UPPERBAND[i] = UPPERBAND[i]
-    else:
-        FINAL_UPPERBAND[i] = FINAL_UPPERBAND[i-1])
-
-    if LOWERBAND[i] > FINAL_LOWERBAND[i-1] and close[i-1] < FINAL_LOWERBAND[i-1]:
-        FINAL_LOWERBAND[i] = LOWERBAND[i]
-    else:
-        FINAL_LOWERBAND[i] = FINAL_LOWERBAND[i-1])
-
-    if close[i] <= FINAL_UPPERBAND[i]:
-        SUPERTREND[i] = FINAL_UPPERBAND[i]
-    else:
-        SUPERTREND[i] = FINAL_LOWERBAND[i]
-
-Args:
-    high (PD.Series): Series of 'high's
-    low (PD.Series): Series of 'low's
-    close (PD.Series): Series of 'close's
-    length (int) : length for ATR calculation. Default: 7
-    multiplier (float): Coefficient for upper and lower band distance to
-        midrange. Default: 3.0
-    offset (int): How many periods to offset the result. Default: 0
-
-Kwargs:
-    fillna (value, optional): PD.DataFrame.fillna(value)
-    fill_method (value, optional): Type of fill method
-
-Returns:
-    PD.DataFrame: SUPERT (trend), SUPERTd (direction), SUPERTl (long), SUPERTs (short) columns.
-"""
+""" text"""
+#######################################################################################
     
 def get_sell_positions_with_open_prices():
     # دریافت تمام موقعیت‌های باز
@@ -1152,6 +1156,7 @@ def get_buy_positions_with_open_prices():
 
     return buy_positions_with_open_prices
 
+########################################################################################
 
 def write_trade_info_to_file(Pair ,Pos, EntryPrice, SL, TP1, Direction ):
     file_path = 'C:/logTrade.txt'  # مسیر فایل
@@ -1163,6 +1168,7 @@ def write_trade_info_to_file(Pair ,Pos, EntryPrice, SL, TP1, Direction ):
         file.write("TP1: {}\n".format(TP1))
         file.write("Direction: {}\n".format(Direction))
         file.write("-" * 30 + "\n")  
+########################################################################################
 
 def write_None(Pair ,text ):
     file_path = 'C:/logNone.txt'  # مسیر فایل
@@ -1171,6 +1177,7 @@ def write_None(Pair ,text ):
         #file.write("-" * 30 + "\n")  
         
 # Define the custom font using @ or any other characters
+########################################################################################
 
 custom_font = {
     'A': ["  @  ", " @ @ ", "@@@@@", "@   @", "@   @"],
@@ -1212,6 +1219,7 @@ def print_custom_text(text):
             else:
                 line += "     "  # space for unknown characters
         print(line)
+########################################################################################
         
 def get_all_buy_positions(Pair):
     from_date = datetime.now() - timedelta(minutes=20)
@@ -1225,6 +1233,7 @@ def get_all_buy_positions(Pair):
          
          return all_buy_positions
 
+########################################################################################
 
 def send_telegram_messages(text, chat_ids):
     token = "8041867463:AAEUH_w2CYFne521LxNVsuR6hiuqk-75pfQ"
@@ -1241,7 +1250,7 @@ def send_telegram_messages(text, chat_ids):
         responses[chat_id] = response.json()
     return responses
 
-
+########################################################################################
 
 def telalert() :
     current_datetime = datetime.now()
@@ -1259,6 +1268,7 @@ def telalert() :
       Text = f"⛔⚠️ توجه ⚠️⛔ \n امروز جمعه مورخ {jdatetime.datetime.now().strftime('%Y-%m-%d')} شب آخر بازار است . لطفا معاملات باز خود را مدیریت کنید"
       results = send_telegram_messages(Text, PublicVarible.chat_ids)  
 
+########################################################################################
 
 def delete_all_limit_orders():
     """
@@ -1353,7 +1363,6 @@ def plot_candles_and_send_telegram(FrameRatesM5, pair, Text):
 
 ########################################################################################
 
-
 def send_telegram_photo(photo_buffer, chat_ids, caption=""):
     print(f"Received chat_ids: {chat_ids}, Type: {type(chat_ids)}")  # بررسی مقدار
 
@@ -1378,116 +1387,6 @@ def send_telegram_photo(photo_buffer, chat_ids, caption=""):
     
     return responses
 
-########################################################################################
-
-# def analyze_market_power(FrameRatesM5):
-#     """
-#     تحلیل قدرت خریداران و فروشندگان با استفاده از ترکیبی از روش‌های مختلف
-#     خروجی: 
-#         +1: قدرت خریداران
-#         -1: قدرت فروشندگان
-#         0: عدم قطعیت
-#     """
-#     try:
-#         # 1. تحلیل حجم معاملات
-#         volume_bullish = 0
-#         volume_bearish = 0
-#         for i in range(-7, -1):  # بررسی از کندل -7 تا -2
-#             if FrameRatesM5.iloc[i]['close'] > FrameRatesM5.iloc[i]['open']:  # کندل صعودی
-#                 volume_bullish += FrameRatesM5.iloc[i]['tick_volume']
-#             else:  # کندل نزولی
-#                 volume_bearish += FrameRatesM5.iloc[i]['tick_volume']
-        
-#         volume_ratio = volume_bullish / (volume_bearish + 1)  # جلوگیری از تقسیم بر صفر
-#         volume_signal = 1 if volume_ratio > 1.2 else (-1 if volume_ratio < 0.8 else 0)
-
-#         # 2. تحلیل مومنتوم قیمت
-#         price_changes = []
-#         for i in range(-7, -1):  # بررسی از کندل -7 تا -2
-#             if i < -1:
-#                 change = (FrameRatesM5.iloc[i]['close'] - FrameRatesM5.iloc[i-1]['close'])
-#                 price_changes.append(change)
-        
-#         avg_price_change = sum(price_changes) / len(price_changes)
-#         momentum_signal = 1 if avg_price_change > 0 else (-1 if avg_price_change < 0 else 0)
-
-#         # 3. تحلیل الگوی کندل‌ها با روش لنس بگز
-#         bullish_candles = 0
-#         bearish_candles = 0
-#         neutral_candles = 0
-        
-#         for i in range(-7, -1):  # بررسی از کندل -7 تا -2
-#             candle = FrameRatesM5.iloc[i]
-#             high = candle['high']
-#             low = candle['low']
-#             close = candle['close']
-            
-#             # محاسبه محدوده قیمتی کندل
-#             price_range = high - low
-#             # محاسبه موقعیت کلوز نسبت به محدوده قیمتی
-#             close_position = (close - low) / price_range
-#             # تحلیل بر اساس روش لنس بگز
-#             if close_position > 0.67:  # ثلث بالایی
-#                 bullish_candles += 1
-#             elif close_position < 0.33:  # ثلث پایینی
-#                 bearish_candles += 1
-#             else:  # ثلث میانی
-#                 neutral_candles += 1
-        
-#         # تعیین سیگنال کندل‌ها
-#         if bullish_candles >= 3:  # حداقل 3 کندل صعودی
-#             candlestick_signal = 1
-#         elif bearish_candles >= 3:  # حداقل 3 کندل نزولی
-#             candlestick_signal = -1
-#         else:
-#             candlestick_signal = 0
-
-#         # 4. محاسبه RSI با استفاده از ماژول pta
-#         rsi = PTA.rsi(FrameRatesM5['close'], length=14)
-#         current_rsi = rsi.iloc[-2]  # استفاده از RSI کندل -2
-        
-#         rsi_signal = 1 if current_rsi > 60 else (-1 if current_rsi < 40 else 0)
-        
-#         # 5. تحلیل EMA 20
-#         # محاسبه EMA 20
-#         ema20 = FrameRatesM5['close'].ewm(span=20, adjust=False).mean()
-#         # بررسی موقعیت کلوز کندل -2 نسبت به EMA 20
-#         close_minus_2 = FrameRatesM5.iloc[-2]['close']
-#         ema20_minus_2 = ema20.iloc[-2]
-#         ema_signal = 1 if close_minus_2 > ema20_minus_2 else -1
-
-#         # 6. تحلیل OBV (On-Balance Volume)
-#         # محاسبه OBV با استفاده از ماژول pta
-#         obv = PTA.obv(FrameRatesM5['close'], FrameRatesM5['tick_volume'])
-#         # محاسبه تغییرات OBV در 5 کندل آخر
-#         obv_changes = []
-#         for i in range(-11, -1):  # بررسی تغییرات OBV از کندل -11 تا -2
-#             obv_change = obv.iloc[i] - obv.iloc[i-1]
-#             obv_changes.append(obv_change)
-        
-#         # محاسبه میانگین تغییرات OBV
-#         avg_obv_change = sum(obv_changes) / len(obv_changes)
-#         # تعیین سیگنال OBV
-#         obv_signal = 1 if avg_obv_change > 0 else -1
-
-#         # ترکیب سیگنال‌ها
-#         signals = [volume_signal, momentum_signal, candlestick_signal, rsi_signal, ema_signal, obv_signal]
-#         #PromptToTelegram(Text=f"volume_signal: {volume_signal} , momentum_signal: {momentum_signal} , candlestick_signal: {candlestick_signal} , rsi_signal: {rsi_signal} , ema_signal: {ema_signal} , obv_signal: {obv_signal}")
-#         bullish_count = sum(1 for s in signals if s == 1)
-#         bearish_count = sum(1 for s in signals if s == -1)
-        
-#         if bullish_count >= 4:  # حداقل 4 سیگنال صعودی (به دلیل اضافه شدن OBV)
-#             return 1  # قدرت خریداران
-#         elif bearish_count >= 4:  # حداقل 4 سیگنال نزولی (به دلیل اضافه شدن OBV)
-#             return -1  # قدرت فروشندگان
-#         else:
-#             return 0  # عدم قطعیت
-
-#     except Exception as e:
-#         error_msg = f"خطا در تحلیل قدرت بازار: {str(e)}"
-#         print(error_msg)
-#         PromptToTelegram(Text=error_msg)
-#         return 0  # در صورت خطا، عدم قطعیت برمی‌گرداند
 
 ########################################################################################""""
 import numpy as np
@@ -1647,8 +1546,8 @@ def time_to_trade(Pair:str):
     #print(f"{Pair} Price is ({SymbolInfo.ask} $)")
     restricted_hours = {6 , 11 , 13 , 19 , 16}
     if current_datetime.minute == 0 and current_datetime.hour in restricted_hours:
-            PublicVarible.CanOpenOrder = False
-            PublicVarible.risk = 1
+            #PublicVarible.CanOpenOrder = False
+            #PublicVarible.risk = 
             if current_time - PublicVarible.last_execution_timeAll >= 600 :
                    Text = f"⏰ Time : {current_datetime} \n"
                    Text += f"Risk changed to Safe Mode 🟢 (Low) \n"
@@ -1660,56 +1559,163 @@ def time_to_trade(Pair:str):
             # if current_datetime.minute == 0 and current_datetime.hour in {13 , 19}:
             #    Text = f"⚠️هشدار⚠️ \n اطلاعات ارائه شده در این بات ، صرفا جنبه #آموزشی داشته و سازنده مسئولیتی در قبال ضرر احتمالی  ندارد . لطفا اصول حرفه ای معامله و مدیریت سرمایه را رعایت فرمائید . "
             #    results = send_telegram_messages(Text, PublicVarible.chat_ids)
-               
-
 
 ##################################################################################################
 
+# def get_signal_from_model(pair):
+#     """
+#     Get prediction signals from three different models and combine them
+    
+#     Args:
+#         pair: Currency pair
+        
+#     Returns:
+#         Tuple[float, float, float]: Prediction signals from three models
+#     """
+#     try:
+#         # Create predictor instances
+#         predictor = GoldPricePredictor(pair, days=30)
+#         predictorM5 = GoldPricePredictorM5(pair, days=7)
+#         predictorM5XGB = GoldPricePredictorM5_XGB(pair)
+
+#         # Get predictions
+#         resultH1 = predictor.predict(show_plot=False)
+#         resultM5 = predictorM5.predict(show_plot=False)
+#         resultXGB = predictorM5XGB.predict(show_plot=False)
+
+#         # Safe initialization
+#         metrics, current_price, next_price, predicted_change, current_time, predicted_time = resultH1 or ({}, 0, 0, 0, '', '')
+#         metricsM5, current_priceM5, next_priceM5, predicted_changeM5, current_timeM5, predicted_timeM5 = resultM5 or ({}, 0, 0, 0, '', '')
+#         metricsXGB, current_priceXGB, next_priceXGB, predicted_changeXGB, current_timeXGB, predicted_timeXGB = resultXGB or ({}, 0, 0, 0, '', '')
+
+#         # Ensure numeric values
+#         predicted_change = predicted_change or 0
+#         predicted_changeM5 = predicted_changeM5 or 0
+#         predicted_changeXGB = predicted_changeXGB or 0
+
+#         # Extract accuracy from metrics
+#         accuracy_h1 = metrics.get('r2', 0.5) if metrics else 0.5
+#         accuracy_m5 = metricsM5.get('r2', 0.5) if metricsM5 else 0.5
+#         accuracy_xgb = metricsXGB.get('r2', 0.5) if metricsXGB else 0.5
+
+#         # Display combined signal
+#         print(Fore.LIGHTWHITE_EX, "=== Combined Trading Signal ===", Fore.WHITE)
+        
+#         # Calculate weighted combined signal
+#         combined_signal = (
+#             predicted_change * accuracy_h1 +
+#             predicted_changeM5 * accuracy_m5 +
+#             predicted_changeXGB * accuracy_xgb
+#         ) / (accuracy_h1 + accuracy_m5 + accuracy_xgb)
+
+#         # Display result
+#         if combined_signal > 0.5:
+#             print(Fore.LIGHTGREEN_EX, "Strong Buy - All models predict increase", Fore.WHITE)
+#         elif combined_signal < -0.5:
+#             print(Fore.LIGHTRED_EX, "Strong Sell - All models predict decrease", Fore.WHITE)
+#         elif combined_signal > 0:
+#             print(Fore.LIGHTGREEN_EX, "Moderate Buy - Some models predict increase", Fore.WHITE)
+#         elif combined_signal < 0:
+#             print(Fore.LIGHTRED_EX, "Moderate Sell - Some models predict decrease", Fore.WHITE)
+#         else:
+#             print("Hold - No significant change predicted")
+
+#         # Print output for each model
+#         text = f" {pair}\n 1-Hour Model: {predicted_change:+.2f} USD (Accuracy: {accuracy_h1:.2%})\n"
+#         text += f" 5-Minute Model: {predicted_changeM5:+.2f} USD (Accuracy: {accuracy_m5:.2%}) \n"
+#         text += f" XGBoost Model: {predicted_changeXGB:+.2f} USD (Accuracy: {accuracy_xgb:.2%}) \n"
+#         text += f" Combined Signal: {combined_signal:+.2f} USD \n*******************"
+#         send_to_window(text)
+
+#         return predicted_change,current_price, next_price, predicted_time ,predicted_changeM5,current_priceM5, next_priceM5, predicted_timeM5 , predicted_changeXGB  ,current_priceXGB, next_priceXGB, predicted_timeXGB
+
+#     except Exception as e:
+#         print(f"Error getting signals: {str(e)}")
+#         return 0, 0, 0
+##################################################################################################
+
 def get_signal_from_model(pair):
-    # predictor = GoldPricePredictor(pair, days=30)
-    # predictorM5 = GoldPricePredictorM5(pair, days=7)
-    # predictorM5XGB = GoldPricePredictorM5_XGB(pair)
+    """
+    Get prediction signals from four different models and combine them (includes LSTM)
+    """
+    try:
+        # Create predictor instances
+        predictor = GoldPricePredictor(pair, days=30)
+        predictorM5 = GoldPricePredictorM5(pair, days=7)
+        predictorM5XGB = GoldPricePredictorM5_XGB(pair)
+        predictorLSTM = GoldPricePredictorLSTM(pair=pair, window_size=60, forecast_horizon=3)
 
-    # # اجرای پیش‌بینی
-    # resultH1 = predictor.predict(show_plot=False)
-    # resultM5 = predictorM5.predict(show_plot=False)
-    # resultXGB = predictorM5XGB.predict(show_plot=False)
-    predictor = GoldPricePredictor(pair, days=30)
-    predictorM5 = GoldPricePredictorM5(pair, days=7)
-    predictorM5XGB = GoldPricePredictorM5_XGB(pair)
+        # Get predictions
+        resultH1 = predictor.predict(show_plot=False)
+        resultM5 = predictorM5.predict(show_plot=False)
+        resultXGB = predictorM5XGB.predict(show_plot=False)
 
-    resultH1 = predictor.predict(show_plot=False)
-    resultM5 = predictorM5.predict(show_plot=False)
-    resultXGB = predictorM5XGB.predict(show_plot=False)
-    # مقداردهی اولیه ایمن
-    metrics, current_price, next_price, predicted_change, current_time, predicted_time = resultH1 or ({}, 0, 0, 0, '', '')
-    metricsM5, current_priceM5, next_priceM5, predicted_changeM5, current_timeM5, predicted_timeM5 = resultM5 or ({}, 0, 0, 0, '', '')
-    metricsXGB, current_priceXGB, next_priceXGB, predicted_changeXGB, current_timeXGB, predicted_timeXGB = resultXGB or ({}, 0, 0, 0, '', '')
-    #print(f"metricsXGB:{metricsXGB} \n current_priceXGB: {current_priceXGB} \n next_priceXGB: {next_priceXGB} \n predicted_changeXGB: {predicted_changeXGB} \n current_timeXGB:{current_timeXGB} \n predicted_timeXGB:{predicted_timeXGB}")
-    # اطمینان از عددی بودن مقادیر (در صورت خرابی جزئی)
-    predicted_change = predicted_change or 0
-    predicted_changeM5 = predicted_changeM5 or 0
-    predicted_changeXGB = predicted_changeXGB or 0
+        # Run LSTM model (returns predicted price only)
+        df_lstm = predictorLSTM.fetch_data()
+        current_price_lstm = df_lstm['Close'].iloc[-1]
+        predictorLSTM.build_model()
+        X_lstm, y_lstm = predictorLSTM.prepare_data(df_lstm)
+        predictorLSTM.train(X_lstm, y_lstm, epochs=5, batch_size=32)
+        predicted_price_lstm = predictorLSTM.predict_next(df_lstm)
+        predicted_change_lstm = predicted_price_lstm - current_price_lstm
+        accuracy_lstm = 0.5  # فرضی، تا وقتی معیاری برای ارزیابی نداریم
 
-    # نمایش سیگنال ترکیبی
-    print(Fore.LIGHTWHITE_EX,"=== Combined Trading Signal ===",Fore.WHITE)
-    if predicted_change > 0 and predicted_changeM5 > 0:
-        print(Fore.LIGHTGREEN_EX,"STRONG BUY - Both models predict increase",Fore.WHITE)
-    elif predicted_change < 0 and predicted_changeM5 < 0:
-        print(Fore.LIGHTRED_EX,"STRONG SELL - Both models predict decrease",Fore.WHITE)
-    elif predicted_change > 0 or predicted_changeM5 > 0:
-        print(Fore.LIGHTGREEN_EX,"MODERATE BUY - One model predicts increase",Fore.WHITE)
-    elif predicted_change < 0 or predicted_changeM5 < 0:
-        print(Fore.LIGHTRED_EX,"MODERATE SELL - One model predicts decrease",Fore.WHITE)
-    else:
-        print("HOLD - No significant change expected")
+        # Safe unpacking
+        metrics, current_price, next_price, predicted_change, current_time, predicted_time = resultH1 or ({}, 0, 0, 0, '', '')
+        metricsM5, current_priceM5, next_priceM5, predicted_changeM5, current_timeM5, predicted_timeM5 = resultM5 or ({}, 0, 0, 0, '', '')
+        metricsXGB, current_priceXGB, next_priceXGB, predicted_changeXGB, current_timeXGB, predicted_timeXGB = resultXGB or ({}, 0, 0, 0, '', '')
 
-    # چاپ خروجی هر سه مدل
-    print(f"\n 1-Hour   Model: {predicted_change:+.2f} ")# and  metrics is {metrics}")
-    print(f" 5-Minute Model: {predicted_changeM5:+.2f} ")#and  metricsM5 is {metricsM5}" )
-    print(f" 5-Minute Model (XGB): {predicted_changeXGB:+.2f} ")#and  metricsM5XGB is {metricsXGB}")
+        # Ensure numeric
+        predicted_change = predicted_change or 0
+        predicted_changeM5 = predicted_changeM5 or 0
+        predicted_changeXGB = predicted_changeXGB or 0
+        predicted_change_lstm = predicted_change_lstm or 0
 
-    return predicted_change, predicted_changeM5, predicted_changeXGB
+        # Accuracy
+        accuracy_h1 = metrics.get('r2', 0.5)
+        accuracy_m5 = metricsM5.get('r2', 0.5)
+        accuracy_xgb = metricsXGB.get('r2', 0.5)
+
+        # Combined signal (with LSTM included)
+        combined_signal = (
+            predicted_change * accuracy_h1 +
+            predicted_changeM5 * accuracy_m5 +
+            predicted_changeXGB * accuracy_xgb +
+            predicted_change_lstm * accuracy_lstm
+        ) / (accuracy_h1 + accuracy_m5 + accuracy_xgb + accuracy_lstm)
+
+        # Print combined interpretation
+        print(Fore.LIGHTWHITE_EX, "=== Combined Trading Signal ===", Fore.WHITE)
+        if combined_signal > 0.5:
+            print(Fore.LIGHTGREEN_EX, "Strong Buy - All models predict increase", Fore.WHITE)
+        elif combined_signal < -0.5:
+            print(Fore.LIGHTRED_EX, "Strong Sell - All models predict decrease", Fore.WHITE)
+        elif combined_signal > 0:
+            print(Fore.LIGHTGREEN_EX, "Moderate Buy - Some models predict increase", Fore.WHITE)
+        elif combined_signal < 0:
+            print(Fore.LIGHTRED_EX, "Moderate Sell - Some models predict decrease", Fore.WHITE)
+        else:
+            print("Hold - No significant change predicted")
+
+        # Print model outputs
+        text = f" {pair}\n 1-Hour Model: {predicted_change:+.2f} USD (Accuracy: {accuracy_h1:.2%})\n"
+        text += f" 5-Minute Model: {predicted_changeM5:+.2f} USD (Accuracy: {accuracy_m5:.2%}) \n"
+        text += f" XGBoost Model: {predicted_changeXGB:+.2f} USD (Accuracy: {accuracy_xgb:.2%}) \n"
+        text += f" LSTM Model: {predicted_change_lstm:+.2f} USD (Accuracy: {accuracy_lstm:.2%}) \n"
+        text += f" Combined Signal: {combined_signal:+.2f} USD \n*******************"
+        send_to_window(text)
+
+        return (
+            predicted_change, current_price, next_price, predicted_time,
+            predicted_changeM5, current_priceM5, next_priceM5, predicted_timeM5,
+            predicted_changeXGB, current_priceXGB, next_priceXGB, predicted_timeXGB,
+            predicted_change_lstm, current_price_lstm, predicted_price_lstm
+        )
+
+    except Exception as e:
+        print(f"Error getting signals: {str(e)}")
+        return 0, 0, 0
+
 
 ##################################################################################################
 ## پیدا کردن لگ 
@@ -1748,21 +1754,23 @@ def build_and_send_analysis_text(pos,PairName, pair, ask_price, trend, final_con
     else:
         text += f"\n✅ ضریب اطمینان پایش مناسب است ({round(final_confidence , 2)}) "
 
-    text += " \n\n🔘 آنالیز LR: \n"
-    if predicted_changeM5 >= 0:
-        text += f"رشد کوتاه مدت :🔺+{round(predicted_changeM5,1)} $\n"
-    else:
-        text += f"رشد کوتاه مدت :🔻{round(predicted_changeM5,1)} $\n"
+    # text += " \n\n🔘 آنالیز LR: \n"
+    # if predicted_changeM5 >= 0:
+    #     text += f"رشد کوتاه مدت :🔺+{round(predicted_changeM5,1)} $\n"
+    # else:
+    #     text += f"رشد کوتاه مدت :🔻{round(predicted_changeM5,1)} $\n"
 
-    if predicted_change >= 0:
-        text += f"رشد بلند مدت :🔺+{round(predicted_change,1)} $\n"
-    else:
-        text += f"رشد بلند مدت :🔻{round(predicted_change,1)} $"
+    # if predicted_change >= 0:
+    #     text += f"رشد بلند مدت :🔺+{round(predicted_change,1)} $\n"
+    # else:
+    #     text += f"رشد بلند مدت :🔻{round(predicted_change,1)} $"
 
-    text += f" \n🔘 آنالیز XGB: \nرشدکوتاه مدت {round(predicted_changeXGB,2)} $"
+    # text += f" \n🔘 آنالیز XGB: \nرشدکوتاه مدت {round(predicted_changeXGB,2)} $"
 
     # ارسال پیام به تلگرام و رسم نمودار
     plot_candles_and_send_telegram(FrameRatesM5, pair, text)
+    text += f"\n\n* * * * * * * * * * * * * * \n"                  
+    send_to_window(text)
 
 ##################################################################################################
 ## خروج قیمت از رنج
@@ -1834,21 +1842,31 @@ def build_position_text(pos,PairName, pair, close_price, trend_C, trend, final_c
       else : 
         Text += f"\n❌ موقعیت Sell: نامناسب "
 
-    # تحلیل‌های پیش‌بینی
-    text += " \n\n🔘 آنالیز LR: \n"
-    if predicted_changeM5 >= 0:
-        text += f"رشد کوتاه مدت :🔺+{round(predicted_changeM5, 1)} $\n"
-    else:
-        text += f"رشد کوتاه مدت :🔻{round(predicted_changeM5, 1)} $\n"
+    # # تحلیل‌های پیش‌بینی
+    # text += " \n\n🔘 آنالیز LR: \n"
+    # if predicted_changeM5 >= 0:
+    #     text += f"رشد کوتاه مدت :🔺+{round(predicted_changeM5, 1)} $\n"
+    # else:
+    #     text += f"رشد کوتاه مدت :🔻{round(predicted_changeM5, 1)} $\n"
 
-    if predicted_change >= 0:
-        text += f"رشد بلند مدت :🔺+{round(predicted_change, 1)} $\n"
-    else:
-        text += f"رشد بلند مدت :🔻{round(predicted_change, 1)} $"
+    # if predicted_change >= 0:
+    #     text += f"رشد بلند مدت :🔺+{round(predicted_change, 1)} $\n"
+    # else:
+    #     text += f"رشد بلند مدت :🔻{round(predicted_change, 1)} $"
 
-    text += f" \n🔘 آنالیز XGB: \nرشدکوتاه مدت {round(predicted_changeXGB, 2)} $"
+    # text += f" \n🔘 آنالیز XGB: \nرشدکوتاه مدت {round(predicted_changeXGB, 2)} $"
 
     # ارسال پیام
     plot_candles_and_send_telegram(FrameRatesM5, pair, text)
+    text += f"\n\n* * * * * * * * * * * * * * \n"                  
+    send_to_window(text)
 
     
+########################################################################################
+
+def predicted_Write(Pair ,text ):
+    file_path = 'C:/ predicted.txt'  # مسیر فایل
+    with open(file_path, 'a') as file:
+        file.write("{}, {}\n".format(Pair, text))
+       
+########################################################################################

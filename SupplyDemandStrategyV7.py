@@ -50,7 +50,7 @@ class SupplyDemandStrategyV7():
                    FrameRatesM5 = FrameRatesM5.drop('time', axis=1)
                    FrameRatesM5 = FrameRatesM5.set_index(PD.DatetimeIndex(FrameRatesM5['datetime']), drop=True)
 
-             predicted_change , predicted_changeM5 , predicted_changeXGB = get_signal_from_model(self.Pair)
+             predicted_change,current_price, next_price, predicted_time ,predicted_changeM5,current_priceM5, next_priceM5, predicted_timeM5 , predicted_changeXGB  ,current_priceXGB, next_priceXGB, predicted_timeXGB = 0,0,0,0,0,0,0,0,0,0,0,0 #get_signal_from_model(self.Pair)
              trendE ,  final_confidence = analyze_market_power(FrameRatesM5, FrameRatesM15, FrameRatesM30) 
              print("trendE: ",trendE , "final_confidence: " ,final_confidence )
 

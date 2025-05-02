@@ -18,7 +18,7 @@ class MachineLearning():
 ##############################################################################################################################################################
       def Main(self):
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ Strategy V9 M5 XAUUSDb ")
-
+         
           SymbolInfo = MT5.symbol_info(self.Pair)
           if SymbolInfo is not None :
              
@@ -64,7 +64,7 @@ class MachineLearning():
                                      # اعمال تغییرات
                                      ModifyTPSLPosition(position_data, NewTakeProfit=take_profit, NewStopLoss=new_stop_loss, Deviation=0)
                                      print(" Buy Position Tp and Sl Modified to Bearish Status")
-                                 else:
+          else:
                                      print(f" Condition not met for ticket                             {ticket}" , "\n")
              
              sell_positions_with_open_prices = get_sell_positions_with_open_prices()

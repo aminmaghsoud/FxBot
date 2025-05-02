@@ -260,7 +260,7 @@ class GoldPricePredictorM5_XGB:
             return {}, 0, 0, 0, '', ''
 
 def main():
-    predictor = GoldPricePredictorM5_XGB(pair='XAUUSD')
+    predictor = GoldPricePredictorM5_XGB(pair='XAUUSDb')
     metrics, current_price, next_price, predicted_change, current_time, predicted_time = predictor.predict(show_plot=True)
     
     if all(v is not None for v in [metrics, current_price, next_price, predicted_change]):

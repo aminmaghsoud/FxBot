@@ -1,3 +1,4 @@
+
 import MetaTrader5 as MT5
 import pandas as PD
 import time
@@ -11,6 +12,7 @@ from SupplyDemandStrategyV6 import *
 from SupplyDemandStrategyV5 import *
 from SupplyDemandStrategyV4 import *
 from SupplyDemandStrategyV10 import *
+from LegAnalyzer import  *
 from Utility import *
 import sys
 from colorama import init, Fore, Back, Style
@@ -21,7 +23,6 @@ class FxBot():
       def __init__(self):
           print("Start Robot Pirouz...")
           print("*************************************")
-          start_text_window()  # شروع پنجره ویندوزی برای نمایش پیام‌ها
 ########################################################################################################
       def Main(self, BotId:int):
           
@@ -116,8 +117,8 @@ class FxBot():
                           time_to_trade(Item['Name'])
                           A = SupplyDemandStrategyV7(Pair = Item['Name']) #M5 EURJPY
                           PublicVarible.Executor.submit(A.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
-                          B = SupplyDemandStrategyV8(Pair = Item['Name']) #M5 USDJPY
-                          PublicVarible.Executor.submit(B.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
+                          #B = SupplyDemandStrategyV8(Pair = Item['Name']) #M5 USDJPY
+                          #PublicVarible.Executor.submit(B.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
                           C = SupplyDemandStrategyV9(Pair = Item['Name']) #M5 XAUUSDb
                           PublicVarible.Executor.submit(C.Main(), Item['Name'], TimeFrame= ConvertStringToTimeFrame(Item['TimeFrame'])) # other M5
                           D = SupplyDemandStrategyV6(Pair = Item['Name']) #M5 BTCUSDT

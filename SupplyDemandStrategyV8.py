@@ -54,7 +54,7 @@ class SupplyDemandStrategyV8():
                    FrameRatesM5 = FrameRatesM5.drop('time', axis=1)
                    FrameRatesM5 = FrameRatesM5.set_index(PD.DatetimeIndex(FrameRatesM5['datetime']), drop=True)
              
-             predicted_change , predicted_changeM5 , predicted_changeXGB = get_signal_from_model(self.Pair)
+             predicted_change,current_price, next_price, predicted_time ,predicted_changeM5,current_priceM5, next_priceM5, predicted_timeM5 , predicted_changeXGB  ,current_priceXGB, next_priceXGB, predicted_timeXGB = 0,0,0,0,0,0,0,0,0,0,0,0 #get_signal_from_model(self.Pair)
 
              trendj ,  final_confidence = analyze_market_power(FrameRatesM5, FrameRatesM15, FrameRatesM30) 
              print(" trendj: ",trendj , "final_confidence: " ,round(final_confidence,2) )
@@ -399,7 +399,7 @@ class SupplyDemandStrategyV8():
                      PublicVarible.HS_UpJ = 1 
 
 ####################  بررسی لگ و جهت روند   ######################
-             if PublicVarible.Baseroofj != 0 :
+             """if PublicVarible.Baseroofj != 0 :
                 return
              elif PublicVarible.Leg_trendj == 1  and final_confidence > 65 and trendj == 1  : 
                 EntryPrice = SymbolInfo.ask
@@ -431,7 +431,7 @@ class SupplyDemandStrategyV8():
                 TP1 = PublicVarible.Baseroofj 
                 Volume = 0.01
                 OrderBuyLimit(Pair= self.Pair, Volume=  Volume  , EntryPrice =  PublicVarible.Basefloorj , StopLoss= SL, TakeProfit= TP1, Deviation= 0, Comment= "Dir11 V9")
-                PublicVarible.Leg_trendj = 0
+                PublicVarible.Leg_trendj = 0"""
 
 
 #Buy####################  بررسی شرط خروج قیمت از سقف و انجام معامله خرید ######################
@@ -504,7 +504,7 @@ class SupplyDemandStrategyV8():
                 TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Baseroofj)) - (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj)*0.75)} (If NEG T is True)" 
                 write_trade_info_to_file(self.Pair ,"Buy", SymbolInfo.ask, SL, TP1, TextN )
 
-                if  trend_C == +1 and trendj == +1 and final_confidence > 65 and Time_Signal == 1  : 
+                if  trend_C == +1 and trendj == +1 and Time_Signal == 1  : 
                    if  (abs(close_C - PublicVarible.Baseroofj) < (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj) * 0.75 )):       
                      Prompt(f"Signal {self.Pair} Type:Buy, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                      EntryPrice = SymbolInfo.ask
@@ -595,7 +595,7 @@ class SupplyDemandStrategyV8():
                 TextN += f"Time_Signal = {Time_Signal} || trend_C = {trend_C}  ||  Break = {(abs(FrameRatesM5.iloc[-2]['close'] - PublicVarible.Basefloorj)) - (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj)*0.75)} (If NEG T is True)\n" 
                 write_trade_info_to_file(self.Pair ,"Sell", SymbolInfo.bid  , SL, TP1, TextN )
                 
-                if  trend_C == -1  and trendj == -1 and final_confidence > 65 and Time_Signal == 1 :
+                if  trend_C == -1  and trendj == -1 and Time_Signal == 1 :
                    if  (abs(close_C - PublicVarible.Basefloorj) < (abs(PublicVarible.Baseroofj - PublicVarible.Basefloorj)* 0.75) ) :
                      Prompt(f"Signal {self.Pair} Type:Sell, Volume:{Volume}, Price:{EntryPrice}, S/L:{SL}, T/P:{TP1}")
                      EntryPrice = SymbolInfo.bid  
