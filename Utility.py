@@ -1643,7 +1643,7 @@ def get_signal_from_model(pair):
         predictor = GoldPricePredictor(pair, days=30)
         predictorM5 = GoldPricePredictorM5(pair, days=7)
         predictorM5XGB = GoldPricePredictorM5_XGB(pair)
-        predictorLSTM = GoldPricePredictorLSTM(pair=pair, window_size=60, forecast_horizon=3)
+        predictorLSTM = GoldPricePredictorLSTM(pair) #, timeframe=MT5.TIMEFRAME_M15) #), days=3)
 
         # Get predictions
         resultH1 = predictor.predict(show_plot=False)
@@ -1714,7 +1714,90 @@ def get_signal_from_model(pair):
 
     except Exception as e:
         print(f"Error getting signals: {str(e)}")
-        return 0, 0, 0
+        return 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+##################################################################################################
+
+# def get_signal_from_model(pair, days_h1=30, days_m5=7, days_lstm=3):
+#     """
+#     Get prediction signals from four different models and combine them (includes LSTM)
+#     """
+#     try:
+#         # Create predictor instances
+#         predictorH1 = GoldPricePredictor(pair, days=days_h1)
+#         predictorM5 = GoldPricePredictorM5(pair, days=days_m5)
+#         predictorM5XGB = GoldPricePredictorM5_XGB(pair)
+#         predictorLSTM = GoldPricePredictorLSTM(symbol=pair, timeframe=mt5.TIMEFRAME_M15, days=days_lstm)
+
+#         # Get predictions
+#         resultH1 = predictorH1.predict(show_plot=False)
+#         resultM5 = predictorM5.predict(show_plot=False)
+#         resultXGB = predictorM5XGB.predict(show_plot=False)
+
+#         # Run LSTM model (returns predicted price only)
+#         df_lstm = predictorLSTM.fetch_data()
+#         current_price_lstm = df_lstm['Close'].iloc[-1]
+#         predictorLSTM.build_model()
+#         X_lstm, y_lstm = predictorLSTM.prepare_data(df_lstm)
+#         predictorLSTM.train(X_lstm, y_lstm, epochs=5, batch_size=32)
+#         predicted_price_lstm = predictorLSTM.predict_next(df_lstm)
+#         predicted_change_lstm = predicted_price_lstm - current_price_lstm
+#         accuracy_lstm = 0.5  # فرضی، تا وقتی معیاری برای ارزیابی نداریم
+
+#         # Safe unpacking
+#         metrics, current_price, next_price, predicted_change, current_time, predicted_time = resultH1 or ({}, 0, 0, 0, '', '')
+#         metricsM5, current_priceM5, next_priceM5, predicted_changeM5, current_timeM5, predicted_timeM5 = resultM5 or ({}, 0, 0, 0, '', '')
+#         metricsXGB, current_priceXGB, next_priceXGB, predicted_changeXGB, current_timeXGB, predicted_timeXGB = resultXGB or ({}, 0, 0, 0, '', '')
+
+#         # Ensure numeric
+#         predicted_change = predicted_change or 0
+#         predicted_changeM5 = predicted_changeM5 or 0
+#         predicted_changeXGB = predicted_changeXGB or 0
+#         predicted_change_lstm = predicted_change_lstm or 0
+
+#         # Accuracy
+#         accuracy_h1 = metrics.get('r2', 0.5)
+#         accuracy_m5 = metricsM5.get('r2', 0.5)
+#         accuracy_xgb = metricsXGB.get('r2', 0.5)
+
+#         # Combined signal (with LSTM included)
+#         combined_signal = (
+#             predicted_change * accuracy_h1 +
+#             predicted_changeM5 * accuracy_m5 +
+#             predicted_changeXGB * accuracy_xgb +
+#             predicted_change_lstm * accuracy_lstm
+#         ) / (accuracy_h1 + accuracy_m5 + accuracy_xgb + accuracy_lstm)
+
+#         # Print combined interpretation
+#         print(Fore.LIGHTWHITE_EX, "=== Combined Trading Signal ===", Fore.WHITE)
+#         if combined_signal > 0.5:
+#             print(Fore.LIGHTGREEN_EX, "Strong Buy - All models predict increase", Fore.WHITE)
+#         elif combined_signal < -0.5:
+#             print(Fore.LIGHTRED_EX, "Strong Sell - All models predict decrease", Fore.WHITE)
+#         elif combined_signal > 0:
+#             print(Fore.LIGHTGREEN_EX, "Moderate Buy - Some models predict increase", Fore.WHITE)
+#         elif combined_signal < 0:
+#             print(Fore.LIGHTRED_EX, "Moderate Sell - Some models predict decrease", Fore.WHITE)
+#         else:
+#             print("Hold - No significant change predicted")
+
+#         # Print model outputs
+#         text = f" {pair}\n 1-Hour Model: {predicted_change:+.2f} USD (Accuracy: {accuracy_h1:.2%})\n"
+#         text += f" 5-Minute Model: {predicted_changeM5:+.2f} USD (Accuracy: {accuracy_m5:.2%}) \n"
+#         text += f" XGBoost Model: {predicted_changeXGB:+.2f} USD (Accuracy: {accuracy_xgb:.2%}) \n"
+#         text += f" LSTM Model: {predicted_change_lstm:+.2f} USD (Accuracy: {accuracy_lstm:.2%}) \n"
+#         text += f" Combined Signal: {combined_signal:+.2f} USD \n*******************"
+#         send_to_window(text)
+
+#         return (
+#             predicted_change, current_price, next_price, predicted_time,
+#             predicted_changeM5, current_priceM5, next_priceM5, predicted_timeM5,
+#             predicted_changeXGB, current_priceXGB, next_priceXGB, predicted_timeXGB,
+#             predicted_change_lstm, current_price_lstm, predicted_price_lstm
+#         )
+
+#     except Exception as e:
+#         print(f"Error getting signals: {str(e)}")
+#         return 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 
 ##################################################################################################

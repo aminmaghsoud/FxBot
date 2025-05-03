@@ -19,8 +19,8 @@ class SupplyDemandStrategyV10():
            
 ##############################################################################################################################################################
       def Main(self):
-          PairNameX = self.Pair #"دلار امریکا/ اونس طلا"
-          if self.Pair != "XAUUSDb" : return
+        PairNameX = self.Pair #"دلار امریکا/ اونس طلا"
+        if self.Pair == "XAUUSDb" or self.Pair == "BTCUSD": 
           print (Fore.LIGHTCYAN_EX,Back.BLACK ,"--------------", self.Pair,Back.RESET,Fore.RESET,"------------------ Strategy V10 M5 XAUUSDb ")
 
           SymbolInfo = MT5.symbol_info(self.Pair)
@@ -207,7 +207,7 @@ class SupplyDemandStrategyV10():
                   PublicVarible.last_execution_timeV10 = current_time  
 
                 Prompt(f"Signal {self.Pair} Type:Sell,predicted_changeM5:{predicted_changeM5},predicted_changeXGB:{predicted_changeXGB}")
-
+        else : return
                                 
 ########################################################################################################
 def CalcLotSize():
